@@ -43,7 +43,7 @@ namespace River.OneMoreAddIn.Commands
 			logger.WriteLine($"Log path..: {logger.LogPath}");
 			logger.WriteLine();
 
-			using var one = new OneNote();
+			await using var one = new OneNote();
 
 			var (backupFolder, defaultFolder, unfiledFolder) = one.GetFolders();
 			logger.WriteLine($"Default path: {defaultFolder}");
@@ -51,29 +51,36 @@ namespace River.OneMoreAddIn.Commands
 			logger.WriteLine($"Unfiled path: {unfiledFolder}");
 			logger.WriteLine();
 
-			var info = one.GetPageInfo();
+			var info = await one.GetPageInfo();
 			logger.WriteLine($"Page name: {info.Name}");
 			logger.WriteLine($"Page path: {info.Path}");
 			logger.WriteLine($"Page link: {info.Link}");
 			logger.WriteLine();
 
-			info = one.GetSectionInfo();
+			info = await one.GetSectionInfo();
 			logger.WriteLine($"Section name: {info.Name}");
 			logger.WriteLine($"Section path: {info.Path}");
 			logger.WriteLine($"Section link: {info.Link}");
 			logger.WriteLine();
 
 			var notebook = await one.GetNotebook();
-			var notebookId = one.CurrentNotebookId;
-			logger.WriteLine($"Notebook name: {notebook.Attribute("name").Value}");
-			logger.WriteLine($"Notebook link: {one.GetHyperlink(notebookId, null)}");
+			if (notebook == null || notebook.Attribute("name") == null)
+			{
+				logger.WriteLine($"Notebook name: << error getting current notebook >>");
+			}
+			else
+			{
+				var notebookId = one.CurrentNotebookId;
+				logger.WriteLine($"Notebook name: {notebook.Attribute("name").Value}");
+				logger.WriteLine($"Notebook link: {one.GetHyperlink(notebookId, null)}");
+			}
 			logger.WriteLine();
 
 			one.ReportWindowDiagnostics(logger);
 
 			logger.WriteLine();
 
-			var page = one.GetPage();
+			var page = await one.GetPage();
 			var pageColor = page.GetPageColor(out _, out _);
 
 			logger.WriteLine($"Page background: {pageColor.ToRGBHtml()}");
@@ -81,16 +88,16 @@ namespace River.OneMoreAddIn.Commands
 			logger.WriteLine($"Page bestText..: {page.GetBestTextColor().ToRGBHtml()}");
 			logger.WriteLine($"Page is dark...: {pageColor.IsDark()}");
 
-			(float dpiX, float dpiY) = UIHelper.GetDpiValues();
+			(float dpiX, float dpiY) = UI.Scaling.GetDpiValues();
 			logger.WriteLine($"Screen DPI.....: horizontal/X:{dpiX} vertical/Y:{dpiY}");
 
-			(float scalingX, float scalingY) = UIHelper.GetScalingFactors();
+			(float scalingX, float scalingY) = UI.Scaling.GetScalingFactors();
 			logger.WriteLine($"Scaling factors: horizontal/X:{scalingX} vertical/Y:{scalingY}");
 
-			var magic = new MagicScaling(100f, 100f);
+			var magic = new UI.Scaling(100f, 100f);
 			logger.WriteLine($"Magic scaling..: ScalingX:{magic.ScalingX} ScalingY:{magic.ScalingY}");
 
-			RemindCommand.ReportDiagnostics(logger);
+			await RemindCommand.ReportDiagnostics(logger);
 			RemindScheduler.ReportDiagnostics(logger);
 
 			logger.WriteLine(new string('-', 80));

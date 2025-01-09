@@ -37,7 +37,7 @@ namespace River.OneMoreAddIn.Commands
 		/// <summary>
 		/// Default constructor to examine all anchors on page or in selected region
 		/// </summary>
-		public GetImagesCommand() 
+		public GetImagesCommand()
 			: this(new Regex(@"<a\s+href=", RegexOptions.Compiled))
 		{
 			forceful = false;
@@ -60,23 +60,20 @@ namespace River.OneMoreAddIn.Commands
 		{
 			if (!HttpClientFactory.IsNetworkAvailable())
 			{
-				UIHelper.ShowInfo(Resx.NetwordConnectionUnavailable);
+				ShowInfo(Resx.NetwordConnectionUnavailable);
 				return;
 			}
 
-			var result = MessageBox.Show(
+			var result = UI.MoreMessageBox.Show(owner,
 				Resx.GetImagesCommand_Cite,
-				Resx.OneMoreTab_Label,
-				MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question,
-				MessageBoxDefaultButton.Button2,
-				MessageBoxOptions.DefaultDesktopOnly);
+				MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
 			if (result == DialogResult.Cancel)
 			{
 				return;
 			}
 
-			using var one = new OneNote(out var page, out _);
+			await using var one = new OneNote(out var page, out _);
 			if (result == DialogResult.Yes)
 			{
 				// ensure page contains the definition of the Citation style
@@ -138,7 +135,7 @@ namespace River.OneMoreAddIn.Commands
 			// parallelize internet access for all hyperlinks on page...
 
 			int count = 0;
-			if (runs?.Count > 0)
+			if (runs.Any())
 			{
 				//<one:Meta name="om" content="caption" />
 

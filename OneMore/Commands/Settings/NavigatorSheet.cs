@@ -5,7 +5,6 @@
 namespace River.OneMoreAddIn.Settings
 {
 	using River.OneMoreAddIn.Commands;
-	using System.Windows.Forms;
 	using Resx = Properties.Resources;
 
 
@@ -19,7 +18,7 @@ namespace River.OneMoreAddIn.Settings
 			InitializeComponent();
 
 			Name = nameof(NavigatorSheet);
-			Title = Resx.NavigatorSheet_Title;
+			Title = Resx.word_Navigator;
 
 			if (NeedsLocalizing())
 			{
@@ -29,6 +28,8 @@ namespace River.OneMoreAddIn.Settings
 					"depthLabel",
 					"intervalLabel",
 					"secLabel=word_Seconds",
+					"hidePinnedBox",
+					"quickBox",
 					"corrallBox",
 					"advancedGroup=phrase_AdvancedOptions",
 					"disabledBox"
@@ -40,18 +41,21 @@ namespace River.OneMoreAddIn.Settings
 			depthBox.Value = settings.Get("depth", NavigationService.DefaultHistoryDepth);
 
 			var interval = settings.Get("interval", NavigationService.DefaultPollingInterval);
-			intervalBox.Value = interval / Millisecond * 2;
+			intervalBox.Value = interval / Millisecond;
 
-			if (Screen.AllScreens.Length == 1)
-			{
-				corrallBox.Text = $"{corrallBox.Text} ({Resx.NavigatorSheet_corrallBox_disabled})";
-				corrallBox.Checked = true;
-				corrallBox.Enabled = false;
-			}
-			else
-			{
-				corrallBox.Checked = settings.Get("corralled", false);
-			}
+			hidePinnedBox.Checked = settings.Get("hidePinned", false);
+			quickBox.Checked = settings.Get("quickNotes", false);
+
+			//if (Screen.AllScreens.Length == 1)
+			//{
+			//	corrallBox.Text = $"{corrallBox.Text} ({Resx.NavigatorSheet_corrallBox_disabled})";
+			//	corrallBox.Checked = true;
+			//	corrallBox.Enabled = false;
+			//}
+			//else
+			//{
+			corrallBox.Checked = settings.Get("corralled", false);
+			//}
 
 			disabledBox.Checked = settings.Get("disabled", false);
 		}
@@ -65,7 +69,15 @@ namespace River.OneMoreAddIn.Settings
 
 			var updated = settings.Add("depth", (int)depthBox.Value);
 
-			updated = settings.Add("interval", (int)(intervalBox.Value * Millisecond / 2)) || updated;
+			updated = settings.Add("interval", (int)(intervalBox.Value * Millisecond)) || updated;
+
+			updated = hidePinnedBox.Checked
+				? settings.Add("hidePinned", true) || updated
+				: settings.Remove("hidePinned") || updated;
+
+			updated = quickBox.Checked
+				? settings.Add("quickNotes", true) || updated
+				: settings.Remove("quickNotes") || updated;
 
 			updated = corrallBox.Checked
 				? settings.Add("corralled", true) || updated

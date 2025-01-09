@@ -26,7 +26,7 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote();
+			await using var one = new OneNote();
 			one.SelectLocation(
 				Resx.SearchQF_Title, Resx.SearchQF_DescriptionCopy,
 				OneNote.Scope.SectionGroups, Callback);
@@ -47,9 +47,9 @@ namespace River.OneMoreAddIn.Commands
 
 			try
 			{
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				// user might choose a sectiongroup or a notebook; GetSection will get either
-				var target = one.GetSection(targetId);
+				var target = await one.GetSection(targetId);
 				if (target == null)
 				{
 					logger.WriteLine("invalid target section");
@@ -75,12 +75,9 @@ namespace River.OneMoreAddIn.Commands
 				{
 					logger.WriteLine("cannot copy a folder into itself or one of its children");
 
-					MessageBox.Show(
+					UI.MoreMessageBox.Show(owner,
 						Resx.CopyFolderCommand_InvalidTarget,
-						Resx.OneMoreTab_Label,
-						MessageBoxButtons.OK, MessageBoxIcon.Information,
-						MessageBoxDefaultButton.Button1,
-						MessageBoxOptions.DefaultDesktopOnly);
+						MessageBoxButtons.OK, MessageBoxIcon.Information);
 
 					return;
 				}
@@ -97,7 +94,7 @@ namespace River.OneMoreAddIn.Commands
 				one.UpdateHierarchy(target);
 
 				// re-fetch target to find newly assigned ID values
-				var upTarget = one.GetSection(targetId);
+				var upTarget = await one.GetSection(targetId);
 
 				var cloneID = upTarget.Elements()
 					.Where(e => !e.Attributes().Any(a => a.Name == "isRecycleBin"))
@@ -168,7 +165,7 @@ namespace River.OneMoreAddIn.Commands
 			foreach (var element in root.Elements(ns + "Page"))
 			{
 				// get the page to copy
-				var page = one.GetPage(element.Attribute("ID").Value);
+				var page = await one.GetPage(element.Attribute("ID").Value);
 				progress.SetMessage(page.Title);
 
 				// create a new page to get a new ID

@@ -26,6 +26,7 @@ using System.Runtime.InteropServices;
 // To use, open LINQPad and set Preferences/Advanced "Allows LINPAad to access internals"...
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("LINQPadQuery")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("OneMoreCalendar")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("OneMoreTray")]
 
 
 namespace River.OneMoreAddIn
@@ -36,7 +37,7 @@ namespace River.OneMoreAddIn
 		 * NOTE - also update the version in the Setup project
 		 * by clicking on the Setup project node in VS and update its properties
 		 */
-		public const string Version = "6.1.0";
+		public const string Version = "6.7.2";
 
 		public const string Product = "OneMore";
 

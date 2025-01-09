@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2021 Steven M Cohn.  All rights reserved.
+// Copyright © 2021 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -9,7 +9,7 @@ namespace River.OneMoreAddIn.Commands
 	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Xml.Linq;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
 	internal class CompleteReminderCommand : Command
@@ -24,15 +24,15 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 			var paragraph = page.Root.Descendants(ns + "T")
 				.Where(e => e.Attribute("selected")?.Value == "all")
 				.Select(e => e.Parent)
 				.FirstOrDefault();
 
-			if (paragraph == null)
+			if (paragraph is null)
 			{
-				UIHelper.ShowInfo(one.Window, Resx.RemindCommand_noContext);
+				ShowInfo(Resx.RemindCommand_noContext);
 				return;
 			}
 
@@ -40,22 +40,22 @@ namespace River.OneMoreAddIn.Commands
 			var reminders = serializer.LoadReminders(page);
 			if (!reminders.Any())
 			{
-				UIHelper.ShowError(one.Window, Resx.RemindCommand_noReminder);
+				ShowError(Resx.RemindCommand_noReminder);
 				return;
 			}
 
 			var objectID = paragraph.Attribute("objectID").Value;
-			var reminder = reminders.FirstOrDefault(r => r.ObjectId == objectID);
-			if (reminder == null)
+			var reminder = reminders.Find(r => r.ObjectId == objectID);
+			if (reminder is null)
 			{
 				// second-chance for multi-client users
 				var uri = one.GetHyperlink(page.PageId, objectID);
-				reminder = reminders.FirstOrDefault(r => r.ObjectUri == uri);
+				reminder = reminders.Find(r => r.ObjectUri == uri);
 			}
 
-			if (reminder == null)
+			if (reminder is null)
 			{
-				UIHelper.ShowError(one.Window, Resx.RemindCommand_noReminder);
+				ShowError(Resx.RemindCommand_noReminder);
 				return;
 			}
 
@@ -71,13 +71,13 @@ namespace River.OneMoreAddIn.Commands
 				}
 			}
 
-			if (tag == null)
+			if (tag is null)
 			{
 				reminders.Remove(reminder);
 				page.SetMeta(MetaNames.Reminder, serializer.EncodeContent(reminders));
 				await one.Update(page);
 
-				UIHelper.ShowError(one.Window, Resx.RemindCommand_noReminder);
+				ShowError(Resx.RemindCommand_noReminder);
 				return;
 			}
 

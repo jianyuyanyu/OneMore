@@ -1,10 +1,11 @@
 ﻿//************************************************************************************************
-// Copyright © 2020 Steven M Cohn.  All rights reserved.
+// Copyright © 2020 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn
 {
 	using River.OneMoreAddIn.Models;
+	using River.OneMoreAddIn.UI;
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Linq;
@@ -15,7 +16,7 @@ namespace River.OneMoreAddIn
 	using Resx = Properties.Resources;
 
 
-	internal class FootnoteEditor
+	internal class FootnoteEditor : Loggable
 	{
 		private const string FootnotesMeta = "omfootnotes";
 		private const string FootnoteMeta = "omfootnote";
@@ -24,7 +25,6 @@ namespace River.OneMoreAddIn
 		private const string RefreshStyle = "font-style:italic;font-size:9.0pt;color:#808080";
 
 		private readonly OneNote one;
-		private readonly ILogger logger;
 		private readonly bool dark;
 
 		private Page page;
@@ -41,14 +41,11 @@ namespace River.OneMoreAddIn
 		public FootnoteEditor(OneNote one)
 		{
 			this.one = one;
-
-			page = one.GetPage();
+			page = Task.Run(async () => { return await one.GetPage(); }).Result;
 			ns = page.Namespace;
 			PageNamespace.Set(ns);
 
 			dark = page.GetPageColor(out _, out _).GetBrightness() < 0.5;
-
-			logger = Logger.Current;
 		}
 
 
@@ -60,7 +57,7 @@ namespace River.OneMoreAddIn
 		{
 			if (!page.ConfirmBodyContext())
 			{
-				UIHelper.ShowError(Resx.Error_BodyContext);
+				MoreMessageBox.ShowError(one.Window, Resx.Error_BodyContext);
 				return false;
 			}
 
@@ -80,9 +77,9 @@ namespace River.OneMoreAddIn
 				.Descendants(ns + "T")
 				.LastOrDefault(e => e.Attribute("selected")?.Value == "all");
 
-			if (element == null)
+			if (element is null)
 			{
-				UIHelper.ShowError(one.Window, Resx.Error_BodyContext);
+				MoreMessageBox.ShowError(one.Window, Resx.Error_BodyContext);
 				return;
 			}
 
@@ -105,7 +102,7 @@ namespace River.OneMoreAddIn
 
 			if (!EnsureFootnoteFooter())
 			{
-				UIHelper.ShowError(one.Window, Resx.Error_BodyContext);
+				MoreMessageBox.ShowError(one.Window, Resx.Error_BodyContext);
 				return;
 			}
 
@@ -137,14 +134,14 @@ namespace River.OneMoreAddIn
 			var outline = page.Root.Elements(ns + "Outline")
 				.FirstOrDefault(e => e.Attributes("selected").Any());
 
-			if (outline == null)
+			if (outline is null)
 			{
 				logger.WriteLine($"could not add footnote footer; no selected outline");
 				return false;
 			}
 
 			var container = outline.Elements(ns + "OEChildren").FirstOrDefault();
-			if (container == null)
+			if (container is null)
 			{
 				logger.WriteLine($"could not add footnote footer; no outline container");
 				return false;
@@ -154,7 +151,7 @@ namespace River.OneMoreAddIn
 				e.Attribute("name").Value == FootnotesMeta &&
 				e.Attribute("content").Value == DividerContent);
 
-			if (divider != null)
+			if (divider is not null)
 			{
 				// found the divider so return its parent OE
 				divider = divider.Parent;
@@ -218,7 +215,7 @@ namespace River.OneMoreAddIn
 				.OfType<XElement>().Elements(ns + "Meta")
 				.Where(e => e.Attribute("name").Value.Equals(FootnoteMeta))
 				.DefaultIfEmpty()  // avoids null ref exception
-				.Max(e => e == null ? 0 : int.Parse(e.Attribute("content").Value))
+				.Max(e => e is null ? 0 : int.Parse(e.Attribute("content").Value))
 				+ 1).ToString();
 
 			// find last footnote (sibling) element after which new note is to be added
@@ -227,7 +224,7 @@ namespace River.OneMoreAddIn
 				.LastOrDefault(e => e.Attribute("name").Value.Equals(FootnoteMeta));
 
 			// divider is a valid precedesor sibling; otherwise last's Parent
-			last = last == null ? divider : last.Parent;
+			last = last is null ? divider : last.Parent;
 
 			// insert new note
 
@@ -295,7 +292,7 @@ namespace River.OneMoreAddIn
 			await one.Update(page);
 
 			// reload the page and reset state variables...
-			page = one.GetPage();
+			page = await one.GetPage();
 			ns = page.Namespace;
 
 			EnsureFootnoteFooter();
@@ -319,7 +316,7 @@ namespace River.OneMoreAddIn
 				.Select(e => e.Parent.Attribute("objectID").Value)
 				.FirstOrDefault();
 
-			if (noteId == null)
+			if (noteId is null)
 			{
 				return false;
 			}
@@ -350,13 +347,13 @@ namespace River.OneMoreAddIn
 				.Descendants(ns + "T")
 				.LastOrDefault(e => e.Attribute("selected")?.Value == "all");
 
-			if (element != null)
+			if (element is not null)
 			{
 				// add footnote link to end of selection range paragraph
 				var cdata = element.DescendantNodes().OfType<XCData>().Last();
-				if (cdata != null)
+				if (cdata is not null)
 				{
-					cdata.Value = 
+					cdata.Value =
 						$"{cdata.Value}{note.ToString(SaveOptions.DisableFormatting)}";
 
 					// set insertion just after footnote ref
@@ -422,7 +419,7 @@ namespace River.OneMoreAddIn
 			for (int i = 0, label = 1; i < refs.Count; i++, label++)
 			{
 				var note = notes.Find(n => n.Label == refs[i].Label);
-				if (note == null)
+				if (note is null)
 				{
 					// something is awry!
 					continue;
@@ -443,7 +440,7 @@ namespace River.OneMoreAddIn
 
 				var text = FindSelectedReferences(notes[i].Element.Elements(ns + "T"), false)?.FirstOrDefault();
 
-				if (text != null && (text.Label != label))
+				if (text is not null && (text.Label != label))
 				{
 					var cdata = text.CData.Value.Remove(text.Index, text.Length);
 					text.CData.Value = cdata.Insert(text.Index, label.ToString());
@@ -454,7 +451,7 @@ namespace River.OneMoreAddIn
 			if (count > 0)
 			{
 				// divider will be null if this routine is invoked independently from Refresh cmd
-				if (divider == null)
+				if (divider is null)
 				{
 					divider = page.Root.Elements(ns + "Outline")
 						.Where(e => e.Attributes("selected").Any())
@@ -464,7 +461,7 @@ namespace River.OneMoreAddIn
 							e.Attribute("content").Value.Equals(DividerContent))?
 						.Parent;
 
-					if (divider == null)
+					if (divider is null)
 					{
 						// no divider so just give up!
 						return;
@@ -496,7 +493,7 @@ namespace River.OneMoreAddIn
 
 		private List<FootnoteReference> FindSelectedReferences(IEnumerable<XElement> roots, bool super)
 		{
-			var pattern = super 
+			var pattern = super
 				? @"vertical-align:super[;'""][^>]*>\[(\d+)\]</span>"
 				: @"\[(\d+)\]";
 
@@ -540,7 +537,7 @@ namespace River.OneMoreAddIn
 					})
 					.FirstOrDefault();
 
-				if ((meta != null) && !list.Exists(e => e.Label == meta.Label))
+				if ((meta is not null) && !list.Exists(e => e.Label == meta.Label))
 				{
 					var match = Regex.Match(meta.CData.Value, @"\[(\d+)\]");
 					if (match.Success)
@@ -574,9 +571,11 @@ namespace River.OneMoreAddIn
 		/// </remarks>
 		public async Task RemoveFootnote()
 		{
-			var cursor = page.GetTextCursor();
-			if (cursor == null ||
-				page.SelectionScope != SelectionScope.Empty)
+			var range = new SelectionRange(page);
+			var cursor = range.GetSelection();
+
+			if (range.Scope != SelectionScope.TextCursor &&
+				range.Scope != SelectionScope.SpecialCursor)
 			{
 				logger.WriteLine("could not delete footnote, cursor not found");
 				SystemSounds.Exclamation.Play();
@@ -590,13 +589,13 @@ namespace River.OneMoreAddIn
 			var meta = cursor.Parent.Elements(ns + "Meta")
 				.FirstOrDefault(e => e.Attribute("name").Value == FootnoteMeta);
 
-			if (meta != null)
+			if (meta is not null)
 			{
 				// cursor must be positioned on a footnote text item
 				label = meta.Attribute("content").Value;
 				logger.WriteLine($"found note [{label}]");
 			}
-			else if (page.SelectionSpecial) // URL?
+			else if (range.Scope == SelectionScope.SpecialCursor) // URL
 			{
 				// cursor is on a hyperlink, check that it matches the [label] syntax
 				var match = Regex.Match(cursor.Value,
@@ -628,7 +627,7 @@ namespace River.OneMoreAddIn
 						c.Value,
 						$@"vertical-align:super[;'""][^>]*>\[{label}\]<\/span>"));
 
-				if (cdata != null)
+				if (cdata is not null)
 				{
 					RemoveReference(cdata, label);
 				}
@@ -701,7 +700,7 @@ namespace River.OneMoreAddIn
 				.Select(e => e.Parent)
 				.FirstOrDefault();
 
-			if (a != null)
+			if (a is not null)
 			{
 				a.Remove();
 				data.Value = wrapper.GetInnerXml();

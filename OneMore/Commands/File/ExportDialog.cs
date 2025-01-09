@@ -14,7 +14,7 @@ namespace River.OneMoreAddIn.Commands
 	using Resx = Properties.Resources;
 
 
-	internal partial class ExportDialog : UI.LocalizableForm
+	internal partial class ExportDialog : UI.MoreForm
 	{
 		private readonly bool wordInstalled;
 
@@ -29,8 +29,8 @@ namespace River.OneMoreAddIn.Commands
 
 				Localize(new string[]
 				{
-					"folderLabel",
-					"formatLabel",
+					"folderLabel=word_Folder",
+					"formatLabel=word_Format",
 					"formatBox",
 					"underBox",
 					"attachmentsBox",
@@ -146,7 +146,10 @@ namespace River.OneMoreAddIn.Commands
 					{
 						path = dialog.SelectedPath;
 					}
-				});
+				})
+				{
+					Name = $"{nameof(ExportDialog)}Thread"
+				};
 
 				thread.SetApartmentState(ApartmentState.STA);
 				thread.IsBackground = true;
@@ -158,7 +161,7 @@ namespace River.OneMoreAddIn.Commands
 			}
 			catch (Exception exc)
 			{
-				Logger.Current.WriteLine("error running FolderBrowserDialog", exc);
+				logger.WriteLine("error running FolderBrowserDialog", exc);
 			}
 		}
 	}

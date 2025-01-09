@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2020 Steven M Cohn.  All rights reserved.
+// Copyright © 2020 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -44,7 +44,7 @@ namespace River.OneMoreAddIn.Commands
 
 		private async Task RemoveSpacing()
 		{
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 			logger.StartClock();
 
 			var elements = page.Root.Descendants(page.Namespace + "OE")
@@ -54,8 +54,10 @@ namespace River.OneMoreAddIn.Commands
 					e.Attribute("spaceBetween") != null)
 				.ToList();
 
-			page.GetTextCursor();
-			if (page.SelectionScope != SelectionScope.Empty)
+			var range = new Models.SelectionRange(page);
+			range.GetSelection();
+
+			if (range.Scope != SelectionScope.TextCursor)
 			{
 				elements = elements.Where(e => e.Attribute("selected") != null).ToList();
 			}
@@ -95,7 +97,7 @@ namespace River.OneMoreAddIn.Commands
 
 				// is this a custom Heading style?
 				var style = new Style(element.CollectStyleProperties(true));
-				if (customStyles.Any(s => s.Equals(style)))
+				if (customStyles.Exists(s => s.Equals(style)))
 				{
 					if (includeHeadings)
 					{

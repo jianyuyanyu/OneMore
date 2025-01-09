@@ -34,24 +34,24 @@ namespace River.OneMoreAddIn.Commands
 		{
 			if (!HttpClientFactory.IsNetworkAvailable())
 			{
-				UIHelper.ShowInfo(Properties.Resources.NetwordConnectionUnavailable);
+				ShowInfo(Properties.Resources.NetwordConnectionUnavailable);
 				return;
 			}
 
-			using (one = new OneNote())
+			await using (one = new OneNote())
 			{
 				var context = SynchronizationContext.Current;
 
 				var results = await one.SearchMeta(string.Empty, "omKeyboardShortcuts");
 				if (results == null)
 				{
-					UIHelper.ShowInfo(one.Window, "Could not show page at this time. Restart OneNote");
+					ShowError("Could not show page at this time. Restart OneNote");
 					return;
 				}
 
 				var ns = one.GetNamespace(results);
 
-				var pageId = results?.Descendants(ns + "Meta")
+				var pageId = results.Descendants(ns + "Meta")
 					.Where(e => e.Attribute("name").Value == "omKeyboardShortcuts")
 					.Select(e => e.Parent.Attribute("ID").Value)
 					.FirstOrDefault();
@@ -130,7 +130,7 @@ namespace River.OneMoreAddIn.Commands
 			{
 				using var stream = new FileStream(path, FileMode.Open);
 				using var archive = new ZipArchive(stream);
-				var entry = archive.Entries.First();
+				var entry = archive.Entries[0];
 
 				using var reader = new StreamReader(entry.Open());
 				return new Page(XElement.Parse(reader.ReadToEnd()));

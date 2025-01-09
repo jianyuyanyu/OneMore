@@ -79,8 +79,8 @@
           <!-- TODO class+active aria-currrent=page -->
           <a class="nav-link" href="/get-started/index.html" id="get-started-section">Get started</a>
           <a class="nav-link" href="/the-basics/index.html" id="the-basics-section">The Basics</a>
-          <a class="nav-link" href="/context-menus/index.html" id="context-menus-section">Context Menus</a>
           <a class="nav-link" href="/commands/index.html" id="commands-section">Commands</a>
+          <a class="nav-link" href="/context-menus/index.html" id="context-menus-section">Context Menus</a>
           <a class="nav-link" href="/developers/index.html" id="developers-section">Developers</a>
         </div>
         <div class="d-flex">
@@ -131,15 +131,18 @@
 <li><a id="edit-commands" href="Edit Commands.htm">Edit Commands</a></li>
 <li><a id="favorites-commands" href="Favorites Commands.htm">Favorites Commands</a></li>
 <li><a id="file-commands" href="File Commands.htm">File Commands</a></li>
+<li><a id="---plugins" href="-- Plugins.htm">-- Plugins</a></li>
+<li><a id="hashtag-commands" href="Hashtag Commands.htm">Hashtag Commands</a></li>
 <li><a id="image-commands" href="Image Commands.htm">Image Commands</a></li>
 <li><a id="my-styles-commands" href="My Styles Commands.htm">My Styles Commands</a></li>
 <li><a id="numbering-commands" href="Numbering Commands.htm">Numbering Commands</a></li>
 <li><a id="page-commands" href="Page Commands.htm">Page Commands</a></li>
 <li><a id="reference-commands" href="Reference Commands.htm">Reference Commands</a></li>
 <li><a id="reminder-commands" href="Reminder Commands.htm">Reminder Commands</a></li>
-<li><a id="search-and-tag-commands" href="Search and Tag Commands.htm">Search and Tag Commands</a></li>
+<li><a id="search-commands" href="Search Commands.htm">Search Commands</a></li>
 <li><a id="snippets-commands" href="Snippets Commands.htm">Snippets Commands</a></li>
 <li><a id="table-commands" href="Table Commands.htm">Table Commands</a></li>
+<li><a id="---tables-and-calculations" href="-- Tables and Calculations.htm">-- Tables and Calculations</a></li>
 <li><a id="table-style-commands" href="Table Style Commands.htm">Table Style Commands</a></li>
 <li><a id="extra-commands" href="Extra Commands.htm">Extra Commands</a></li>
           </ul>
@@ -196,6 +199,9 @@
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
 <H1 lang=yo style="FONT-SIZE: 16pt; FONT-FAMILY: Calibri; COLOR: #1e4e79; MARGIN: 0in">Additional Reference Commands</H1>
 <H2 lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; COLOR: #2e75b5; MARGIN: 0in">&nbsp;</H2>
+<H2 lang=yo style="FONT-SIZE: 14pt; FONT-FAMILY: Calibri; COLOR: #2e75b5; MARGIN: 0in">Check URLs</H2>
+<P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">Validates each URL on the current page and highlights invalid URLs with a <SPAN style="BACKGROUND: red; mso-highlight: red">red background</SPAN>.</P>
+<P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
 <H2 lang=yo style="FONT-SIZE: 14pt; FONT-FAMILY: Calibri; COLOR: #2e75b5; MARGIN: 0in">Create Page Map</H2>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">Generates a report showing all pages that contain links to other pages. This can be scope to the current section, current notebook, or all notebooks. The report is produced as a new page in the current section.</P>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
@@ -204,7 +210,7 @@
 <H2 lang=yo style="FONT-SIZE: 14pt; FONT-FAMILY: Calibri; COLOR: #2e75b5; MARGIN: 0in">Embed Page and Update Embedded Pages</H2>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">There are time when you have a snippet of content that you want to repeat on other pages. The&nbsp;<SPAN style="FONT-STYLE: italic">Embed Page</SPAN>&nbsp;command embeds the contents of a selected page into the current page at the cursor location. The embedded content is wrapped in a single-cell table with a visible border to indicate that it is embedded content. Click the [Refresh] link in the upper right of the table cell to refresh the embedded contents and synchronize with any changes from the source page.</P>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
-<P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">Note that this will only embed the first outline on the page; outlines are the boxes that appear and let you move content around the page. If you have a large and complex page with multiple outlines, it would be better to simply link to that page rather than embed its contents.</P>
+<P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">Note that this will only embed the first outline on the page; outlines are the boxes that appear and let you move content around the page. If you have a large and complex page with multiple outlines, it would be better to simply link to that page rather than embed its contents. If there are no outlines on the source page but there are images or attached files, this command will embed only the first item on the page.</P>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">The&nbsp;<SPAN style="FONT-STYLE: italic">Update Embedded Pages</SPAN>&nbsp;command will refresh and resynchronize the content of all embedded pages on the current page.</P>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
@@ -214,13 +220,16 @@
 <H2 lang=yo style="FONT-SIZE: 14pt; FONT-FAMILY: Calibri; COLOR: #2e75b5; MARGIN: 0in">Replace URLs with Images</H2>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">Replaces all or selected hyperlinked URLs that reference online images with those referred image. If the image cannot be downloaded, no changes are made. This will only affect URLs where you can read the Web address on the page; it skips URLs where the text differs from the actual address.</P>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
+<H2 lang=yo style="FONT-SIZE: 14pt; FONT-FAMILY: Calibri; COLOR: #2e75b5; MARGIN: 0in">Replace URL TItles with Addresses</H2>
+<P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">This is the opposite of the <SPAN style="FONT-STYLE: italic">Replace URLs with Web Page Titles</SPAN> command, in that it removes the Web page title and restores the original Web address as the text of the hyperlink.</P>
+<P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
 <H2 lang=yo style="FONT-SIZE: 14pt; FONT-FAMILY: Calibri; COLOR: #2e75b5; MARGIN: 0in">Replace URLs with Web Page Titles</H2>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">Automatically replaces all or selected hyperlinked URLs with the &lt;title&gt; specified on the associated Web pages. This only affects URLs for which the displayed text is the same as the link address, meaning if you've already customized the displayed text, OneMore will not alter your changes.</P>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">For example, given this URL on a OneNote page:&nbsp; <A href="https://github.com/">https://github.com/</A> it would be replaced with its hyperlinked title:&nbsp;<A href="https://github.com/">GitHub</A></P>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
 <P lang=yo style="FONT-SIZE: 11.5pt; FONT-FAMILY: Calibri; MARGIN: 0in">&nbsp;</P>
-<P><CITE lang=yo style="FONT-SIZE: 9pt; FONT-FAMILY: Calibri; COLOR: #595959; MARGIN: 0in">##omwiki ##omcommands</CITE></P>
+<P><CITE lang=yo style="FONT-SIZE: 9pt; FONT-FAMILY: Calibri; COLOR: #595959; MARGIN: 0in">#omwiki #omcommands</CITE></P>
 <P><CITE lang=yo style="FONT-SIZE: 9pt; FONT-FAMILY: Calibri; COLOR: #595959; MARGIN: 0in">&nbsp;</CITE></P>
 <P><CITE lang=yo style="FONT-SIZE: 10pt; FONT-FAMILY: Calibri; COLOR: #595959; MARGIN: 0in">© 2020 Steven M Cohn. All rights reserved.</CITE></P>
 <P><CITE lang=yo style="FONT-SIZE: 10pt; FONT-FAMILY: Calibri; COLOR: #595959; MARGIN: 0in">Please consider a <A href="https://github.com/sponsors/stevencohn">sponsorship or one-time donation</A> to support ongoing development</CITE></P>

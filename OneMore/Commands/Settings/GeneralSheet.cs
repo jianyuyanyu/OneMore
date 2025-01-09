@@ -1,9 +1,10 @@
 ﻿//************************************************************************************************
-// Copyright © 2021 Steven M. Cohn. All Rights Reserved.
+// Copyright © 2021 Steven M Cohn. All Rights Reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Settings
 {
+	using River.OneMoreAddIn.UI;
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.IO;
@@ -29,8 +30,11 @@ namespace River.OneMoreAddIn.Settings
 				Localize(new string[]
 				{
 					"introBox",
+					"themeLabel",
+					"themeBox",
+					"langLabel=word_Language",
+					"sequentialBox",
 					"checkUpdatesBox",
-					"langLabel",
 					"advancedGroup=phrase_AdvancedOptions",
 					"verboseBox",
 					"experimentalBox"
@@ -39,9 +43,7 @@ namespace River.OneMoreAddIn.Settings
 
 			var settings = provider.GetCollection(Name);
 
-			checkUpdatesBox.Checked = settings.Get("checkUpdates", false);
-			verboseBox.Checked = settings.Get("verbose", false);
-			experimentalBox.Checked = settings.Get("experimental", false);
+			themeBox.SelectedIndex = settings.Get("theme", 0);
 
 			var lang = settings.Get("language", "en-US");
 			foreach (CultureInfo info in langBox.Items)
@@ -51,6 +53,22 @@ namespace River.OneMoreAddIn.Settings
 					langBox.SelectedItem = info;
 					break;
 				}
+			}
+
+			sequentialBox.Checked = settings.Get("nonseqMatching", false);
+			checkUpdatesBox.Checked = settings.Get("checkUpdates", false);
+			experimentalBox.Checked = settings.Get("experimental", false);
+
+			// <logging>verbose|debug</logging> is the new way
+			// <verbose>true</verbose> was the old way
+			var loglevel = settings.Get("logging", string.Empty).ToLower();
+			verboseBox.Checked = loglevel.Length == 0
+				? settings.Get("verbose", false)
+				: loglevel.In("verbose", "debug");
+
+			if (loglevel == "debug")
+			{
+				verboseBox.Enabled = false;
 			}
 		}
 
@@ -71,7 +89,7 @@ namespace River.OneMoreAddIn.Settings
 
 			var languages = new List<CultureInfo>
 			{
-				new CultureInfo("en-US")
+				new("en-US")
 			};
 
 			foreach (var file in files)
@@ -90,7 +108,7 @@ namespace River.OneMoreAddIn.Settings
 				catch
 				{
 					// an exception is thrown if the culture name is a bad form
-					Logger.Current.WriteLine($"{file} is an unrecognized culture directory");
+					logger.WriteLine($"{file} is an unrecognized culture directory");
 				}
 			}
 
@@ -104,29 +122,44 @@ namespace River.OneMoreAddIn.Settings
 			// general...
 
 			var settings = provider.GetCollection(Name);
+			var save = false;
 
-			// does not require a restart
-			if (checkUpdatesBox.Checked)
-				settings.Add("checkUpdates", true);
-			else
-				settings.Remove("checkUpdates");
+			if (settings.Add("theme", themeBox.SelectedIndex))
+			{
+				ThemeManager.Instance.LoadColors(themeBox.SelectedIndex);
+				save = true;
+			}
 
 			var lang = ((CultureInfo)(langBox.SelectedItem)).Name;
 			var updated = settings.Add("language", lang);
 
-			// requires a restart
-			updated = verboseBox.Checked
-				? settings.Add("verbose", true) || updated
-				: settings.Remove("verbose") || updated;
+			// does not require a restart
+			save = sequentialBox.Checked
+				? settings.Add("nonseqMatching", "true") || save
+				: settings.Remove("nonseqMatching") || save;
 
+			// does not require a restart
+			save = checkUpdatesBox.Checked
+				? settings.Add("checkUpdates", true) || save
+				: settings.Remove("checkUpdates") || save;
+
+			// does not require a restart; only Enabled if !debug
+			if (verboseBox.Enabled)
+			{
+				save = verboseBox.Checked
+					? settings.Add("logging", "verbose") || save
+					: settings.Remove("logging") || save;
+
+				((Logger)logger).SetLoggingLevel(verboseBox.Checked, false);
+				save = settings.Remove("verbose") || save;
+			}
+
+			// requires a restart
 			updated = experimentalBox.Checked
 				? settings.Add("experimental", true) || updated
 				: settings.Remove("experimental") || updated;
 
-			// deprecated
-			updated = settings.Remove("imageViewer") || updated;
-
-			if (updated)
+			if (updated || save)
 			{
 				provider.SetCollection(settings);
 			}

@@ -4,10 +4,8 @@
 
 namespace River.OneMoreAddIn.Commands
 {
-	using System;
+	using River.OneMoreAddIn.Models;
 	using System.Collections.Generic;
-	using System.Drawing;
-	using System.IO;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
@@ -29,7 +27,7 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out ns, OneNote.PageDetail.All);
+			await using var one = new OneNote(out var page, out ns, OneNote.PageDetail.All);
 
 			var foreElements = page.Root
 				.Elements(ns + "Outline")
@@ -42,7 +40,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (!foreElements.Any() && !backElements.Any())
 			{
-				UIHelper.ShowMessage(Resx.StylizeImagesCommand_noImages);
+				ShowError(Resx.StylizeImagesCommand_noImages);
 				return;
 			}
 
@@ -99,40 +97,14 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private void Stylize(
-			IEnumerable<XElement> elements, StylizeImagesDialog.ImageStyle style)
+		private void Stylize(IEnumerable<XElement> elements, ImageEditor.Stylization style)
 		{
+			var editor = new ImageEditor { Style = style };
+
 			foreach (var element in elements)
 			{
-				using var image = ReadImage(element);
-
-				var stylized = style switch
-				{
-					StylizeImagesDialog.ImageStyle.GrayScale => image.ToGrayscale(),
-					StylizeImagesDialog.ImageStyle.Sepia => image.ToSepia(),
-					StylizeImagesDialog.ImageStyle.Polaroid => image.ToPolaroid(),
-					_ => image.Inverted()
-				};
-
-				WriteImage(element, stylized);
+				editor.Apply(new OneImage(element));
 			}
-		}
-
-
-		private Image ReadImage(XElement image)
-		{
-			var data = Convert.FromBase64String(image.Element(ns + "Data").Value);
-			using var stream = new MemoryStream(data, 0, data.Length);
-			return Image.FromStream(stream);
-		}
-
-
-		private void WriteImage(XElement element, Image image)
-		{
-			var bytes = (byte[])new ImageConverter().ConvertTo(image, typeof(byte[]));
-
-			var data = element.Element(ns + "Data");
-			data.Value = Convert.ToBase64String(bytes);
 		}
 	}
 }

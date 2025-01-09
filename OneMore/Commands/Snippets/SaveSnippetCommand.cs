@@ -1,12 +1,12 @@
 ﻿//************************************************************************************************
-// Copyright © 2021 Steven M Cohn.  All rights reserved.
+// Copyright © 2021 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
 {
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
 	internal class SaveSnippetCommand : Command
@@ -19,11 +19,15 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out _);
+			await using var one = new OneNote(out var page, out _);
 
-			if (page.GetTextCursor() != null)
+			var range = new Models.SelectionRange(page);
+			range.GetSelection();
+
+			if (range.Scope != SelectionScope.Range &&
+				range.Scope != SelectionScope.Run)
 			{
-				UIHelper.ShowMessage(Resx.SaveSnippet_NeedSelection);
+				ShowError(Resx.SaveSnippet_NeedSelection);
 				return;
 			}
 
@@ -47,7 +51,7 @@ namespace River.OneMoreAddIn.Commands
 
 			await new SnippetsProvider().Save(html, dialog.SnippetName);
 
-			ribbon.InvalidateControl("ribFavoritesMenu");
+			ribbon.InvalidateControl("ribCustomSnippetsMenu");
 		}
 	}
 }

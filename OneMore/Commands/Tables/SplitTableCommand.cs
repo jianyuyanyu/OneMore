@@ -29,7 +29,7 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 
 			// Find first selected cell as anchor point to locate table; by filtering on
 			// selected=all, we avoid including the parent table of a selected nested table.
@@ -45,14 +45,14 @@ namespace River.OneMoreAddIn.Commands
 
 			if (anchor == null)
 			{
-				UIHelper.ShowInfo(one.Window, Resx.SplitTableCommand_NoSelection);
+				ShowInfo(Resx.SplitTableCommand_NoSelection);
 				return;
 			}
 
 			var row = anchor.FirstAncestor(ns + "Row");
 			if (!row.ElementsBeforeSelf(ns + "Row").Any())
 			{
-				UIHelper.ShowInfo(one.Window, Resx.SplitTableCommand_FirstRow);
+				ShowInfo(Resx.SplitTableCommand_FirstRow);
 				return;
 			}
 

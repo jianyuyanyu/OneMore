@@ -4,7 +4,6 @@
 
 namespace River.OneMoreAddIn.Commands
 {
-	using System.Globalization;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Xml.Linq;
@@ -25,7 +24,7 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 
 			var sizes = page.Root.Descendants(ns + "Outline")
 				.Elements(ns + "Size")
@@ -33,7 +32,7 @@ namespace River.OneMoreAddIn.Commands
 					e.Attribute("isSetByUser") != null &&
 					e.Attribute("isSetByUser").Value == "true");
 
-			if (sizes != null)
+			if (sizes.Any())
 			{
 				var modified = false;
 
@@ -46,7 +45,7 @@ namespace River.OneMoreAddIn.Commands
 					size.SetAttributeValue("width", $"{MaxWidth}.0");
 
 					size.GetAttributeValue("height", out float height);
-					size.SetAttributeValue("height", (height + 1).ToString("F04", CultureInfo.InvariantCulture));
+					size.SetAttributeValue("height", (height + 1).ToInvariantString());
 
 					modified = true;
 				}

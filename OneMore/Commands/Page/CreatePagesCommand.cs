@@ -34,24 +34,24 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out page, out ns, OneNote.PageDetail.Selection);
+			await using var one = new OneNote(out page, out ns, OneNote.PageDetail.Selection);
 
 			var cursor = GetContextCursor(out var onlySelected);
 			if (cursor == null)
 			{
-				UIHelper.ShowError(Resx.Error_BodyContext);
+				ShowError(Resx.Error_BodyContext);
 				return;
 			}
 
 			ReadNamesFromContext(cursor, onlySelected);
 			if (!names.Any())
 			{
-				UIHelper.ShowError(Resx.CreatePagesCommand_NoNamesFound);
+				ShowError(Resx.CreatePagesCommand_NoNamesFound);
 				return;
 			}
 
 			var msg = string.Format(Resx.CreatePagesCommand_CreatePages, names.Count);
-			if (UIHelper.ShowQuestion(msg) != DialogResult.Yes)
+			if (UI.MoreMessageBox.ShowQuestion(owner, msg) != DialogResult.Yes)
 			{
 				return;
 			}
@@ -74,7 +74,7 @@ namespace River.OneMoreAddIn.Commands
 
 							//await one.CreatePage(sectionId, name);
 							one.CreatePage(sectionId, out var pageId);
-							var newpage = one.GetPage(pageId);
+							var newpage = await one.GetPage(pageId);
 							newpage.Title = name;
 							await one.Update(newpage);
 
@@ -94,7 +94,7 @@ namespace River.OneMoreAddIn.Commands
 				logger.End();
 			});
 
-			await progress.RunModeless();
+			progress.RunModeless();
 		}
 
 
@@ -102,17 +102,23 @@ namespace River.OneMoreAddIn.Commands
 		{
 			onlySelected = false;
 
-			var cursor = page.GetTextCursor();
-			if (cursor == null)
+			var range = new Models.SelectionRange(page);
+			var selections = range.GetSelections(anyElement: true);
+
+			if (range.Scope == SelectionScope.TextCursor)
 			{
-				cursor = page.GetSelectedElements().FirstOrDefault();
-				if (cursor != null)
-				{
-					onlySelected = page.SelectionScope == SelectionScope.Region;
-				}
+				return selections.First();
 			}
 
-			return cursor;
+			if (range.Scope == SelectionScope.Run || // allow single List item
+				range.Scope == SelectionScope.Range ||
+				range.Scope == SelectionScope.Block)
+			{
+				onlySelected = true;
+				return selections.First();
+			}
+
+			return null;
 		}
 
 
@@ -161,14 +167,18 @@ namespace River.OneMoreAddIn.Commands
 
 		private bool ContextIsTable(XElement cursor)
 		{
-			return cursor.Parent?.Parent?.Parent?.Name.LocalName == "Cell";
+			// should have selected Cell
+			return cursor.Name.LocalName == "Cell";
 		}
 
 
 		private void ReadTable(XElement cursor, bool onlySelected)
 		{
 			logger.WriteLine("table");
-			var anchor = cursor.Parent.Parent.Parent;
+
+			// Cell
+			var anchor = cursor;
+
 			var table = anchor.FirstAncestor(ns + "Table");
 			var index = anchor.ElementsBeforeSelf(ns + "Cell").Count();
 
@@ -176,8 +186,7 @@ namespace River.OneMoreAddIn.Commands
 			{
 				var cell = r.Elements(ns + "Cell").ElementAt(index);
 				if (cell != null &&
-					(!onlySelected ||
-					(onlySelected && cell.Attribute("selected") != null)))
+					(!onlySelected || (cell.Attribute("selected") != null)))
 				{
 					logger.WriteLine($"cell: {cell.TextValue()}");
 					names.Add(cell.TextValue());

@@ -2,6 +2,8 @@
 // Copyright © 2021 Steven M Cohn.  All rights reserved.
 //************************************************************************************************
 
+#pragma warning disable S2583 // Conditionally executed code should be reachable
+
 namespace River.OneMoreAddIn.Commands
 {
 	using River.OneMoreAddIn.Models;
@@ -24,6 +26,7 @@ namespace River.OneMoreAddIn.Commands
 		private Page page;
 		private Color pageColor;
 		private string pcolor;
+		private SelectionRange range;
 
 
 		public ClearBackgroundCommand()
@@ -33,11 +36,16 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out page, out ns);
+			await using var one = new OneNote(out page, out ns);
 			pageColor = page.GetPageColor(out var _, out var _);
 			pcolor = page.GetQuickStyle(StandardStyles.Normal).Color;
 
-			var updated = ClearTextBackground(page.GetSelectedElements(all: true));
+			range = new SelectionRange(page);
+
+			var runs = range.GetSelections(defaulToAnytIfNoRange: true);
+			logger.WriteLine($"found {runs.Count()} runs, scope={range.Scope}");
+
+			var updated = ClearTextBackground(runs);
 			updated = ClearCellBackground() || updated;
 
 			if (updated)
@@ -87,6 +95,7 @@ namespace River.OneMoreAddIn.Commands
 					var wrapper = cdata.GetWrapper();
 					wrapper.Elements("span").ForEach(e => rewrap = CheckContrast(e) || rewrap);
 
+					// #pragma
 					if (rewrap)
 					{
 						cdata.Value = wrapper.GetInnerXml();
@@ -157,7 +166,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			IEnumerable<XElement> cells;
 
-			if (page.SelectionScope == SelectionScope.Empty)
+			if (range.Scope == SelectionScope.TextCursor)
 			{
 				cells = page.Root.Descendants(ns + "Cell")
 					.Where(e => e.Attribute("shadingColor") != null);

@@ -5,7 +5,6 @@
 namespace River.OneMoreAddIn.Commands
 {
 	using River.OneMoreAddIn.Models;
-	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Linq;
@@ -32,12 +31,12 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using (one = new OneNote(out var page, out var ns, OneNote.PageDetail.All))
+			await using (one = new OneNote(out var page, out var ns, OneNote.PageDetail.All))
 			{
 				images = page.Root.Elements(ns + "Image");
 				if ((!images.Any() || images.Count() < 2))
 				{
-					UI.MoreMessageBox.ShowError(owner, Resx.StackBackgroundImagesCommand_noImages);
+					ShowError(Resx.StackBackgroundImagesCommand_noImages);
 					return;
 				}
 
@@ -50,7 +49,7 @@ namespace River.OneMoreAddIn.Commands
 
 
 		/// <summary>
-		/// Entry point for ResizeImagesCommand so this functionality can be shared
+		/// Entry point for AdjustImagesCommand so this functionality can be shared
 		/// </summary>
 		/// <param name="page"></param>
 		/// <returns></returns>

@@ -15,7 +15,7 @@ namespace River.OneMoreAddIn.Commands
 	using Resx = River.OneMoreAddIn.Properties.Resources;
 
 
-	internal partial class RemoveDuplicatesNavigator : UI.LocalizableForm
+	internal partial class RemoveDuplicatesNavigator : UI.MoreForm
 	{
 		private readonly OneNote one;
 
@@ -53,8 +53,8 @@ namespace River.OneMoreAddIn.Commands
 
 				if (group == null)
 				{
-					group = new ListViewGroup(node.GroupID, node.PageID == null 
-						? node.Title 
+					group = new ListViewGroup(node.GroupID, node.PageID == null
+						? node.Title
 						: String.Format(Resx.RemoveDuplicatesNavigator_pagesSimilarTo, node.Title)
 						);
 
@@ -151,7 +151,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var button = new Button
 			{
-				Image = Resx.Delete,
+				Image = Resx.m_Delete,
 				Padding = new Padding(0),
 				Margin = new Padding(0),
 				FlatStyle = FlatStyle.Flat,

@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2020 Steven M Cohn.  Yada yada...
+// Copyright © 2020 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -10,7 +10,7 @@ namespace River.OneMoreAddIn.UI
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
 	/// <summary>
@@ -33,7 +33,7 @@ namespace River.OneMoreAddIn.UI
 	/// A cancel button is displayed that, when pressed, sets the cancelltion token and returns
 	/// DialogResult.Cancel. If the execute action completes without cancellation OK is returned.
 	/// </remarks>
-	internal partial class ProgressDialog : LocalizableForm
+	internal partial class ProgressDialog : MoreForm
 	{
 		private const int SimpleHeight = 112;
 		private const int CancelHeight = 144;
@@ -97,7 +97,7 @@ namespace River.OneMoreAddIn.UI
 		{
 			InitializeComponent();
 
-			(_, float factorY) = UIHelper.GetScalingFactors();
+			(_, float factorY) = UI.Scaling.GetScalingFactors();
 			Height = (int)Math.Round(height * factorY);
 
 			if (NeedsLocalizing())
@@ -121,12 +121,10 @@ namespace River.OneMoreAddIn.UI
 			Func<ProgressDialog, CancellationToken, Task<bool>> action)
 		{
 			cancelButton.Visible = true;
-			(_, float factorY) = UIHelper.GetScalingFactors();
+			(_, float factorY) = UI.Scaling.GetScalingFactors();
 			Height = (int)Math.Round(CancelHeight * factorY);
 
 			source ??= new CancellationTokenSource();
-
-			DialogResult result = DialogResult.Cancel;
 
 			try
 			{
@@ -151,28 +149,32 @@ namespace River.OneMoreAddIn.UI
 					}
 
 					Close();
-				});
+				})
+				{
+					Name = $"{nameof(ProgressDialog)}Thread"
+				};
 
 				thread.SetApartmentState(ApartmentState.STA);
 				thread.IsBackground = true;
 				thread.Start();
 
-				result = ShowDialog();
+				var result = ShowDialog();
 
 				if (result == DialogResult.Cancel)
 				{
 					logger.WriteLine("clicked cancel");
 					source.Cancel();
 					thread.Abort();
-					return result;
 				}
+
+				return result;
 			}
 			catch (Exception exc)
 			{
 				logger.WriteLine("error importing", exc);
 			}
 
-			return result;
+			return DialogResult.Cancel;
 		}
 
 
@@ -198,7 +200,7 @@ namespace River.OneMoreAddIn.UI
 		/// Called after Show()
 		/// </summary>
 		/// <param name="e"></param>
-		protected override void OnLoad(EventArgs e)
+		protected override async void OnLoad(EventArgs e)
 		{
 			base.OnLoad(e);
 
@@ -209,7 +211,7 @@ namespace River.OneMoreAddIn.UI
 
 				var rect = new Native.Rectangle();
 
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				Native.GetWindowRect(one.WindowHandle, ref rect);
 
 				var yoffset = (int)(Height * 20 / 100.0);

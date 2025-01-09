@@ -39,7 +39,7 @@ namespace River.OneMoreAddIn.Commands
 
 		private OneNote one;
 		private XNamespace ns;
-		private readonly MD5CryptoServiceProvider hasher;
+		private readonly SHA1CryptoServiceProvider hasher;
 		private readonly List<HashNode> hashes;
 		private UI.ProgressDialog progress;
 
@@ -53,7 +53,11 @@ namespace River.OneMoreAddIn.Commands
 		public RemoveDuplicatesCommand()
 		{
 			hashes = new List<HashNode>();
-			hasher = new MD5CryptoServiceProvider();
+
+			// MD5 should be sufficient and performs best but is not FIPS compliant
+			// so use SHA1 instead. Computers are configured to enable/disable FIPS via
+			// HKLM\SYSTEM\CurrentControlSet\Control\Lsa\FipsAlgorithmPolicy\Enabled
+			hasher = new SHA1CryptoServiceProvider();
 		}
 
 
@@ -94,13 +98,13 @@ namespace River.OneMoreAddIn.Commands
 
 			if (hashes.Count == 0)
 			{
-				UIHelper.ShowInfo("No duplicate pages were found");
+				ShowInfo("No duplicate pages were found");
 				return;
 			}
 
 			// let user cherrypick duplicate pages to delete...
 			var navigator = new RemoveDuplicatesNavigator(hashes);
-			await navigator.RunModeless((sender, e) =>
+			navigator.RunModeless((sender, e) =>
 			{
 				var d = sender as RemoveDuplicatesNavigator;
 				d.Dispose();
@@ -119,7 +123,7 @@ namespace River.OneMoreAddIn.Commands
 				Title = "Empty Pages"
 			};
 
-			using (one = new OneNote(out _, out ns))
+			await using (one = new OneNote(out _, out ns))
 			{
 				var hierarchy = await BuildHierarchy(scope, books);
 				dialog.SetMaximum(hierarchy.Elements().Count());
@@ -132,7 +136,7 @@ namespace River.OneMoreAddIn.Commands
 						break;
 					}
 
-					var page = one.GetPage(pageRef.Attribute("ID").Value,
+					var page = await one.GetPage(pageRef.Attribute("ID").Value,
 						deep ? OneNote.PageDetail.BinaryData : OneNote.PageDetail.Basic);
 
 					dialog.SetMessage($"Scanning {page.Title}...");
@@ -152,17 +156,17 @@ namespace River.OneMoreAddIn.Commands
 						continue;
 					}
 
-					var sibling = hashes.FirstOrDefault(n =>
+					var sibling = hashes.Find(n =>
 						n.TextHash == node.TextHash || n.XmlHash == node.XmlHash);
 
 					if (sibling != null)
 					{
-						var info = one.GetPageInfo(node.PageID);
+						var info = await one.GetPageInfo(node.PageID);
 						node.Path = info.Path;
 						node.Link = info.Link;
 						if (sibling.Path == null)
 						{
-							info = one.GetPageInfo(sibling.PageID);
+							info = await one.GetPageInfo(sibling.PageID);
 							sibling.Path = info.Path;
 							sibling.Link = info.Link;
 						}
@@ -212,7 +216,7 @@ namespace River.OneMoreAddIn.Commands
 			switch (scope)
 			{
 				case UI.SelectorScope.Section:
-					one.GetSection().Descendants(ns + "Page")
+					(await one.GetSection()).Descendants(ns + "Page")
 						.ForEach(p => hierarchy.Add(p));
 					break;
 

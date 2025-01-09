@@ -28,7 +28,7 @@ namespace River.OneMoreAddIn.Commands
 			if (new SettingsProvider()
 				.GetCollection(nameof(NavigatorSheet)).Get("disabled", false))
 			{
-				UIHelper.ShowInfo(Resx.NavigatorWindow_disabled);
+				ShowInfo(Resx.NavigatorWindow_disabled);
 				return;
 			}
 
@@ -36,7 +36,7 @@ namespace River.OneMoreAddIn.Commands
 			{
 				window = new NavigatorWindow();
 				window.FormClosed += CloseNavigatorWindow;
-				await window.RunModeless();
+				window.RunModeless();
 				return;
 			}
 
@@ -50,9 +50,9 @@ namespace River.OneMoreAddIn.Commands
 				window.WindowState = FormWindowState.Normal;
 			}
 
-			window.ForceTopMost();
-			window.Activate();
-			window.Focus();
+			window.Elevate(false);
+
+			await Task.Yield();
 		}
 
 

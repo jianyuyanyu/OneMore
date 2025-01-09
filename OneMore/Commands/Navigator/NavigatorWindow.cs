@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2023 Steven M Cohn.  All rights reserved.
+// Copyright © 2023 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -21,19 +21,20 @@ namespace River.OneMoreAddIn.Commands
 	using Resx = Properties.Resources;
 
 
-	internal partial class NavigatorWindow : LocalizableForm
+	internal partial class NavigatorWindow : MoreForm
 	{
-		private const int WindowMargin = 20;
+		private const int WindowMargin = ScreenExtensions.ReasonableMargin;
 		private const int HeaderIndent = 18;
 		private const int MinimizedBounds = -32000;
 
 		private static string visitedID;
 
 		private Screen screen;
-		private Point corral;
+		private Rectangle corral;
 		private Point location;
 		private bool minimized;
 		private readonly int depth;
+		private readonly bool reading;
 		private readonly bool corralled;
 		private readonly List<IDisposable> trash;
 
@@ -65,28 +66,39 @@ namespace River.OneMoreAddIn.Commands
 				tooltip.SetToolTip(pinButton, Resx.NavigatorWindow_pinButton_Tooltip);
 				tooltip.SetToolTip(copyPinnedButton, Resx.NavigatorWindow_copyTooltip);
 				tooltip.SetToolTip(copyHistoryButton, Resx.NavigatorWindow_copyTooltip);
+				tooltip.SetToolTip(deleteHistoryButton, Resx.NavigatorWindow_deleteHistoryButton_Tooltip);
 			}
 
 			ManualLocation = true;
 
+			// User settings
+			var settings = new SettingsProvider().GetCollection(nameof(NavigatorSheet));
+			reading = !settings.Get("hidePinned", false);
+			corralled = settings.Get("corralled", false); //|| Screen.AllScreens.Length == 1;
+			depth = settings.Get("depth", NavigationService.DefaultHistoryDepth);
+
 			provider = new NavigationProvider();
-			provider.Navigated += UpdateViewOnNavigated;
+			provider.Navigated += ShowHistory;
 			trash.Add(provider);
 
 			var rowWidth = Width - SystemInformation.VerticalScrollBarWidth * 2;
 
-			pinnedBox.FullRowSelect = true;
-			pinnedBox.Columns.Add(
-				new MoreColumnHeader(string.Empty, rowWidth) { AutoSizeItems = true });
+			if (reading)
+			{
+				pinnedBox.FullRowSelect = true;
+				pinnedBox.Columns.Add(
+					new MoreColumnHeader(string.Empty, rowWidth) { AutoSizeItems = true });
+			}
+			else
+			{
+				subContainer.Panel1Collapsed = true;
+				copyHistoryButton.Left = pinButton.Left;
+				historyToolPanel.Controls.Remove(pinButton);
+			}
 
 			historyBox.FullRowSelect = true;
 			historyBox.Columns.Add(
 				new MoreColumnHeader(string.Empty, rowWidth) { AutoSizeItems = true });
-
-			// User settings
-			var settings = new SettingsProvider().GetCollection(nameof(NavigatorSheet));
-			corralled = settings.Get("corralled", false) || Screen.AllScreens.Length == 1;
-			depth = settings.Get("depth", NavigationService.DefaultHistoryDepth);
 
 			pinButton.Rescale();
 			unpinButton.Rescale();
@@ -98,47 +110,106 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
+		protected override void OnLoad(EventArgs e)
+		{
+			//logger.WriteLine($"NavigatorWindow.OnLoad calling base...");
+
+			base.OnLoad(e);
+			//logger.WriteLine($"NavigatorWindow.OnLoad after base");
+
+			BackColor = manager.GetColor("Control");
+
+			var viewColor = manager.GetColor("ListView");
+
+			pageBox.BackColor = viewColor;
+
+			if (reading)
+			{
+				pinnedBox.BackColor = viewColor;
+				pinnedBox.HighlightBackground = manager.GetColor("LinkHighlight");
+			}
+
+			historyBox.BackColor = viewColor;
+			historyBox.HighlightBackground = manager.GetColor("LinkHighlight");
+		}
+
+
 		#region Window Management
 		private async void PositionOnLoad(object sender, EventArgs e)
 		{
+			//logger.WriteLine($"NavigatorWindow.PositionOnLoad");
+
 			// deal with primary/secondary displays in either duplicate or extended mode...
 			// Load is invoked prior to SizeChanged
 
-			using var one = new OneNote();
-			screen = Screen.FromHandle(one.WindowHandle);
+			screen = null;
+
+			var settings = new SettingsProvider().GetCollection("navigator");
+			var device = settings.Get<string>("device");
+			if (device is not null)
+			{
+				screen = Array.Find(Screen.AllScreens, s => s.DeviceName == device);
+			}
+
+			if (screen is null)
+			{
+				await using var one = new OneNote();
+				screen = Screen.FromHandle(one.WindowHandle);
+			}
+
+			//logger.WriteLine($"NavigatorWindow.PositionOnLoad screen primary:{screen.Primary} " +
+			//	$"dev:{screen.DeviceName} bounds:{screen.Bounds.X}x{screen.Bounds.Y} " +
+			//	$"Bounds:{screen.Bounds.Width}x{screen.Bounds.Height} " +
+			//	$"WorkArea:{screen.WorkingArea.Width}x{screen.WorkingArea.Height}");
 
 			// move this window into the coordinate space of the active screen
 			Location = screen.WorkingArea.Location;
+			//logger.WriteLine($"NavigatorWindow.PositionOnLoad location:{location.X}x{location.Y}");
 
-			corral = screen.GetBoundedLocation(this);
+			corral = GetCorral(screen);
 
-			var settings = new SettingsProvider().GetCollection("navigator");
 			if (settings.Contains("left") && settings.Contains("top"))
 			{
 				Left = settings.Get("left", Left);
 				Top = settings.Get("top", Top);
+				//logger.WriteLine($"NavigatorWindow.PositionOnLoad setting left:{Left} Top:{Top}");
 			}
 			else
 			{
+				// set to corral origin regardless of whether "corralled" is set
 				Left = corral.X;
-				Top = SystemInformation.CaptionHeight + WindowMargin;
+				Top = corral.Y;
+				//logger.WriteLine($"NavigatorWindow.PositionOnLoad corral left:{Left} Top:{Top}");
 
 				if (CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft)
 				{
 					Left = WindowMargin;
+					//logger.WriteLine($"NavigatorWindow.PositionOnLoad corral RTL left:{Left} Top:{Top}");
 				}
 			}
 
 			// it's possible that screen resolution has changed since settings were saved
 			// and that left/top is now off the visible screen...
-			if (Left > screen.WorkingArea.Width) Left = WindowMargin;
-			if (Top > screen.WorkingArea.Height) Top = WindowMargin;
+			if (Left > screen.WorkingArea.Right)
+			{
+				Left = WindowMargin;
+				//logger.WriteLine($"NavigatorWindow.PositionOnLoad override Left:{Left}");
+			}
+
+			if (Top > screen.WorkingArea.Bottom)
+			{
+				Top = WindowMargin;
+				//logger.WriteLine($"NavigatorWindow.PositionOnLoad override Top:{Top}");
+			}
 
 			if (settings.Contains("width") && settings.Contains("height"))
 			{
 				Width = settings.Get("width", Width);
 				Height = settings.Get("height", Height);
+				//logger.WriteLine($"NavigatorWindow.PositionOnLoad width:{Width} height:{Height}");
 			}
+
+			//logger.WriteLine($"NavigatorWindow.PositionOnLoad data...");
 
 			// designer defines width but height is calculated
 			MaximumSize = new Size(MaximumSize.Width, screen.WorkingArea.Height - (WindowMargin * 2));
@@ -148,8 +219,21 @@ namespace River.OneMoreAddIn.Commands
 			subContainer.SplitterDistance = settings.Get("splitter2", subContainer.SplitterDistance);
 
 			// load data
-			await LoadPinned();
-			UpdateViewOnNavigated(null, await provider.ReadHistory());
+			if (reading)
+			{
+				await LoadPinned();
+			}
+
+			ShowHistory(null, await provider.ReadHistoryLog());
+		}
+
+
+		private Rectangle GetCorral(Screen screen)
+		{
+			var bounds = screen.GetBoundedLocation(this);
+			var left = screen.WorkingArea.X + WindowMargin;
+			var top = screen.WorkingArea.Top + WindowMargin + SystemInformation.CaptionHeight;
+			return new Rectangle(left, top, bounds.X - left, bounds.Y - top);
 		}
 
 
@@ -162,10 +246,15 @@ namespace River.OneMoreAddIn.Commands
 			}
 
 			// SizeChanged is invoked after Load which sets screenArea
-			corral = screen.GetBoundedLocation(this);
+			corral = GetCorral(screen);
 
 			var rowWidth = Width - SystemInformation.VerticalScrollBarWidth * 2;
-			pinnedBox.Columns[0].Width = rowWidth;
+
+			if (reading)
+			{
+				pinnedBox.Columns[0].Width = rowWidth;
+			}
+
 			historyBox.Columns[0].Width = rowWidth;
 		}
 
@@ -190,9 +279,7 @@ namespace River.OneMoreAddIn.Commands
 				minimized = false;
 			}
 
-			BringToFront();
-			TopMost = true;
-			Activate();
+			Elevate(false);
 			PanelFocusOnClick(historyHeadPanel, e);
 		}
 
@@ -254,8 +341,20 @@ namespace River.OneMoreAddIn.Commands
 		{
 			if (WindowState == FormWindowState.Normal)
 			{
+				screen = Array.Find(Screen.AllScreens, s =>
+					Left >= s.WorkingArea.Left && Left <= s.WorkingArea.Right &&
+					Top >= s.WorkingArea.Top && Top <= s.WorkingArea.Bottom);
+
+				screen ??= Array.Find(Screen.AllScreens, s => s.Primary);
+
 				var settings = new SettingsProvider();
 				var collection = settings.GetCollection("navigator");
+
+				if (screen is not null)
+				{
+					collection.Add("device", screen.DeviceName);
+				}
+
 				collection.Add("left", Left);
 				collection.Add("top", Top);
 				collection.Add("width", Width);
@@ -271,62 +370,155 @@ namespace River.OneMoreAddIn.Commands
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		public static void SetVisited(string ID)
-		{
-			// called from HistoryControl!
-			// need to lock?
-			visitedID = ID;
-		}
-
-
-		private async void UpdateViewOnNavigated(object sender, List<HistoryRecord> e)
-		{
-			if (historyBox.InvokeRequired)
-			{
-				historyBox.Invoke(new Action(() => UpdateViewOnNavigated(sender, e)));
-				return;
-			}
-
-			try
-			{
-				if (e.Count > 0 && e[0].PageId == visitedID)
-				{
-					// user clicked ths page in navigator; don't reorder the list or they'll lose
-					// their context and get confused, but refresh the headings pane
-					await LoadPageHeadings(e[0].PageId);
-					visitedID = null;
-					return;
-				}
-
-				visitedID = null;
-
-				await ShowPageOutline(e[0]);
-
-				historyBox.BeginUpdate();
-				historyBox.Items.Clear();
-
-				e.ForEach(record =>
-				{
-					var control = new HistoryControl(record);
-					var item = historyBox.AddHostedItem(control);
-					item.Tag = record;
-				});
-
-				historyBox.Items[0].Selected = true;
-				historyBox.EndUpdate();
-				historyBox.Invalidate();
-
-				historyBox.EnableItemEventBubbling();
-			}
-			catch (Exception exc)
-			{
-				logger.WriteLine($"error navigating", exc);
-			}
-		}
 
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		// Page...
+		// Page headings...
+
+		#region Page headings
+		private async Task LoadPageHeadings(string pageID)
+		{
+			if (pageBox.InvokeRequired)
+			{
+				pageBox.BeginInvoke(new Action(async () => await LoadPageHeadings(pageID)));
+				return;
+			}
+
+			await using var one = new OneNote();
+			var page = await one.GetPage(pageID ?? one.CurrentPageId, OneNote.PageDetail.Basic);
+
+			logger.Verbose($"LoadPageHeadings [{page.Title}]");
+			logger.StartClock();
+
+			var headings = page.GetHeadings(one, linked: false);
+			logger.DebugTime($"GetHeadings <---", keepRunning: true);
+
+			// need to escape ampersand because it is used to indicate keyboard accelerators
+			var title = page.Title.Replace("&", "&&");
+			pageHeadLabel.Text = page.TitleID == null
+				? Resx.phrase_QuickNote
+				: title;
+
+			pageBox.Controls.Clear();
+
+			// inject the page Title as the top-most Heading
+			if (page.TitleID != null)
+			{
+				var ns = page.Root.GetNamespaceOfPrefix(OneNote.Prefix);
+				var root = page.Root
+						.Elements(ns + "Title")
+						.Elements(ns + "OE")
+						.FirstOrDefault();
+
+				if (root != null)
+				{
+					headings.Insert(0, new()
+					{
+						// defer URL lookup until clicked
+						Link = string.Empty,
+						Root = root,
+						Text = title
+					});
+				}
+			}
+
+			if (headings.Count == 0)
+			{
+				logger.VerboseTime("LoadPageHeadings done, 0 headings");
+				return;
+			}
+
+			var font = new Font("Segoe UI", 8.5F, FontStyle.Regular, GraphicsUnit.Point);
+			trash.Add(font);
+
+			logger.DebugTime($"suspending layout", keepRunning: true);
+			pageBox.SuspendLayout();
+
+			var margin = SystemInformation.VerticalScrollBarWidth * 2;
+
+			foreach (var heading in headings)
+			{
+				var wrapper = new XElement("T", new XCData(heading.Text));
+				var text = wrapper.TextValue(true);
+
+				var leftpad = heading.Level * HeaderIndent;
+				var leftmar = leftpad + 4;
+
+				var link = new MoreLinkLabel
+				{
+					Text = text,
+					Tag = heading,
+					Font = font,
+					Padding = new Padding(0),
+					Margin = new Padding(leftmar, 0, 0, 4),
+					Width = pageBox.Width - leftmar - margin
+				};
+
+				using var g = link.CreateGraphics();
+				var size = g.MeasureString(text, font);
+				link.Height = (int)(size.Height + link.Padding.Top + link.Padding.Bottom);
+
+				link.LinkClicked += new LinkLabelLinkClickedEventHandler(async (s, e) =>
+				{
+					if (s is MoreLinkLabel label)
+					{
+						await using var one = new OneNote();
+						var heading = (Heading)label.Tag;
+						if (heading.Link == string.Empty)
+						{
+							logger.Verbose($"fetching URL for [{heading.Text}]");
+							heading.Link = page.GetHyperlink(heading.Root, one);
+						}
+						else
+						{
+							logger.Verbose($"found URL for [{heading.Text}]");
+						}
+
+						await one.NavigateTo(heading.Link);
+					}
+				});
+
+				pageBox.Controls.Add(link);
+				pageBox.SetFlowBreak(link, true);
+
+				((ILoadControl)link).OnLoad();
+			}
+
+			pageBox.ResumeLayout();
+			logger.DebugTime($"resumed layout", keepRunning: true);
+
+			await UpdateTitles(page);
+
+			logger.DebugTime("LoadPageHeadings done");
+		}
+
+
+		private async Task UpdateTitles(Page page)
+		{
+			if (TitleChanged(historyBox, page) || TitleChanged(pinnedBox, page))
+			{
+				await provider.RecordHistory(page.PageId, depth);
+			}
+		}
+
+
+		private static bool TitleChanged(ListView box, Page page)
+		{
+			foreach (IMoreHostItem host in box.Items)
+			{
+				if (host.Tag is HistoryRecord record)
+				{
+					if (record.PageId == page.PageId &&
+						record.Name != page.Title)
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
 
 		private async Task ShowPageOutline(HistoryRecord info)
 		{
@@ -350,99 +542,23 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private async Task LoadPageHeadings(string pageID)
+		private void ResizePageBox(object sender, EventArgs e)
 		{
-			using var one = new OneNote();
-			var page = one.GetPage(pageID ?? one.CurrentPageId, OneNote.PageDetail.Basic);
-			var headings = page.GetHeadings(one);
-
-			pageHeadLabel.Text = page.Title;
-
-			pageBox.Controls.Clear();
-
-			if (headings.Count == 0)
-			{
-				return;
-			}
-
-			var font = new Font("Segoe UI", 8.5F, FontStyle.Regular, GraphicsUnit.Point);
-			trash.Add(font);
-
 			var margin = SystemInformation.VerticalScrollBarWidth * 2;
 
-			foreach (var heading in headings)
+			foreach (MoreLinkLabel link in pageBox.Controls)
 			{
-				var wrapper = new XElement("wrapper", heading.Text);
-				var text = wrapper.TextValue();
-
-				var leftpad = heading.Level * HeaderIndent;
+				var leftpad = ((Heading)link.Tag).Level * HeaderIndent;
 				var leftmar = leftpad + 4;
+				link.Width = pageBox.Width - leftmar - margin;
 
-				var link = new MoreLinkLabel
-				{
-					BackColor = Color.Transparent,
-					ForeColor = SystemColors.WindowText,
-					LinkColor = SystemColors.WindowText,
-					VisitedLinkColor = SystemColors.WindowText,
-					Text = text,
-					Tag = heading,
-					Font = font,
-					Padding = new Padding(0),
-					Margin = new Padding(leftmar, 0, 0, 4),
-					Width = pageBox.Width - leftmar - margin
-				};
-
-				using var g = link.CreateGraphics();
-				var size = g.MeasureString(text, font);
-				link.Height = (int)(size.Height + link.Padding.Top + link.Padding.Bottom);
-
-				link.LinkClicked += new LinkLabelLinkClickedEventHandler(async (s, e) =>
-				{
-					if (s is MoreLinkLabel label)
-					{
-						using var one = new OneNote();
-						var heading = (Models.Heading)label.Tag;
-						await one.NavigateTo(heading.Link);
-					}
-				});
-
-				pageBox.Controls.Add(link);
-				pageBox.SetFlowBreak(link, true);
-			}
-
-			await UpdateTitles(page);
-		}
-
-
-		private async Task UpdateTitles(Page page)
-		{
-			if (TitleChanged(historyBox, page) || TitleChanged(pinnedBox, page))
-			{
-				await provider.RecordHistory(page.PageId, depth);
 			}
 		}
-
-
-		private bool TitleChanged(ListView box, Page page)
-		{
-			foreach (IMoreHostItem host in box.Items)
-			{
-				if (host.Tag is HistoryRecord record)
-				{
-					if (record.PageId == page.PageId &&
-						record.Name != page.Title)
-					{
-						return true;
-					}
-				}
-			}
-
-			return false;
-		}
+		#endregion Page headings
 
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		// Pinned...
+		// Pinned reading list...
 
 		private async Task LoadPinned()
 		{
@@ -455,27 +571,32 @@ namespace River.OneMoreAddIn.Commands
 		{
 			if (pinnedBox.InvokeRequired)
 			{
-				pinnedBox.Invoke(new Action(() => ShowPins(pinned)));
+				pinnedBox.BeginInvoke(new Action(() => ShowPins(pinned)));
 				return;
 			}
 
 			pinnedBox.BeginUpdate();
 			pinnedBox.Items.Clear();
 
+			var viewColor = manager.GetColor("ListView");
 			pinned.ForEach(record =>
 			{
-				var control = new HistoryControl(record);
+				var control = new HistoryControl(record)
+				{
+					BackColor = viewColor
+				};
+
+				control.ApplyTheme(manager);
+
 				var item = pinnedBox.AddHostedItem(control);
 				item.Tag = record;
 			});
 
 			pinnedBox.EndUpdate();
-			pinnedBox.Invalidate();
-
 			pinnedBox.EnableItemEventBubbling();
 		}
 
-
+		#region Pin control
 		private async void PinOnClick(object sender, EventArgs e)
 		{
 			if (historyBox.SelectedItems.Count == 0)
@@ -494,7 +615,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (records.Count > 0)
 			{
-				SetVisited(records.Last().PageId);
+				SetVisited(records[records.Count - 1].PageId);
 				await provider.AddPinned(records);
 				await LoadPinned();
 			}
@@ -599,11 +720,104 @@ namespace River.OneMoreAddIn.Commands
 
 			await provider.SavePinned(records);
 		}
+		#endregion Pin control
+
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		// History list...
+
+		private async void ShowHistory(object sender, HistoryLog log)
+		{
+			if (historyBox.InvokeRequired)
+			{
+				historyBox.BeginInvoke(new Action(() => ShowHistory(sender, log)));
+				return;
+			}
+
+			try
+			{
+				// update pinned panel...
+
+				var records = new List<HistoryRecord>();
+				foreach (IMoreHostItem host in historyBox.SelectedItems)
+				{
+					if (host.Tag is HistoryRecord record)
+					{
+						records.Add(record);
+					}
+				}
+
+				// new items not currently displayed; user must have pressed Ctrl+Shift+B
+				if (log.Pinned.Except(records).Any())
+				{
+					ShowPins(log.Pinned);
+				}
+
+				// update history panel...
+
+				if (log.History.Count > 0 && log.History[0].PageId == visitedID)
+				{
+					// user clicked ths page in navigator; don't reorder the list or they'll lose
+					// their context and get confused, but refresh the headings pane
+					await ShowPageOutline(log.History[0]);
+					visitedID = null;
+					return;
+				}
+
+				visitedID = null;
+
+				await ShowPageOutline(log.History[0]);
+
+				UpdateHistoryBox(log);
+			}
+			catch (Exception exc)
+			{
+				logger.WriteLine($"error navigating", exc);
+			}
+		}
+
+
+		private void UpdateHistoryBox(HistoryLog log)
+		{
+			if (historyBox.InvokeRequired)
+			{
+				historyBox.BeginInvoke(new Action(() => UpdateHistoryBox(log)));
+				return;
+			}
+
+			historyBox.BeginUpdate();
+			historyBox.Items.Clear();
+			var viewColor = manager.GetColor("ListView");
+
+			log.History.ForEach(record =>
+			{
+				var control = new HistoryControl(record)
+				{
+					BackColor = viewColor
+				};
+
+				control.ApplyTheme(manager);
+
+				var item = historyBox.AddHostedItem(control);
+				item.Tag = record;
+			});
+
+			historyBox.Items[0].Selected = true;
+			historyBox.EndUpdate();
+			historyBox.EnableItemEventBubbling();
+		}
+
+
+		private void Control_DoubleClick(object sender, EventArgs e)
+		{
+			logger.WriteLine("double");
+		}
 
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		private async void CopyLinksOnClick(object sender, EventArgs e)
+		#region Control
+		private async void CopyLinks(object sender, EventArgs e)
 		{
 			var box = sender == copyPinnedButton ? pinnedBox : historyBox;
 
@@ -645,5 +859,52 @@ namespace River.OneMoreAddIn.Commands
 
 			await board.RestoreState();
 		}
+
+
+		private async void DeleteHistoryRecords(object sender, EventArgs e)
+		{
+			var result = MoreMessageBox.Show(Owner,
+				string.Format(Resx.NavigatorWindow_confirmDelete, historyBox.SelectedItems.Count),
+				MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+			if (result != DialogResult.Yes)
+			{
+				return;
+			}
+
+			var records = new List<HistoryRecord>();
+			foreach (IMoreHostItem host in historyBox.SelectedItems)
+			{
+				if (host.Tag is HistoryRecord record)
+				{
+					records.Add(record);
+				}
+			}
+
+			await provider.DeleteHistory(records);
+			var log = await provider.ReadHistoryLog();
+			UpdateHistoryBox(log);
+		}
+
+
+		private void HistoryKeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Control && e.KeyCode == Keys.A)
+			{
+				foreach (ListViewItem item in historyBox.Items)
+				{
+					item.Selected = true;
+				}
+			}
+		}
+
+
+		public static void SetVisited(string ID)
+		{
+			// called from HistoryControl!
+			// need to lock?
+			visitedID = ID;
+		}
+		#endregion Control
 	}
 }
