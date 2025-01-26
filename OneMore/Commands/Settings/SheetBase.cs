@@ -5,6 +5,7 @@
 namespace River.OneMoreAddIn.Settings
 {
 	using River.OneMoreAddIn.UI;
+	using System;
 	using System.Windows.Forms;
 
 
@@ -14,27 +15,55 @@ namespace River.OneMoreAddIn.Settings
 	/// <remarks>
 	/// Preferred this to be abstract but that screws up VS Designer
 	/// </remarks>
-	internal class SheetBase : UserControl
+	internal class SheetBase : MoreUserControl
 	{
 		protected readonly SettingsProvider provider;
+		protected readonly ILogger logger;
 
 
 		protected SheetBase()
+			: base()
 		{
-			// required for VS Designer
+			// default constructor required for VS Designer
+
+			logger = Logger.Current;
 		}
 
 
 		protected SheetBase(SettingsProvider provider)
+			: this()
 		{
 			SuspendLayout();
-			BackColor = System.Drawing.SystemColors.ControlLightLight;
 			Name = "SheetBase";
 			Size = new System.Drawing.Size(800, 500);
 			Dock = DockStyle.Fill;
 			ResumeLayout(false);
 
 			this.provider = provider;
+		}
+
+
+		protected override void OnLoad(EventArgs e)
+		{
+			base.OnLoad(e);
+			LoadControls(Controls);
+		}
+
+
+		private void LoadControls(Control.ControlCollection controls)
+		{
+			foreach (Control child in controls)
+			{
+				if (child is ILoadControl loader)
+				{
+					loader.OnLoad();
+				}
+
+				if (child.Controls.Count > 0)
+				{
+					LoadControls(child.Controls);
+				}
+			}
 		}
 
 
@@ -59,7 +88,7 @@ namespace River.OneMoreAddIn.Settings
 		/// <param name="keys">An collection of strings specifying the control names</param>
 		protected void Localize(string[] keys)
 		{
-			TranslationHelper.Localize(this, keys);
+			Translator.Localize(this, keys);
 		}
 
 

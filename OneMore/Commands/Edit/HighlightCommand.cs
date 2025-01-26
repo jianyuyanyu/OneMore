@@ -27,7 +27,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var increment = (int)args[0];
 
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 			var updated = false;
 			var index = 0;
 
@@ -44,7 +44,7 @@ namespace River.OneMoreAddIn.Commands
 				? StyleBase.Transparent
 				: GetColor(index, page.GetPageColor(out _, out _).GetBrightness() < 0.5);
 
-			updated = page.EditSelected((s) =>
+			updated = new PageEditor(page).EditSelected((s) =>
 			{
 				if (s is XText text)
 				{

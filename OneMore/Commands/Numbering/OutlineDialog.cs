@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2020 Steven M Cohn.  All rights reserved.
+// Copyright © 2020 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 #pragma warning disable CS3003  // Type is not CLS-compliant
@@ -10,10 +10,10 @@ namespace River.OneMoreAddIn.Commands
 	using River.OneMoreAddIn.Settings;
 	using System;
 	using System.Windows.Forms;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
-	internal partial class OutlineDialog : UI.LocalizableForm
+	internal partial class OutlineDialog : UI.MoreForm
 	{
 		private const int SysMenuId = 1000;
 
@@ -32,10 +32,9 @@ namespace River.OneMoreAddIn.Commands
 
 				Localize(new string[]
 				{
-					"numberingGroup",
 					"numberingBox",
-					"alphaRadio",
-					"numRadio",
+					"alphaRadio=word_Alphanumeric",
+					"numRadio=word_Numeric",
 					"cleanBox",
 					"indentationsGroup",
 					"indentBox",
@@ -194,8 +193,8 @@ namespace River.OneMoreAddIn.Commands
 
 		private void SetOK()
 		{
-			okButton.Enabled = 
-				numberingBox.Checked || cleanBox.Checked || 
+			okButton.Enabled =
+				numberingBox.Checked || cleanBox.Checked ||
 				indentBox.Checked || indentTagBox.Checked;
 		}
 

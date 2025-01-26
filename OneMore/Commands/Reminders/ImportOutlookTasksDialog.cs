@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2021 Steven M Cohn.  All rights reserved.
+// Copyright © 2021 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 #pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions
@@ -9,16 +9,18 @@ namespace River.OneMoreAddIn.Commands
 	using Aga.Controls.Tree;
 	using Aga.Controls.Tree.NodeControls;
 	using River.OneMoreAddIn.Helpers.Office;
+	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
 	using System.Linq;
 	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 	using static River.OneMoreAddIn.OneNote;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
-	internal partial class ImportOutlookTasksDialog : UI.LocalizableForm
+	internal partial class ImportOutlookTasksDialog : UI.MoreForm
 	{
 		private readonly TreeModel model;
 		private OneNote one;
@@ -70,16 +72,6 @@ namespace River.OneMoreAddIn.Commands
 					"cancelButton=word_Cancel"
 				});
 			}
-			else
-			{
-				// customization only for English
-				warningBox.Clear();
-				warningBox.AppendText("Note that OneNote does not bind completely to tasks that " +
-					"are not in the Outlook Tasks folder. Tasks from sub-folders are shown ");
-				warningBox.AppendFormattedText("in red", Color.Firebrick);
-				warningBox.AppendFormattedText(" to indicate that their status flags will not update " +
-					"automatically after importing.", SystemColors.GrayText);
-			}
 
 			resetInfoLabel.Visible = false;
 			resetInfoLabel.Left = resetLabel.Left;
@@ -109,7 +101,7 @@ namespace River.OneMoreAddIn.Commands
 			treeNodeTextBox.DrawText += (sender, args) =>
 			{
 				if (args.Node.Level > 2)
-					args.TextColor = Color.Firebrick;
+					args.TextColor = manager.GetColor("ErrorText");
 			};
 			tree.NodeControls.Add(treeNodeTextBox);
 
@@ -123,6 +115,24 @@ namespace River.OneMoreAddIn.Commands
 		{
 			PopulateTree(folders);
 			tree.ExpandAll();
+		}
+
+
+		protected override void OnLoad(EventArgs e)
+		{
+			base.OnLoad(e);
+
+			warningBox.BackColor = manager.GetColor("Control");
+			var gray = manager.GetColor("GrayText");
+			warningBox.ForeColor = gray;
+
+			// customization only for English
+			warningBox.Clear();
+			warningBox.AppendText("Note that OneNote does not bind completely to tasks that " +
+				"are not in the Outlook Tasks folder. Tasks from sub-folders are shown ");
+			warningBox.AppendFormattedText("in red", manager.GetColor("ErrorText"));
+			warningBox.AppendFormattedText(" to indicate that their status flags will not update " +
+				"automatically after importing.", gray);
 		}
 
 
@@ -205,7 +215,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var userChecked = 0;
 			var userUnchecked = 0;
-			foreach (var child in node.Nodes.Where(n => 
+			foreach (var child in node.Nodes.Where(n =>
 				n.Tag is OutlookTask task && string.IsNullOrEmpty(task.OneNoteTaskID)))
 			{
 				if (child.IsChecked)
@@ -235,7 +245,7 @@ namespace River.OneMoreAddIn.Commands
 
 		private IEnumerable<OutlookTask> GetSelectedTask(Node node, List<OutlookTask> tasks)
 		{
-			var t = node.Nodes.Where(n => n.Tag is OutlookTask task && 
+			var t = node.Nodes.Where(n => n.Tag is OutlookTask task &&
 				string.IsNullOrEmpty(task.OneNoteTaskID) && n.IsChecked)
 				.Select(n => n.Tag as OutlookTask);
 
@@ -255,15 +265,17 @@ namespace River.OneMoreAddIn.Commands
 
 		private async void ResetOrphanedTasks(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			using (one = new OneNote())
+			await using (one = new OneNote())
 			{
-				var source = new CancellationTokenSource();
-				var map = await one.BuildHyperlinkMap(Scope.Sections, source.Token);
+				using var source = new CancellationTokenSource();
+
+				var map = await new HyperlinkProvider(one)
+					.BuildHyperlinkMap(Scope.Sections, source.Token);
 
 				var count = 0;
 				using (outlook = new Outlook())
 				{
-					count = ResetOrphanedTasks(map, model.Root);
+					count = await ResetOrphanedTasks(map, model.Root);
 				}
 
 				resetLabel.Visible = false;
@@ -276,7 +288,7 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private int ResetOrphanedTasks(Dictionary<string, HyperlinkInfo> map, Node node)
+		private async Task<int> ResetOrphanedTasks(Dictionary<string, HyperlinkInfo> map, Node node)
 		{
 			var count = 0;
 			var taskNodes = node.Nodes
@@ -288,10 +300,10 @@ namespace River.OneMoreAddIn.Commands
 				{
 					var task = taskNode.Tag as OutlookTask;
 
-					var key = one.GetHyperKey(task.OneNoteURL, out _);
+					var key = HyperlinkProvider.GetHyperKey(task.OneNoteURL, out _);
 					if (map.ContainsKey(key))
 					{
-						var page = one.GetPage(map[key].PageID, PageDetail.Basic);
+						var page = await one.GetPage(map[key].PageID, PageDetail.Basic);
 						if (page == null)
 						{
 							ResetTask(taskNode, task);
@@ -312,7 +324,7 @@ namespace River.OneMoreAddIn.Commands
 
 			foreach (var child in node.Nodes.Where(n => n.Tag is OutlookTaskFolder))
 			{
-				count += ResetOrphanedTasks(map, child);
+				count += await ResetOrphanedTasks(map, child);
 			}
 
 			return count;

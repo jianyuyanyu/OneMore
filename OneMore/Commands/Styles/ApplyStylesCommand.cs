@@ -7,6 +7,7 @@ namespace River.OneMoreAddIn.Commands
 	using River.OneMoreAddIn.Models;
 	using River.OneMoreAddIn.Styles;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.Linq;
 	using System.Text.RegularExpressions;
 	using System.Threading.Tasks;
@@ -45,7 +46,7 @@ namespace River.OneMoreAddIn.Commands
 		/// <returns></returns>
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out page, out ns);
+			await using var one = new OneNote(out page, out ns);
 
 			// apply theme page color..
 
@@ -116,7 +117,7 @@ namespace River.OneMoreAddIn.Commands
 			string spacing = null;
 			if (FindStyle(styles, "p") is Style normal)
 			{
-				if (double.TryParse(normal.Spacing, out var spc) && spc > 0.0)
+				if (double.TryParse(normal.Spacing, NumberStyles.Any, CultureInfo.InvariantCulture, out var spc) && spc > 0.0)
 				{
 					spacing = normal.Spacing;
 				}
@@ -150,8 +151,8 @@ namespace River.OneMoreAddIn.Commands
 						// spaceBetween should only apply to normal paragraphs
 						name == "p" ? spacing : null);
 
-					quick.Attribute("fontColor").Value = style.Color;
-					quick.Attribute("highlightColor").Value = style.Highlight;
+					quick.SetAttributeValue("fontColor", style.Color);
+					quick.SetAttributeValue("highlightColor", style.Highlight);
 
 					quick.SetAttributeValue("italic", style.IsItalic.ToString().ToLower());
 					quick.SetAttributeValue("bold", style.IsBold.ToString().ToLower());
@@ -227,9 +228,9 @@ namespace River.OneMoreAddIn.Commands
 				.Elements(ns + "Outline")
 				.Descendants(ns + "OE")
 				.Where(e => e.Attribute("quickStyleIndex")?.Value == index &&
-					!e.Elements(ns + "Meta").Any(a => 
+					!e.Elements(ns + "Meta").Any(a =>
 						a.Attribute("name").Value.StartsWith("omfootnote") ||
-						a.Attribute("name").Value.StartsWith("omtaggingbank"))
+						a.Attribute("name").Value.StartsWith(MetaNames.TaggingBank))
 					);
 
 			foreach (var paragraph in paragraphs)

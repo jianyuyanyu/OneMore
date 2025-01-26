@@ -38,6 +38,10 @@ namespace River.OneMoreAddIn.Commands
 				);
 
 			replacementString = replacement;
+
+			CaseSensitive = caseSensitive;
+			EnableRegex = enableRegex;
+			SearchPattern = pattern;
 		}
 
 
@@ -57,7 +61,21 @@ namespace River.OneMoreAddIn.Commands
 				);
 
 			replacementElement = element;
+
+			CaseSensitive = caseSensitive;
+			EnableRegex = enableRegex;
+			SearchPattern = pattern;
 		}
+
+
+		public bool CaseSensitive { get; private set; }
+
+		public bool EnableRegex { get; private set; }
+
+		public string ReplacementString => replacementString;
+		// ?? replacementElement.ToString(SaveOptions.DisableFormatting);
+
+		public string SearchPattern { get; private set; }
 
 
 		/// <summary>
@@ -68,14 +86,15 @@ namespace River.OneMoreAddIn.Commands
 		/// <returns>The number of successful replacements</returns>
 		public int SearchAndReplace(Page page)
 		{
-			var elements = page.GetSelectedElements();
-
 			int count = 0;
-			if (elements.Any())
+
+			var range = new SelectionRange(page);
+			var runs = range.GetSelections(defaulToAnytIfNoRange: true);
+			if (runs.Any())
 			{
-				foreach (var element in elements)
+				foreach (var run in runs)
 				{
-					count += ScanElement(element);
+					count += ScanElement(run);
 				}
 
 				if (count > 0)
@@ -243,11 +262,11 @@ namespace River.OneMoreAddIn.Commands
 		// most likely SPAN or BR tags. This routine ignores the SPAN XElements themsevles
 		// and focuses only on the inner text of the SPAN.
 		private void Replace(
-			XElement wrapper,				// the wrapped CDATA of the run
-			int searchIndex,				// the starting index of the match in the text
-			int searchLength,				// the length of the match
-			string stringValue = null,		// the replacement string value
-			XElement elementValue = null)	// the replacement XML value
+			XElement wrapper,               // the wrapped CDATA of the run
+			int searchIndex,                // the starting index of the match in the text
+			int searchLength,               // the length of the match
+			string stringValue = null,      // the replacement string value
+			XElement elementValue = null)   // the replacement XML value
 		{
 			// XText and XElement nodes in wrapper
 			var nodes = wrapper.Nodes().ToList();

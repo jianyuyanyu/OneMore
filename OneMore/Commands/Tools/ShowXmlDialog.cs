@@ -6,8 +6,8 @@
 
 namespace River.OneMoreAddIn.Commands
 {
-	using River.OneMoreAddIn.UI;
 	using River.OneMoreAddIn.Settings;
+	using River.OneMoreAddIn.UI;
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
@@ -23,7 +23,7 @@ namespace River.OneMoreAddIn.Commands
 	/// <summary>
 	/// A dialog to view page and hierarchy XML and update page XML if desired.
 	/// </summary>
-	internal partial class ShowXmlDialog : LocalizableForm
+	internal partial class ShowXmlDialog : MoreForm
 	{
 		private int findIndex = -1;
 		private bool ready = false;
@@ -47,7 +47,7 @@ namespace River.OneMoreAddIn.Commands
 				Localize(new string[]
 				{
 					"wrapBox",
-					"selectButton",
+					"selectButton=phrase_SelectAll",
 					// pagePanel
 					"hideEditedByBox",
 					"multilineBox",
@@ -64,7 +64,7 @@ namespace River.OneMoreAddIn.Commands
 					// tabs
 					"pageTab=word_Page",
 					"sectionTab=word_Section",
-					"notebooksTab",
+					"notebooksTab=word_Notebooks",
 					"nbSectionsTab",
 					"nbPagesTab",
 					"manualTab",
@@ -77,12 +77,14 @@ namespace River.OneMoreAddIn.Commands
 				});
 			}
 
+			functionBox.SelectedIndex = 0;
 			manualPanel.Location = pageOptionsPanel.Location;
+
 			((Control)manualTab).Enabled = false;
 		}
 
 
-		protected override void OnLoad(EventArgs e)
+		protected override async void OnLoad(EventArgs e)
 		{
 			base.OnLoad(e);
 
@@ -104,8 +106,8 @@ namespace River.OneMoreAddIn.Commands
 			scopeBox.SelectedIndex = names.IndexOf("Selection");
 
 			// populate page info...
-			using var one = new OneNote();
-			var info = one.GetPageInfo(sized: true);
+			await using var one = new OneNote();
+			var info = await one.GetPageInfo(sized: true);
 			pageName.Text = $"{info.Name} ({info.Size.ToBytes()})";
 			pagePath.Text = info.Path;
 			pageLink.Text = info.Link;
@@ -132,8 +134,7 @@ namespace River.OneMoreAddIn.Commands
 
 		protected override void OnShown(EventArgs e)
 		{
-			//Location = new System.Drawing.Point(30, 30);
-			UIHelper.SetForegroundWindow(this);
+			base.OnShown(e);
 			findBox.Focus();
 		}
 
@@ -321,7 +322,7 @@ namespace River.OneMoreAddIn.Commands
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		// Page Editor
 
-		private void RefreshPage(object sender, EventArgs e)
+		private async void RefreshPage(object sender, EventArgs e)
 		{
 			if (!ready)
 			{
@@ -335,8 +336,8 @@ namespace River.OneMoreAddIn.Commands
 				return;
 			}
 
-			using var one = new OneNote();
-			var page = one.GetPage(scope);
+			await using var one = new OneNote();
+			var page = await one.GetPage(scope);
 			if (page == null)
 			{
 				// should never happen!
@@ -498,7 +499,7 @@ namespace River.OneMoreAddIn.Commands
 
 		private bool PromoteAttribute(List<XAttribute> attributes, string name)
 		{
-			var att = attributes.FirstOrDefault(a => a.Name == name);
+			var att = attributes.Find(a => a.Name == name);
 			if (att != null)
 			{
 				attributes.Remove(att);
@@ -514,14 +515,20 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var selectionStart = -1;
 
+			// XML...
+
 			var matches = Regex.Matches(box.Text,
 				@"<((?:[a-zA-Z][a-zA-Z0-9]*?:)?[a-zA-Z][a-zA-Z0-9]*?)[^>]+selected=""all""[^\1]*?\1>");
+
+			var backColor = manager.GetColor("XmlHighlight");
+			var foreColor = manager.GetColor("XmlHighlightText");
 
 			foreach (Match match in matches)
 			{
 				box.SelectionStart = match.Index;
 				box.SelectionLength = match.Length;
-				box.SelectionBackColor = Color.Yellow;
+				box.SelectionBackColor = backColor;
+				box.SelectionColor = foreColor;
 
 				if (selectionStart < 0)
 				{
@@ -539,21 +546,24 @@ namespace River.OneMoreAddIn.Commands
 					"lastModifiedTime|dateTime)=\"[^\"]*\""
 					);
 
+				foreColor = manager.GetColor("XmlMatch");
+
 				foreach (Match m in matches)
 				{
 					box.SelectionStart = m.Index;
 					box.SelectionLength = m.Length;
-					box.SelectionColor = Color.Silver;
+					box.SelectionColor = foreColor;
 				}
 
 				// objectID
-				matches = Regex.Matches(box.Text, "(?:objectID|ID)=\"[^\"]*\"");
+				matches = Regex.Matches(box.Text, "(?:objectID|[^\\w]ID)=\"[^\"]*\"");
+				foreColor = manager.GetColor("XmlEditedBy");
 
 				foreach (Match m in matches)
 				{
 					box.SelectionStart = m.Index;
 					box.SelectionLength = m.Length;
-					box.SelectionColor = Color.CornflowerBlue;
+					box.SelectionColor = foreColor;
 				}
 			}
 
@@ -563,24 +573,41 @@ namespace River.OneMoreAddIn.Commands
 				//<one:T><![CDATA[A]]></one:T>
 
 				matches = Regex.Matches(box.Text, @"(?:\<!\[CDATA\[)([^\]]*)(?:\]]>)");
+				foreColor = manager.GetColor("XmlString");
 
 				foreach (Match m in matches)
 				{
 					box.SelectionStart = m.Groups[1].Index;
 					box.SelectionLength = m.Groups[1].Length;
-					box.SelectionColor = Color.Maroon;
+					box.SelectionColor = foreColor;
 				}
 			}
 			else
 			{
 				// recycleBin
-				matches = Regex.Matches(box.Text, "(?:isRecycleBin|isInRecycleBin|isDeletedPages)=\"[^\"]*\"");
+				matches = Regex.Matches(box.Text,
+					"(?:isRecycleBin|isInRecycleBin|isDeletedPages)=\"[^\"]*\"");
+
+				foreColor = manager.GetColor("XmlTrash");
 
 				foreach (Match m in matches)
 				{
 					box.SelectionStart = m.Index;
 					box.SelectionLength = m.Length;
-					box.SelectionColor = Color.Maroon;
+					box.SelectionColor = foreColor;
+				}
+
+				// locked
+				matches = Regex.Matches(box.Text,
+					"(?:encrypted|locked)=\"[^\"]*\"");
+
+				foreColor = manager.GetColor("MenuItemBorder");
+
+				foreach (Match m in matches)
+				{
+					box.SelectionStart = m.Index;
+					box.SelectionLength = m.Length;
+					box.SelectionColor = foreColor;
 				}
 			}
 
@@ -592,7 +619,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			if (editModeBox.Checked)
 			{
-				pageBox.BackColor = Color.White;
+				pageBox.BackColor = manager.GetColor("XmlEditMode");
 				pageBox.ReadOnly = false;
 				okButton.Enabled = true;
 				hideEditedByBox.Checked = false;
@@ -606,7 +633,7 @@ namespace River.OneMoreAddIn.Commands
 			}
 			else
 			{
-				pageBox.BackColor = SystemColors.Control;
+				pageBox.BackColor = manager.GetColor("XmlReadMode");
 				pageBox.ReadOnly = true;
 				okButton.Enabled = false;
 				hideEditedByBox.Enabled = true;
@@ -681,7 +708,7 @@ namespace River.OneMoreAddIn.Commands
 
 				case 1: // Section+Pages
 					await ShowHierarchy(sectionBox, "one.GetSection()",
-						async (one) => { await Task.Yield(); return one.GetSection(); });
+						async (one) => { await Task.Yield(); return await one.GetSection(); });
 					break;
 
 				case 2: // Notebooks
@@ -700,7 +727,8 @@ namespace River.OneMoreAddIn.Commands
 					break;
 
 				case 5:
-					enabled = false;
+					enabled = true;
+					RunManual(sender, e);
 					break;
 			}
 
@@ -740,7 +768,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			if (box.TextLength == 0)
 			{
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				var root = await action(one);
 
 				if (root != null)
@@ -758,10 +786,10 @@ namespace River.OneMoreAddIn.Commands
 
 					box.Clear();
 					box.WordWrap = wrapBox.Checked;
-					box.SelectionColor = Color.Black;
+					box.SelectionColor = manager.GetColor("XmlText");
 					box.Text = $"<!-- {comment} -->\n{xml}";
 					box.Select(0, comment.Length + 9);
-					box.SelectionColor = Color.Green;
+					box.SelectionColor = manager.GetColor("XmlComment");
 
 					Colorize(box, !hideEditedByBox2.Checked);
 
@@ -803,8 +831,8 @@ namespace River.OneMoreAddIn.Commands
 			// validate the input...
 
 			queryButton.Enabled =
-				objectIdBox.Text.Trim().Length > 0 &&
-				functionBox.SelectedIndex >= 0;
+				functionBox.SelectedIndex < 3 || // allow empty for GetNotebook/GetSection/GetPage
+				(objectIdBox.Text.Trim().Length > 0);
 		}
 
 
@@ -814,26 +842,41 @@ namespace River.OneMoreAddIn.Commands
 			{
 				XElement content = null;
 
-				using var one = new OneNote();
+				await using var one = new OneNote();
 
 				switch (functionBox.SelectedIndex)
 				{
 					case 0:
-						content = await one.GetNotebook(objectIdBox.Text, OneNote.Scope.Pages);
+						content = await one.GetNotebook(
+							string.IsNullOrEmpty(objectIdBox.Text)
+								? one.CurrentNotebookId
+								: objectIdBox.Text,
+							OneNote.Scope.Pages);
 						break;
 
 					case 1:
-						content = one.GetSection(objectIdBox.Text);
+						content = await one.GetSection(
+							string.IsNullOrEmpty(objectIdBox.Text)
+								? one.CurrentSectionId
+								: objectIdBox.Text);
 						break;
 
 					case 2:
-						content = one.GetPage(objectIdBox.Text, OneNote.PageDetail.BinaryData).Root;
+						content = (await one.GetPage(
+							string.IsNullOrEmpty(objectIdBox.Text)
+								? one.CurrentPageId
+								: objectIdBox.Text,
+							OneNote.PageDetail.BinaryData))?.Root;
+						break;
+
+					case 3:
+						content = (await one.SearchMeta(string.Empty, objectIdBox.Text, false));
 						break;
 				}
 
 				if (content == null)
 				{
-					UIHelper.ShowMessage("Cannot find object ID");
+					MoreMessageBox.ShowError(null, "Cannot find object ID");
 					return;
 				}
 
@@ -845,7 +888,7 @@ namespace River.OneMoreAddIn.Commands
 				var eventMask = Native.SendMessage(manualBox.Handle, Native.EM_GETEVENTMASK, 0, 0);
 
 				manualBox.Clear();
-				manualBox.SelectionColor = Color.Black;
+				manualBox.SelectionColor = manager.GetColor("XmlText");
 
 				await ShowHierarchy(manualBox,
 					$"{(string)functionBox.SelectedItem}(\"{objectIdBox.Text}\")",
@@ -863,15 +906,15 @@ namespace River.OneMoreAddIn.Commands
 				{
 					if ((uint)cex.ErrorCode == 0x80042014)
 					{
-						UIHelper.ShowMessage("Invalid ObjectID");
+						MoreMessageBox.ShowError(null, "Invalid ObjectID");
 						return;
 					}
 				}
 
-				manualBox.SelectionColor = Color.Black;
+				manualBox.SelectionColor = manager.GetColor("XmlText");
 				manualBox.Text = exc.FormatDetails();
 				manualBox.SelectAll();
-				manualBox.SelectionColor = Color.Red;
+				manualBox.SelectionColor = manager.GetColor("XmlTrash");
 
 				logger.WriteLine(exc);
 			}
@@ -883,12 +926,15 @@ namespace River.OneMoreAddIn.Commands
 
 		private async void UpdatePage(object sender, EventArgs e)
 		{
-			var result = UIHelper.ShowQuestion(Resx.ShowXmlDialog_WARNING);
+			//var result = UIHelper.ShowQuestion(Resx.ShowXmlDialog_WARNING);
+			var result = UI.MoreMessageBox.Show(this,
+				Resx.ShowXmlDialog_WARNING, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
 			if (result == DialogResult.Yes)
 			{
 				try
 				{
-					using var one = new OneNote();
+					await using var one = new OneNote();
 					await one.Update(new Models.Page(XElement.Parse(pageBox.Text)));
 
 					Close();

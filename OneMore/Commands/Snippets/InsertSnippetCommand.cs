@@ -1,12 +1,12 @@
 ﻿//************************************************************************************************
-// Copyright © 2021 Steven M Cohn.  All rights reserved.
+// Copyright © 2021 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
 {
 	using System.Threading.Tasks;
 	using System.Xml.Linq;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
 	/// <summary>
@@ -29,11 +29,11 @@ namespace River.OneMoreAddIn.Commands
 
 			var provider = new SnippetsProvider();
 
-			using var one = new OneNote(out var page, out _);
+			await using var one = new OneNote(out var page, out _);
 
 			if (!page.ConfirmBodyContext())
 			{
-				UIHelper.ShowError(Resx.Error_BodyContext);
+				ShowError(Resx.Error_BodyContext);
 				return;
 			}
 
@@ -44,14 +44,14 @@ namespace River.OneMoreAddIn.Commands
 			{
 				// assume Expand command and infer name from current word...
 
-				path = page.GetSelectedText();
+				path = new Models.PageEditor(page).GetSelectedText();
 				if (!string.IsNullOrWhiteSpace(path))
 				{
 					snippet = await provider.LoadByName(path);
 					if (!string.IsNullOrEmpty(snippet))
 					{
 						// remove placeholder
-						var updated = page.EditSelected((s) =>
+						var updated = new Models.PageEditor(page).EditSelected((s) =>
 						{
 							if (s is XText text)
 							{
@@ -78,15 +78,28 @@ namespace River.OneMoreAddIn.Commands
 
 			if (string.IsNullOrWhiteSpace(snippet))
 			{
-				UIHelper.ShowMessage(string.Format(Resx.InsertSnippets_CouldNotLoad, path));
+				ShowError(string.Format(Resx.InsertSnippets_CouldNotLoad, path));
 				return;
 			}
 
 			var clippy = new ClipboardProvider();
 			await clippy.StashState();
-			await clippy.SetHtml(snippet);
-			await clippy.Paste(true);
-			await clippy.RestoreState();
+
+			var success = await clippy.SetHtml(snippet);
+			if (success)
+			{
+				await clippy.Paste(true);
+			}
+			else
+			{
+				ShowInfo(Resx.Clipboard_locked);
+			}
+
+			success = await clippy.RestoreState();
+			if (!success)
+			{
+				ShowInfo(Resx.Clipboard_norestore);
+			}
 		}
 	}
 }

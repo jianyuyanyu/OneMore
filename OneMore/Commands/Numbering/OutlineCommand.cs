@@ -37,7 +37,7 @@ namespace River.OneMoreAddIn.Commands
 				return;
 			}
 
-			using var one = new OneNote(out var page, out ns);
+			await using var one = new OneNote(out var page, out ns);
 			if (!page.IsValid)
 			{
 				return;
@@ -184,11 +184,12 @@ namespace River.OneMoreAddIn.Commands
 						break;
 
 					case 1:
-						text.Value = $"{counter.ToAlphabetic().ToLower()}. {text.Value}";
+						text.Value = $"{counter.ToAlphabetic().ToLowerInvariant()}. {text.Value}";
 						break;
 
 					case 2:
-						text.Value = $"{counter.ToRoman().ToLower()}. {text.Value}";
+						// use Invariant so langs like tr-TR convert "I" to "i" instead of "ı"
+						text.Value = $"{counter.ToRoman().ToLowerInvariant()}. {text.Value}";
 						break;
 				}
 			}

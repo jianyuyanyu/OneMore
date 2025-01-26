@@ -37,6 +37,7 @@ namespace River.OneMoreAddIn.Commands
 		private string tempdir;
 		private int totalCount;
 		private int pageCount = 0;
+		private int quickCount = 0;
 		private bool bookScope;
 
 		private Exception exception = null;
@@ -51,24 +52,24 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var scope = args[0] as string;
 
-			using (one = new OneNote())
+			await using (one = new OneNote())
 			{
 				bookScope = scope == "notebook";
 
 				hierarchy = bookScope
 					? await one.GetNotebook(one.CurrentNotebookId, OneNote.Scope.Pages)
-					: one.GetSection(one.CurrentSectionId);
+					: await one.GetSection(one.CurrentSectionId);
 
 				var ns = one.GetNamespace(hierarchy);
 
 				totalCount = hierarchy.Descendants(ns + "Page").Count();
 				if (totalCount == 0)
 				{
-					UIHelper.ShowMessage(Resx.ArchiveCommand_noPages);
+					ShowError(Resx.ArchiveCommand_noPages);
 					return;
 				}
 
-				var topName = hierarchy.Attribute("name").Value;
+				var topName = hierarchy.Attribute("name").Value.Trim();
 				zipPath = await SingleThreaded.Invoke(() =>
 				{
 					// OpenFileDialog must run in STA thread
@@ -83,7 +84,7 @@ namespace River.OneMoreAddIn.Commands
 				var progressDialog = new ProgressDialog(Execute);
 
 				// report result is needed to show UI after Execute is completed on another thread
-				await progressDialog.RunModeless(ReportResult);
+				progressDialog.RunModeless(ReportResult);
 			}
 
 			logger.WriteLine("done");
@@ -118,7 +119,7 @@ namespace River.OneMoreAddIn.Commands
 				using var stream = new FileStream(zipPath, FileMode.Create);
 				using (archive = new ZipArchive(stream, ZipArchiveMode.Create))
 				{
-					await Archive(progress, hierarchy, hierarchy.Attribute("name").Value);
+					await Archive(progress, hierarchy, hierarchy.Attribute("name").Value.Trim());
 				}
 			}
 			catch (Exception exc)
@@ -147,9 +148,16 @@ namespace River.OneMoreAddIn.Commands
 		{
 			// report results back on the main UI thread...
 
+			if (sender is ProgressDialog progress)
+			{
+				// otherwise ShowMessage window will appear behind progress dialog
+				progress.Visible = false;
+			}
+
 			if (exception == null)
 			{
-				UIHelper.ShowMessage(string.Format(Resx.ArchiveCommand_archived, pageCount, zipPath));
+				ShowMessage(string.Format(
+					Resx.ArchiveCommand_archived, pageCount, totalCount, zipPath));
 			}
 			else
 			{
@@ -185,7 +193,7 @@ namespace River.OneMoreAddIn.Commands
 			var dir = Path.GetDirectoryName(path);
 			if (!Directory.Exists(dir))
 			{
-				UIHelper.ShowMessage(Resx.ArchiveCommand_noDirectory);
+				ShowError(Resx.ArchiveCommand_noDirectory);
 				return null;
 			}
 
@@ -202,14 +210,17 @@ namespace River.OneMoreAddIn.Commands
 			{
 				if (element.Name.LocalName == "Page")
 				{
-					var page = one.GetPage(
+					var page = await one.GetPage(
 						element.Attribute("ID").Value, OneNote.PageDetail.BinaryData);
 
-					progress.SetMessage($"Archiving {page.Title}");
+					progress.SetMessage($"Archiving {page.Title ?? Resx.phrase_QuickNote}");
 					progress.Increment();
 
-					await ArchivePage(element, page, path);
-					order.Add(page.Title);
+					var name = await ArchivePage(element, page, path);
+					if (name is not null)
+					{
+						order.Add(name);
+					}
 
 					CleanupTemp();
 				}
@@ -224,10 +235,9 @@ namespace River.OneMoreAddIn.Commands
 					if (recycle) continue;
 
 					// append name of Section/Group to path to build zip folder path
-					var name = element.Attribute("name").Value;
+					var name = element.Attribute("name").Value.Trim();
 
 					await Archive(progress, element, Path.Combine(path, name));
-					//order.Add(name);
 				}
 			}
 
@@ -238,8 +248,17 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private async Task ArchivePage(XElement element, Page page, string path)
+		private async Task<string> ArchivePage(XElement element, Page page, string path)
 		{
+			if (page.Title == null)
+			{
+				page.SetTitle(quickCount == 0
+					? Resx.phrase_QuickNote
+					: $"{Resx.phrase_QuickNote} ({quickCount})");
+
+				quickCount++;
+			}
+
 			var name = PathHelper.CleanFileName(page.Title).Trim();
 			if (string.IsNullOrEmpty(name))
 			{
@@ -258,17 +277,19 @@ namespace River.OneMoreAddIn.Commands
 				}
 			}
 
-			var filename = string.IsNullOrEmpty(path)
-				? Path.Combine(tempdir, $"{name}.htm")
-				: Path.Combine(tempdir, Path.Combine(path, $"{name}.htm"));
+			var tpath = string.IsNullOrEmpty(path) ? tempdir : Path.Combine(tempdir, path);
+			var filename = PathHelper.GetUniqueQualifiedFileName(tpath, ref name, ".htm");
 
-			filename = PathHelper.FitMaxPath(filename);
+			if (filename is not null)
+			{
+				filename = await archivist.ExportHTML(page, filename, path, bookScope);
+				await ArchiveAssets(Path.GetDirectoryName(filename), path);
+				pageCount++;
+				return name;
+			}
 
-			archivist.ExportHTML(page, ref filename, path, bookScope);
-
-			await ArchiveAssets(Path.GetDirectoryName(filename), path);
-
-			pageCount++;
+			logger.WriteLine($"archive path too long [{tpath}\\{name}.htm]");
+			return null;
 		}
 
 
@@ -342,6 +363,14 @@ namespace River.OneMoreAddIn.Commands
 			{
 				try
 				{
+					// this will unset the ReadOnly flag for all files/dirs in and below dir
+					dir.Attributes = FileAttributes.Normal;
+					foreach (var info in dir.GetFileSystemInfos("*", SearchOption.AllDirectories))
+					{
+						info.Attributes = FileAttributes.Normal;
+					}
+
+					// recursively delete del
 					dir.Delete(true);
 				}
 				catch (Exception exc)

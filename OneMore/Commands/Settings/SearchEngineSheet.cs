@@ -7,6 +7,7 @@
 
 namespace River.OneMoreAddIn.Settings
 {
+	using River.OneMoreAddIn.Commands;
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
@@ -15,7 +16,7 @@ namespace River.OneMoreAddIn.Settings
 	using System.Net;
 	using System.Windows.Forms;
 	using System.Xml.Linq;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
 	internal partial class SearchEngineSheet : SheetBase
@@ -42,11 +43,10 @@ namespace River.OneMoreAddIn.Settings
 			{
 				Localize(new string[]
 				{
-					"introLabel",
+					"introBox",
 					"upButton",
 					"downButton",
 					"refreshButton=word_Refresh",
-					"deleteLabel",
 					"deleteButton=word_Delete"
 				});
 
@@ -55,12 +55,13 @@ namespace River.OneMoreAddIn.Settings
 				urlColumn.HeaderText = Resx.SearchEngineDialog_urlColumn_HeaderText;
 			}
 
-			toolStrip.Rescale();
-
 			gridView.AutoGenerateColumns = false;
 			gridView.Columns[0].DataPropertyName = "Image";
 			gridView.Columns[1].DataPropertyName = "Name";
 			gridView.Columns[2].DataPropertyName = "Uri";
+
+			(_, float scaleY) = UI.Scaling.GetScalingFactors();
+			gridView.RowTemplate.Height = (int)(16 * scaleY);
 
 			engines = new BindingList<SearchEngine>(LoadSettings());
 
@@ -103,6 +104,24 @@ namespace River.OneMoreAddIn.Settings
 					RefreshImage(engine);
 				}
 			}
+		}
+
+
+		protected override void OnLoad(EventArgs e)
+		{
+			if (manager.DarkMode)
+			{
+				using var img = iconColumn.Image;
+
+				iconColumn.Image = new ImageEditor
+				{
+					Size = new Size(16, 16),
+					Style = ImageEditor.Stylization.Invert
+				}
+				.Apply(img);
+			}
+
+			base.OnLoad(e);
 		}
 
 
@@ -187,12 +206,9 @@ namespace River.OneMoreAddIn.Settings
 
 			var engine = engines[rowIndex];
 
-			var result = MessageBox.Show(
+			var result = UI.MoreMessageBox.Show(this,
 				string.Format(Resx.SearchEngineDialog_DeleteMessage, engine.Name),
-				"OneMore",
-				MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-				MessageBoxDefaultButton.Button2,
-				MessageBoxOptions.DefaultDesktopOnly);
+				MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
 			if (result != DialogResult.Yes)
 				return;
@@ -207,39 +223,15 @@ namespace River.OneMoreAddIn.Settings
 		}
 
 
-		private void upButton_Click(object sender, EventArgs e)
+		private void downButton_Click(object sender, EventArgs e)
 		{
-			if (gridView.SelectedCells.Count > 0)
-			{
-				int colIndex = gridView.SelectedCells[0].ColumnIndex;
-				int rowIndex = gridView.SelectedCells[0].RowIndex;
-				if (rowIndex > 0 && rowIndex < engines.Count)
-				{
-					var item = engines[rowIndex];
-					engines.RemoveAt(rowIndex);
-					engines.Insert(rowIndex - 1, item);
-
-					gridView.Rows[rowIndex - 1].Cells[colIndex].Selected = true;
-				}
-			}
+			gridView.MoveSelectedItemDown(engines);
 		}
 
 
-		private void downButton_Click(object sender, EventArgs e)
+		private void upButton_Click(object sender, EventArgs e)
 		{
-			if (gridView.SelectedCells.Count > 0)
-			{
-				int colIndex = gridView.SelectedCells[0].ColumnIndex;
-				int rowIndex = gridView.SelectedCells[0].RowIndex;
-				if (rowIndex < engines.Count - 1)
-				{
-					var item = engines[rowIndex];
-					engines.RemoveAt(rowIndex);
-					engines.Insert(rowIndex + 1, item);
-
-					gridView.Rows[rowIndex + 1].Cells[colIndex].Selected = true;
-				}
-			}
+			gridView.MoveSelectedItemUp(engines);
 		}
 
 

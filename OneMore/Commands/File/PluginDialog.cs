@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2020 Steven M Cohn.  All rights reserved.
+// Copyright © 2020 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 #pragma warning disable CS3003  // Type is not CLS-compliant
@@ -14,18 +14,24 @@ namespace River.OneMoreAddIn.Commands
 	using System.IO;
 	using System.Linq;
 	using System.Windows.Forms;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
-	internal partial class PluginDialog : UI.LocalizableForm
+	internal partial class PluginDialog : MoreForm
 	{
+		public const string DefaultCreatedPageName = "$name (2)";
+
+		private readonly bool initializing;
+		private readonly bool single = false;
 		private string[] predefinedNames;
 		private Plugin plugin;
-		private readonly bool single = false;
+		private Plugin snapshot;
 
 
 		public PluginDialog()
 		{
+			initializing = true;
+
 			InitializeComponent();
 
 			// sectionGroup is not visible by default but sits in same location as pageGroup
@@ -46,10 +52,11 @@ namespace River.OneMoreAddIn.Commands
 
 				Localize(new string[]
 				{
-					"pluginsLabel",
+					"pluginsLabel=word_Plugins",
 					"nameLabel=word_Name",
 					"cmdLabel=word_Command",
 					"argsLabel",
+					"userArgsLabel",
 					"timeoutLabel",
 					"targetLabel=word_Target",
 					"targetBox",
@@ -58,46 +65,41 @@ namespace River.OneMoreAddIn.Commands
 					"childBox",
 					"skipLockRadio",
 					"failLockRadio",
+					"trialBox",
 					"saveButton",
 					"okButton", // Run
 					"cancelButton=word_Cancel"
 				});
 			}
+
+			targetBox.SelectedIndex = 0;
+
+			initializing = false;
 		}
 
 
 		public PluginDialog(Plugin plugin)
 			: this()
 		{
-			this.plugin = new Plugin
-			{
-				Version = plugin.Version,
-				Path = plugin.Path,
-				Name = plugin.Name,
-				OriginalName = plugin.OriginalName,
-				Command = plugin.Command,
-				Arguments = plugin.Arguments,
-				TargetPage = plugin.TargetPage,
-				CreateNewPage = plugin.CreateNewPage,
-				PageName = plugin.PageName,
-				AsChildPage = plugin.AsChildPage,
-				SkipLocked = plugin.SkipLocked,
-				Timeout = plugin.Timeout
-			};
+			initializing = true;
+
+			SetPlugin(plugin);
 
 			single = true;
 
 			Text = Resx.PluginDialog_editText;
 
-			ChangeTarget(null, EventArgs.Empty);
+			ViewPlugin(this.plugin);
 
-			saveButton.Location = okButton.Location;
+			saveButton.Location = runButton.Location;
 			saveButton.DialogResult = DialogResult.OK;
 			AcceptButton = saveButton;
 
 			// disable so it's no longer a tab-stop
-			okButton.Enabled = false;
-			okButton.Visible = false;
+			runButton.Enabled = false;
+			runButton.Visible = false;
+
+			initializing = false;
 		}
 
 
@@ -107,7 +109,8 @@ namespace River.OneMoreAddIn.Commands
 			OriginalName = nameBox.Text,
 			Command = cmdBox.Text,
 			Arguments = argsBox.Text,
-			TargetPage = (targetBox.SelectedIndex == 0),
+			UserArguments = userArgsBox.Text,
+			Target = (PluginTarget)targetBox.SelectedIndex,
 			CreateNewPage = createRadio.Checked,
 			AsChildPage = childBox.Checked,
 			PageName = pageNameBox.Text,
@@ -118,7 +121,29 @@ namespace River.OneMoreAddIn.Commands
 		};
 
 
+		public bool TrialRun => trialBox.Checked;
+
+
 		public string PageName { set; private get; }
+
+
+		private void SetPlugin(Plugin instance)
+		{
+			// make sure it's changing, otherwise we'll get duplicate event fires. See this:
+			// https://stackoverflow.com/questions/2820447/net-winforms-inotifypropertychanged-updates-all-bindings-when-one-is-changed-b
+			if (plugin != instance)
+			{
+				if (plugin is not null)
+				{
+					plugin.PropertyChanged -= SetButtonsStates;
+				}
+
+				plugin = instance;
+				plugin.PropertyChanged += SetButtonsStates;
+
+				snapshot = new Plugin(plugin);
+			}
+		}
 
 
 		protected override async void OnLoad(EventArgs e)
@@ -128,13 +153,9 @@ namespace River.OneMoreAddIn.Commands
 			if (single)
 			{
 				pluginsBox.Enabled = false;
-				nameBox.Text = plugin.Name;
-				cmdBox.Text = plugin.Command;
-				argsBox.Text = plugin.Arguments;
 
-				ChangeTarget(null, EventArgs.Empty);
-
-				timeoutBox.Value = plugin.Timeout;
+				ViewPlugin(plugin);
+				SetButtonsStates(null, null);
 				return;
 			}
 
@@ -147,11 +168,11 @@ namespace River.OneMoreAddIn.Commands
 			pluginsBox.DataSource = binding;
 			pluginsBox.DisplayMember = "Name";
 
-			plugin = new Plugin
+			SetPlugin(new Plugin
 			{
 				Name = Resx.PluginDialog_newItem,
 				PageName = this.PageName
-			};
+			});
 
 			binding.Add(plugin);
 
@@ -164,35 +185,91 @@ namespace River.OneMoreAddIn.Commands
 				}
 			}
 
-			pluginsBox.SelectedIndex = 0;
 			nameBox.Text = plugin.Name;
+			pluginsBox.SelectedIndex = 0;
+
+			SetButtonsStates(null, null);
 			nameBox.Focus();
+		}
+
+
+		private void SetButtonsStates(object sender, PropertyChangedEventArgs e)
+		{
+			if (snapshot is null)
+			{
+				return;
+			}
+
+			var dirty = !plugin.Equals(snapshot);
+
+			var valid =
+				!errorBox.Visible &&
+				!string.IsNullOrWhiteSpace(plugin.Name) &&
+				!string.IsNullOrWhiteSpace(plugin.Command) &&
+				(
+					updateRadio.Checked ||
+					(createRadio.Checked && !string.IsNullOrWhiteSpace(plugin.PageName))
+				);
+
+			if (!valid)
+			{
+				if (!single)
+				{
+					pluginsBox.Enabled = (pluginsBox.SelectedIndex == 0 && !dirty) || dirty;
+				}
+
+				saveButton.Enabled = false;
+				runButton.Enabled = false;
+				return;
+			}
+
+			if (dirty)
+			{
+				if (!single)
+				{
+					pluginsBox.Enabled = false;
+				}
+
+				saveButton.Enabled = true;
+				runButton.Enabled = true;
+				return;
+			}
+
+			pluginsBox.Enabled = !single;
+			saveButton.Enabled = false;
+			runButton.Enabled = true;
 		}
 
 
 		private void ChangeTarget(object sender, EventArgs e)
 		{
-			if (sender == null)
+			if (initializing)
 			{
-				targetBox.SelectedIndex = plugin.TargetPage ? 0 : 1;
-			}
-			else
-			{
-				plugin.TargetPage = targetBox.SelectedIndex == 0;
+				return;
 			}
 
-			if (plugin.TargetPage)
+			plugin.Target = (PluginTarget)targetBox.SelectedIndex;
+
+			if (plugin.Target == PluginTarget.Page)
 			{
 				pageGroup.Visible = true;
 				sectionGroup.Visible = false;
 
 				if (plugin.CreateNewPage)
+				{
 					createRadio.Checked = true;
+					pageNameBox.Text = plugin.PageName;
+					childBox.Enabled = true;
+					childBox.Checked = plugin.AsChildPage;
+				}
 				else
+				{
 					updateRadio.Checked = true;
+					pageNameBox.Text = plugin.PageName;
+					childBox.Checked = false;
+					childBox.Enabled = false;
+				}
 
-				pageNameBox.Text = plugin.PageName;
-				childBox.Checked = plugin.AsChildPage;
 				skipLockRadio.Checked = true;
 			}
 			else
@@ -206,7 +283,7 @@ namespace River.OneMoreAddIn.Commands
 					failLockRadio.Checked = true;
 
 				updateRadio.Checked = true;
-				pageNameBox.Text = String.Empty;
+				pageNameBox.Text = string.Empty;
 				childBox.Checked = false;
 			}
 		}
@@ -216,25 +293,30 @@ namespace River.OneMoreAddIn.Commands
 
 		private void ViewPredefined(object sender, EventArgs e)
 		{
-			plugin = pluginsBox.SelectedItem as Plugin;
+			SetPlugin(pluginsBox.SelectedItem as Plugin);
+			ViewPlugin(plugin);
+			SetButtonsStates(null, null);
+		}
 
+
+		private void ViewPlugin(Plugin plugin)
+		{
 			nameBox.Text = plugin.Name;
 			cmdBox.Text = plugin.Command;
 			argsBox.Text = plugin.Arguments;
+			userArgsBox.Text = plugin.UserArguments;
 			timeoutBox.Value = plugin.Timeout;
 
-			ChangeTarget(null, EventArgs.Empty);
+			var index = targetBox.SelectedIndex;
+			targetBox.SelectedIndex = (int)plugin.Target;
 
-			var read = pluginsBox.SelectedIndex > 0;
-			nameBox.ReadOnly = read;
-			cmdBox.ReadOnly = read;
-			argsBox.ReadOnly = read;
-			timeoutBox.ReadOnly = read;
-			createRadio.Enabled = !read;
-			updateRadio.Enabled = !read;
-			pageNameBox.ReadOnly = read;
-			childBox.Enabled = !read;
-			saveButton.Enabled = !read;
+			if (targetBox.SelectedIndex == index)
+			{
+				// newly selected plugin's Target may be the same as the previously selected
+				// plugin, which means ChangeTarget would not get fired, but we need to ensure
+				// that the target sub-fields are updated accordingly. So force it to happen...
+				ChangeTarget(null, EventArgs.Empty);
+			}
 		}
 
 
@@ -246,6 +328,11 @@ namespace River.OneMoreAddIn.Commands
 
 		private void ChangeText(object sender, EventArgs e)
 		{
+			if (initializing)
+			{
+				return;
+			}
+
 			var valid = true;
 
 			if (sender == nameBox)
@@ -265,23 +352,21 @@ namespace River.OneMoreAddIn.Commands
 				}
 			}
 			else if (sender == cmdBox)
+			{
 				plugin.Command = cmdBox.Text.Trim();
+			}
 			else if (sender == argsBox)
+			{
 				plugin.Arguments = argsBox.Text.Trim();
+			}
 			else if (sender == pageNameBox)
+			{
 				plugin.PageName = pageNameBox.Text.Trim();
-
-			saveButton.Enabled =
-				valid &&
-				!string.IsNullOrWhiteSpace(plugin.Name) &&
-				!string.IsNullOrWhiteSpace(plugin.Command);
-
-			okButton.Enabled = valid &&
-				saveButton.Enabled &&
-				(
-					updateRadio.Checked ||
-					(createRadio.Checked && !string.IsNullOrWhiteSpace(plugin.PageName))
-				);
+			}
+			else if (sender == userArgsBox)
+			{
+				plugin.UserArguments = userArgsBox.Text.Trim();
+			}
 		}
 
 
@@ -331,10 +416,23 @@ namespace River.OneMoreAddIn.Commands
 
 		private void updateRadio_CheckedChanged(object sender, EventArgs e)
 		{
-			pageNameBox.Enabled = !updateRadio.Checked;
-			childBox.Enabled = !updateRadio.Checked;
+			if (updateRadio.Checked)
+			{
+				pageNameBox.Enabled = false;
+				pageNameBox.Text = string.IsNullOrWhiteSpace(plugin.PageName)
+					? DefaultCreatedPageName
+					: plugin.PageName;
 
-			plugin.CreateNewPage = createRadio.Checked;
+				childBox.Enabled = false;
+				childBox.Checked = false;
+			}
+			else //createRadio.Checked
+			{
+				pageNameBox.Enabled = true;
+				childBox.Enabled = true;
+				pageNameBox.Text = plugin.PageName;
+				childBox.Checked = plugin.AsChildPage;
+			}
 		}
 
 
@@ -396,11 +494,13 @@ namespace River.OneMoreAddIn.Commands
 
 		private async void SavePlugin(object sender, EventArgs e)
 		{
-			if (!plugin.TargetPage)
+
+			if (plugin.Target != PluginTarget.Page)
 			{
-				plugin.PageName = String.Empty;
+				plugin.PageName = string.Empty;
 				plugin.CreateNewPage = false;
 				plugin.AsChildPage = false;
+				plugin.SkipLocked = skipLockRadio.Checked;
 			}
 
 			try
@@ -417,10 +517,12 @@ namespace River.OneMoreAddIn.Commands
 					await provider.Save(plugin);
 				}
 
+				snapshot = new Plugin(plugin);
+				SetButtonsStates(null, null);
 
 				if (!single)
 				{
-					UIHelper.ShowMessage($"{plugin.Name} has been saved");
+					MoreMessageBox.Show(this, $"{plugin.Name} has been saved");
 				}
 			}
 			catch (Exception exc)

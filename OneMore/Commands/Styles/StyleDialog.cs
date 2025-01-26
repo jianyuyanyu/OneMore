@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2016 Steven M Cohn.  Yada yada...
+// Copyright © 2016 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -24,7 +24,7 @@ namespace River.OneMoreAddIn.Commands
 	/// All other local disposables are handled.
 	/// </remarks>
 
-	internal partial class StyleDialog : LocalizableForm
+	internal partial class StyleDialog : MoreForm
 	{
 		private Color pageColor;
 		private readonly Color originalColor;
@@ -51,7 +51,7 @@ namespace River.OneMoreAddIn.Commands
 			Logger.SetDesignMode(DesignMode);
 			eventing = false;
 
-			Text = Resx.StyleDialog_NewText;
+			Text = Resx.phrase_NewStyle;
 
 			this.pageColor = originalColor = pageColor;
 			this.darkMode = darkMode;
@@ -96,6 +96,8 @@ namespace River.OneMoreAddIn.Commands
 
 			this.theme = theme;
 
+			resetButton.Enabled = theme.IsPredefined;
+
 			var styles = theme.GetStyles();
 			LoadStyles(styles);
 			if (styles.Count > 0)
@@ -118,9 +120,10 @@ namespace River.OneMoreAddIn.Commands
 					"loadButton",
 					"saveButton",
 					"newStyleButton",
-					"renameButton=word_Rename",
-					"deleteButton=word_Delete",
+					"renameButton.ToolTipText=word_Rename",
+					"deleteButton.ToolTipText=word_Delete",
 					"reorderButton",
+					"resetButton=word_Reset",
 					// toolstrip
 					"boldButton",
 					"italicButton",
@@ -142,7 +145,7 @@ namespace River.OneMoreAddIn.Commands
 					"styleTypeLabel",
 					"applyColorsBox",
 					// options
-					"optionsGroup",
+					"optionsGroup=word_Options",
 					"darkBox",
 					"pageColorBox",
 					"pageColorLink",
@@ -153,9 +156,6 @@ namespace River.OneMoreAddIn.Commands
 				styleTypeBox.Items.Clear();
 				styleTypeBox.Items.AddRange(Resx.StyleDialog_styleTypeBox_Items.Split('\n'));
 			}
-
-			mainTools.Rescale();
-			toolStrip.Rescale();
 
 			if (AddIn.Culture.NumberFormat.NumberDecimalSeparator != ".")
 			{
@@ -248,7 +248,7 @@ namespace River.OneMoreAddIn.Commands
 			if (families.Any())
 			{
 				var names = string.Join(", ", families);
-				UIHelper.ShowInfo(string.Format(Resx.StyleDialog_familyWarning, names));
+				MoreMessageBox.Show(this, string.Format(Resx.StyleDialog_familyWarning, names));
 			}
 		}
 
@@ -279,8 +279,8 @@ namespace River.OneMoreAddIn.Commands
 		/// <summary>
 		/// Get the modified theme. Used when editing an entire theme.
 		/// </summary>
-		public Theme Theme => new(MakeStyles(),
-			theme.Key, theme.Name, theme.Color, theme.SetColor, theme.Dark);
+		public Theme Theme => new(MakeStyles(), theme.Key, theme.Name,
+			theme.Color, theme.SetColor, theme.Dark, theme.IsPredefined);
 
 
 		// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -647,7 +647,7 @@ namespace River.OneMoreAddIn.Commands
 
 		private Color SelectColor(string title, Rectangle bounds, Color color)
 		{
-			var location = PointToScreen(toolStrip.Location);
+			var location = PointToScreen(fontTools.Location);
 
 			using var dialog = new UI.MoreColorDialog(title,
 				location.X + bounds.Location.X,
@@ -811,8 +811,9 @@ namespace River.OneMoreAddIn.Commands
 
 		private void DeleteStyle(object sender, EventArgs e)
 		{
-			var result = MessageBox.Show(this, "Delete this custom style?", "Confirm",
-				MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+			var result = UI.MoreMessageBox.Show(this,
+				"Delete this custom style?",
+				MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
 			if (result == DialogResult.Yes)
 			{
@@ -891,7 +892,14 @@ namespace River.OneMoreAddIn.Commands
 			dialog.ShowHelp = true; // stupid, but this is needed to avoid hang
 			dialog.AutoUpgradeEnabled = true; // simpler UI, faster
 
-			var path = Path.Combine(PathHelper.GetAppDataPath(), Resx.ThemesFolder);
+			var path = ThemeProvider.GetCustomThemeDirectory();
+			if (!Directory.Exists(path) ||
+				!Directory.EnumerateFiles(path, "*.xml").Any())
+			{
+				path = ThemeProvider.GetThemeDirectory();
+				PathHelper.EnsurePathExists(path);
+			}
+
 			if (Directory.Exists(path))
 			{
 				dialog.InitialDirectory = path;
@@ -913,14 +921,34 @@ namespace River.OneMoreAddIn.Commands
 
 					// update dialog title
 					Text = string.Format(Resx.StyleDialog_ThemeText, theme.Name);
-
 					VerifyFontFamilies();
 				}
 				else
 				{
-					MessageBox.Show(this, "Could not load this theme file?", "Error",
+					MoreMessageBox.Show(this,
+						"Could not load this theme file?",
 						MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
+			}
+		}
+
+
+		private void ResetTheme(object sender, EventArgs e)
+		{
+			if (MoreMessageBox.ShowQuestion(this,
+				"Reset the settings of this predefined theme?") != DialogResult.Yes)
+			{
+				return;
+			}
+
+			theme = new ThemeProvider().ResetPredefinedTheme(theme.Key);
+			if (theme is not null)
+			{
+				LoadStyles(theme.GetStyles());
+
+				// update dialog title
+				Text = string.Format(Resx.StyleDialog_ThemeText, theme.Name);
+				VerifyFontFamilies();
 			}
 		}
 
@@ -953,7 +981,14 @@ namespace River.OneMoreAddIn.Commands
 				}
 
 				var key = Path.GetFileNameWithoutExtension(dialog.FileName);
-				theme = new Theme(MakeStyles(), key, key, theme.Color, theme.SetColor, theme.Dark);
+				if (key.EndsWith("-edited"))
+				{
+					key = key.Substring(0, key.Length - 7);
+				}
+
+				theme = new Theme(MakeStyles(), key, key,
+					theme.Color, theme.SetColor, theme.Dark, theme.IsPredefined);
+
 				ThemeProvider.Save(theme, dialog.FileName);
 
 				Text = string.Format(
@@ -968,7 +1003,7 @@ namespace River.OneMoreAddIn.Commands
 
 			using var dialog = new PageColorDialog(color);
 			dialog.HideOptions();
-			dialog.StartPosition = FormStartPosition.CenterParent;
+			//dialog.StartPosition = FormStartPosition.CenterParent;
 			dialog.VerticalOffset = 50;
 
 			if (dialog.ShowDialog(this) == DialogResult.OK)

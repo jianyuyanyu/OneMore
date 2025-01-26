@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2022 Steven M Cohn.  All rights reserved.
+// Copyright © 2022 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.UI
@@ -7,10 +7,10 @@ namespace River.OneMoreAddIn.UI
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
-	internal partial class RenameDialog : UI.LocalizableForm
+	internal partial class RenameDialog : UI.MoreForm
 	{
 		private readonly IEnumerable<string> names;
 
@@ -21,7 +21,7 @@ namespace River.OneMoreAddIn.UI
 
 			if (NeedsLocalizing())
 			{
-				Text = Resx.NameStyleDialog_NewStyle;
+				Text = Resx.phrase_NewStyle;
 
 				Localize(new string[]
 				{
@@ -48,9 +48,9 @@ namespace River.OneMoreAddIn.UI
 
 			set
 			{
-				Text = value 
+				Text = value
 					? Resx.NameStyleDialog_RenameStyle
-					: Resx.NameStyleDialog_NewStyle;
+					: Resx.phrase_NewStyle;
 			}
 		}
 
@@ -74,7 +74,7 @@ namespace River.OneMoreAddIn.UI
 				return;
 			}
 
-			var duplicate = names.Any(n => 
+			var duplicate = names.Any(n =>
 				n.Equals(text, StringComparison.InvariantCultureIgnoreCase));
 
 			errorLabel.Visible = duplicate;

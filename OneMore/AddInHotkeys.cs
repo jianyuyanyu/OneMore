@@ -36,7 +36,7 @@ namespace River.OneMoreAddIn
 				.Select(m => new
 				{
 					m.Method,
-					Command = (CommandAttribute)m.Attributes.First()
+					Command = (CommandAttribute)m.Attributes[0]
 				});
 
 			// an awful hack to avoid a conflict with Italian keyboard (FIGS and likely UK) that
@@ -61,7 +61,7 @@ namespace River.OneMoreAddIn
 
 			// register hotkey for each discovered command...
 
-			HotkeyManager.Initialize();
+			await HotkeyManager.Initialize();
 			var count = 0;
 
 			methods.ForEach((m) =>

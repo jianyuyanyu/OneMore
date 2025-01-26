@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2016 Steven M Cohn.  All rights reserved.
+// Copyright © 2016 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Models
@@ -32,11 +32,18 @@ namespace River.OneMoreAddIn.Models
 		// page is a reminder summary report, content is scope
 		public static readonly string ReminderReport = "omReminderReport";
 
+		// page is a section or notebook TOC
+		public static readonly string TableOfContents = "omTableOfContents";
+
 		// Outline meta to mark visible word bank
 		public static readonly string TaggingBank = "omTaggingBank";
 
 		// page tag list
+		// TODO: temporary page tagging
 		public static readonly string TaggingLabels = "omTaggingLabels";
+
+		// page is a hashtag index page
+		public static readonly string TagIndex = "omTagIndex";
 
 		// word count report for section or notebook
 		public static readonly string WordCount = "omWordCounts";

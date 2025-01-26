@@ -27,12 +27,12 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out ns);
+			await using var one = new OneNote(out var page, out ns);
 
 			var anchor = FindAnchor(page);
 			if (anchor == null)
 			{
-				UIHelper.ShowInfo(Resx.JoinParagraphCommand_Select);
+				ShowInfo(Resx.JoinParagraphCommand_Select);
 				return;
 			}
 
@@ -110,7 +110,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (runs.Any())
 			{
-				var first = runs.First();
+				var first = runs[0];
 				if (runs.Count == 1 && first.GetCData().Value == string.Empty)
 				{
 					caret = first;
@@ -124,7 +124,7 @@ namespace River.OneMoreAddIn.Commands
 				}
 
 				// include siblings after last
-				var after = runs.Last().ElementsAfterSelf(ns + "T");
+				var after = runs[runs.Count - 1].ElementsAfterSelf(ns + "T");
 				if (after.Any())
 				{
 					runs.AddRange(after);
@@ -199,7 +199,7 @@ namespace River.OneMoreAddIn.Commands
 			// collapse soft-breaks
 			var text = cdata.Value.Replace("<br>\n", " ").Trim();
 
-			if ((index < runs.Count - 1) && 
+			if ((index < runs.Count - 1) &&
 				(run.Parent != runs[index + 1].Parent) &&
 				!text.EndsWithWhitespace())
 			{

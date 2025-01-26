@@ -229,6 +229,14 @@
       "foreground": "Gray"
     },
     {
+      "name": "ShellKnownVariable",
+      "foreground": "Firebrick"
+    },
+    {
+      "name": "ShellUserVariable",
+      "foreground": "Orange"
+    },
+    {
       "name": "SpecialCharacter"
     },
     {
@@ -255,6 +263,10 @@
       "name": "TypeVariable",
       "foreground": "Teal",
       "italic": true
+    },
+    {
+      "name": "Variable",
+      "foreground": "Navy"
     },
     {
       "name": "XmlAttribute",

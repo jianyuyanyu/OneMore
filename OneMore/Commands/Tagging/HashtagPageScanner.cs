@@ -20,12 +20,13 @@ namespace River.OneMoreAddIn.Commands
 		private const string SkipRegion = "#skiphashtags";
 		private const string KeepRegion = "#keephashtags";
 
-		private readonly XElement root;
+		private readonly Page page;
 		private readonly XNamespace ns;
 		private readonly Regex hashPattern;
 		private readonly SearchAndReplaceEditor editor;
 		private readonly string pageID;
 		private bool keepTags;
+		private int documentOrder;
 
 
 		/// <summary>
@@ -34,21 +35,16 @@ namespace River.OneMoreAddIn.Commands
 		/// <param name="root">The root element of the page</param>
 		/// <param name="pattern">The compiled regular express used to find ##hashtags</param>
 		/// <param name="styleTemplate">template used to stylize hashtags</param>
-		public HashtagPageScanner(
-			XElement root, Regex pattern, XElement styleTemplate)
+		public HashtagPageScanner(Page page, Regex pattern, XElement styleTemplate)
 		{
-			this.root = root;
-			ns = root.GetNamespaceOfPrefix(OneNote.Prefix);
-			pageID = root.Attribute("ID").Value;
+			this.page = page;
+			ns = page.Root.GetNamespaceOfPrefix(OneNote.Prefix);
+			pageID = page.Root.Attribute("ID").Value;
 
-			MoreID = root.Elements(ns + "Meta")
-				.FirstOrDefault(e => e.Attribute("name").Value == MetaNames.PageID)?
-				.Attribute("content").Value;
-
+			MoreID = page.GetMetaContent(MetaNames.PageID);
 			if (string.IsNullOrWhiteSpace(MoreID))
 			{
-				MoreID = Guid.NewGuid().ToString("N");
-				UpdateMeta = true;
+				SetMoreID();
 			}
 
 			hashPattern = pattern;
@@ -82,6 +78,17 @@ namespace River.OneMoreAddIn.Commands
 
 
 		/// <summary>
+		/// Sets or updates the moreID of the page and marks UpdateMeta as true.
+		/// </summary>
+		public void SetMoreID()
+		{
+			MoreID = Guid.NewGuid().ToString("N");
+			page.SetMeta(MetaNames.PageID, MoreID);
+			UpdateMeta = true;
+		}
+
+
+		/// <summary>
 		/// Finds ##hashtags on the page
 		/// </summary>
 		/// <returns>A collection of Hashtags</returns>
@@ -89,13 +96,15 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var tags = new Hashtags();
 
-			var paragraphs = root
+			var paragraphs = page.Root
 				.Elements(ns + "Outline")
 				.Elements(ns + "OEChildren")
 				.Elements(ns + "OE");
 
 			if (paragraphs.Any())
 			{
+				documentOrder = 0;
+
 				foreach (var paragraph in paragraphs)
 				{
 					var count = tags.Count;
@@ -149,7 +158,7 @@ namespace River.OneMoreAddIn.Commands
 								keepTags = true;
 							}
 							// this "else" ensures the #Skip and #Keep tags are not captured
-							else if (keepTags && 
+							else if (keepTags &&
 								!tags.Exists(t => t.Tag == name && t.ObjectID == objectID))
 							{
 								var context = ExtractContext(text, capture.Index, capture.Length);
@@ -161,6 +170,7 @@ namespace River.OneMoreAddIn.Commands
 									PageID = pageID,
 									ObjectID = objectID,
 									Snippet = context,
+									DocumentOrder = documentOrder++,
 									LastModified = lastModifiedTime
 								});
 							}

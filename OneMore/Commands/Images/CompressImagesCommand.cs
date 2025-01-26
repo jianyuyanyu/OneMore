@@ -4,10 +4,9 @@
 
 namespace River.OneMoreAddIn.Commands
 {
+	using River.OneMoreAddIn.Models;
 	using System;
 	using System.Drawing;
-	using System.Globalization;
-	using System.IO;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using Resx = Properties.Resources;
@@ -26,69 +25,66 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using (var one = new OneNote(out var page, out var ns, OneNote.PageDetail.All))
+			await using var one = new OneNote(out var page, out var ns, OneNote.PageDetail.All);
+			var elements = page.Root.Descendants(ns + "Image")?
+				.Where(e => e.Attribute("selected")?.Value == "all");
+
+			if ((elements == null) || !elements.Any())
 			{
-				var elements = page.Root.Descendants(ns + "Image")?
-					.Where(e => e.Attribute("selected")?.Value == "all");
+				// include background images
+				elements = page.Root.Descendants(ns + "Image");
+			}
 
-				if ((elements == null) || !elements.Any())
+			if (!elements.Any())
+			{
+				UI.MoreBubbleWindow.Show(Resx.ConvertImagesCommand_NoImages);
+				return;
+			}
+
+			var count = 0;
+			var delta = 0;
+
+			foreach (var element in elements)
+			{
+				var wrapper = new OneImage(element);
+				using var image = wrapper.ReadImage();
+
+				if (image.Width > wrapper.Width || image.Height > wrapper.Height)
 				{
-					// include background images
-					elements = page.Root.Descendants(ns + "Image");
-				}
-
-				var count = 0;
-				var delta = 0;
-
-				if (elements.Any())
-				{
-					foreach (var element in elements)
+					var editor = new ImageEditor
 					{
-						// convert base64 to image
-						var data = element.Element(ns + "Data");
-						var dataLen = data.Value.Length;
+						PreserveQualityOnResize = false,
+						Size = new Size(wrapper.Width, wrapper.Height)
+					};
 
-						var bytes = Convert.FromBase64String(data.Value);
-						using var input = new MemoryStream(bytes, 0, bytes.Length);
-						using var image = Image.FromStream(input);
+					var datalen = wrapper.Data.Length;
 
-						var size = element.Element(ns + "Size");
-						int viewWidth = (int)decimal.Parse(
-							size.Attribute("width").Value, CultureInfo.InvariantCulture);
-						int viewHeight = (int)decimal.Parse(
-							size.Attribute("height").Value, CultureInfo.InvariantCulture);
+					// work against image rather than wrapper so we can control if we
+					// want to accept changes based on size
+					var compressed = editor.Apply(image);
 
-						if (image.Width > viewWidth || image.Height > viewHeight)
-						{
-							using var resized = image.Resize(viewWidth, viewHeight, false);
-
-							var value = resized.ToBase64String();
-							if (value.Length < dataLen)
-							{
-								logger.WriteLine($"compressed {dataLen} to {value.Length}");
-								data.Value = value;
-
-								delta += dataLen - value.Length;
-								count++;
-							}
-						}
-					}
-
-					if (count > 0)
+					var data = compressed.ToBase64String();
+					if (data.Length < datalen)
 					{
-						await one.Update(page);
+						logger.WriteLine($"compressed {datalen} to {data.Length}");
+						wrapper.Data = data;
+
+						delta += datalen - data.Length;
+						count++;
 					}
 				}
+			}
 
-				if (count > 0)
-				{
-					UI.MoreBubbleWindow.Show(string.Format(
-						Resx.ConvertImagesCommand_Converted, count, delta));
-				}
-				else
-				{
-					UI.MoreBubbleWindow.Show(Resx.ConvertImagesCommand_NoImages);
-				}
+			if (count > 0)
+			{
+				await one.Update(page);
+
+				UI.MoreBubbleWindow.Show(string.Format(
+					Resx.ConvertImagesCommand_Converted, count, delta));
+			}
+			else
+			{
+				UI.MoreBubbleWindow.Show(Resx.ConvertImagesCommand_NoImages);
 			}
 		}
 	}

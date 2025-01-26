@@ -63,10 +63,10 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var addTitle = args.Length == 0 || (bool)args[0];
 
-			using var one = new OneNote(out var page, out ns);
+			await using var one = new OneNote(out var page, out ns);
 			if (!page.ConfirmBodyContext())
 			{
-				UIHelper.ShowError(Resx.Error_BodyContext);
+				ShowError(Resx.Error_BodyContext);
 				return;
 			}
 
@@ -78,7 +78,9 @@ namespace River.OneMoreAddIn.Commands
 			};
 
 			// remember selection cursor
-			var cursor = page.GetTextCursor();
+
+			var range = new SelectionRange(page);
+			var cursor = range.GetSelection(true);
 
 			// determine if cursor is inside a table or outline with a user set width
 			table.AddColumn(CalculateWidth(cursor, page.Root), true);
@@ -108,36 +110,63 @@ namespace River.OneMoreAddIn.Commands
 			row = table.AddRow();
 			cell = row.Cells.First();
 
-			if (// cursor is not null if selection range is empty
-				cursor != null &&
-				// selection range is a single line containing a hyperlink
-				!(page.SelectionSpecial && page.SelectionScope == SelectionScope.Empty))
+			if (range.Scope == SelectionScope.TextCursor)
 			{
 				// empty text cursor found, add default content
 				cell.SetContent(MakeDefaultContent(addTitle));
-				page.AddNextParagraph(table.Root);
+
+				var editor = new PageEditor(page);
+				editor.ExtractSelectedContent();
+
+				var box = new XElement(ns + "OE", table.Root);
+				if (editor.Anchor.Name.LocalName.In("OE", "HTMLBlock"))
+				{
+					editor.Anchor.AddAfterSelf(box);
+				}
+				else // if (localName.In("OEChildren", "Outline"))
+				{
+					editor.Anchor.AddFirst(box);
+				}
 			}
 			else
 			{
 				// selection range found so move it into snippet
-				var content = page.ExtractSelectedContent(out var firstParent);
+				var editor = new PageEditor(page)
+				{
+					// the extracted content will be selected=all, keep it that way
+					KeepSelected = true
+				};
+
+				var content = editor.ExtractSelectedContent();
+
+				if (!content.HasElements)
+				{
+					ShowError(Resx.Error_BodyContext);
+					logger.WriteLine("error reading page content!");
+					return;
+				}
+
+				editor.Deselect();
+				editor.FollowWithCurosr(content);
+
 				cell.SetContent(content);
 
 				var shading = DetermineShading(page, content);
-				if (shading != null)
+				if (shading is not null)
 				{
 					cell.ShadingColor = shading;
 				}
 
-				if (firstParent.HasElements)
+				var localName = editor.Anchor.Name.LocalName;
+				var box = new XElement(ns + "OE", table.Root);
+
+				if (localName.In("OE", "HTMLBlock"))
 				{
-					// selected text was a subset of runs under an OE
-					firstParent.AddAfterSelf(new XElement(ns + "OE", table.Root));
+					editor.Anchor.AddAfterSelf(box);
 				}
-				else
+				else // if (localName.In("OEChildren", "Outline"))
 				{
-					// selected text was all of an OE
-					firstParent.Add(table.Root);
+					editor.Anchor.AddFirst(box);
 				}
 			}
 
@@ -148,49 +177,64 @@ namespace River.OneMoreAddIn.Commands
 		private float CalculateWidth(XElement cursor, XElement root)
 		{
 			// if selected range
-			if (cursor == null)
+			if (cursor is null)
 			{
 				cursor = root.Elements(ns + "Outline")
 					.Descendants(ns + "T")
 					.FirstOrDefault(e => e.Attributes().Any(a => a.Name == "selected" && a.Value == "all"));
 
-				if (cursor == null)
+				if (cursor is null)
 				{
 					// shouldn't happen
 					return DefaultWidth;
 				}
 			}
 
+			// calculate delta for width based on indent of outline
+			var delta = 0;
+			var outline = cursor.Ancestors(ns + "Outline").FirstOrDefault();
+			if (outline is not null)
+			{
+				var x = outline.Elements(ns + "Position").Attributes("x").FirstOrDefault();
+				if (x is not null)
+				{
+					delta = (int)double.Parse(x.Value, CultureInfo.InvariantCulture) - 36;
+				}
+			}
+
 			// if insertion point is within a table cell then assume the width of that cell
 
 			var cell = cursor.Ancestors(ns + "Cell").FirstOrDefault();
-			if (cell != null)
+			if (cell is not null)
 			{
 				var index = cell.ElementsBeforeSelf(ns + "Cell").Count().ToString();
 				var column = cell.Ancestors(ns + "Table")
 					.Elements(ns + "Columns").Elements(ns + "Column")
 					.FirstOrDefault(e => e.Attribute("index")?.Value == index);
 
-				if (column != null)
+				if (column is not null)
 				{
 					return (float)Math.Floor(double.Parse(
-						column.Attribute("width").Value, CultureInfo.InvariantCulture));
+						column.Attribute("width").Value, CultureInfo.InvariantCulture)) - delta;
 				}
 			}
 
 			// if insertion point is within an Outline with a width set by the users
 			// then assume the width of the Outline
 
-			var size = cursor.Ancestors(ns + "Outline").Elements(ns + "Size")
-				.FirstOrDefault(e => e.Attribute("isSetByUser")?.Value == "true");
-
-			if (size != null)
+			if (outline is not null)
 			{
-				return (float)Math.Floor(double.Parse(
-					size.Attribute("width").Value, CultureInfo.InvariantCulture));
+				var size = outline.Elements(ns + "Size")
+					.FirstOrDefault(e => e.Attribute("isSetByUser")?.Value == "true");
+
+				if (size is not null)
+				{
+					return (float)Math.Floor(double.Parse(
+						size.Attribute("width").Value, CultureInfo.InvariantCulture)) - delta;
+				}
 			}
 
-			return DefaultWidth;
+			return DefaultWidth - delta;
 		}
 
 
@@ -209,7 +253,11 @@ namespace River.OneMoreAddIn.Commands
 
 			return new XElement(ns + "OEChildren",
 				new Paragraph(string.Empty),
-				new Paragraph(Resx.InsertBoxCommand_Text),
+				new Paragraph(
+					new XElement(ns + "T",
+						new XAttribute("selected", "all"),
+						new XCData(Resx.phrase_YourContentHere))
+					),
 				new Paragraph(string.Empty)
 				);
 		}
@@ -257,16 +305,10 @@ namespace River.OneMoreAddIn.Commands
 				var ground = ColorTranslator.FromHtml(mostFrequent);
 				var bright = ground.GetBrightness() >= 0.5;
 
-				if (dark && bright)
+				if ((dark && bright) || (!dark && !bright))
 				{
 					// page is dark and text background is all light then return
 					// light background color
-					background = mostFrequent;
-				}
-				else if (!dark && !bright)
-				{
-					// page is light and text background is all dark then return
-					// dark background color
 					background = mostFrequent;
 				}
 			}
@@ -275,28 +317,3 @@ namespace River.OneMoreAddIn.Commands
 		}
 	}
 }
-/*
-<one:Table bordersVisible="true">
-  <one:Columns>
-    <one:Column index="0" width="550" isLocked="true" />
-  </one:Columns>
-  <one:Row>
-    <one:Cell shadingColor="#F2F2F2">
-      <one:OEChildren>
-        <one:OE style="font-family:'Segoe UI';font-size:11.0pt;color:black">
-          <one:T><![CDATA[<span style='font-weight:bold;background:white'>Code</span>]]></one:T>
-        </one:OE>
-      </one:OEChildren>
-    </one:Cell>
-  </one:Row>
-  <one:Row>
-    <one:Cell>
-      <one:OEChildren selected="partial">
-        <one:OE style="font-family:'Lucida Console';font-size:9.0pt">
-          <one:T><![CDATA[Your code here...]]></one:T>
-        </one:OE>
-      </one:OEChildren>
-    </one:Cell>
-  </one:Row>
-</one:Table>
-*/

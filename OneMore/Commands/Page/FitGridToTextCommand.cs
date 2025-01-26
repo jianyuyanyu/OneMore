@@ -6,6 +6,7 @@ namespace River.OneMoreAddIn.Commands
 {
 	using River.OneMoreAddIn.Styles;
 	using System.Drawing;
+	using System.Globalization;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Xml.Linq;
@@ -34,7 +35,7 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns, OneNote.PageDetail.Basic);
+			await using var one = new OneNote(out var page, out var ns, OneNote.PageDetail.Basic);
 			var rule = page.Root
 				.Elements(ns + "PageSettings")
 				.Elements(ns + "RuleLines")
@@ -44,14 +45,14 @@ namespace River.OneMoreAddIn.Commands
 
 			if (rule == null)
 			{
-				UIHelper.ShowMessage(Resx.FitGridToTextCommand_noGrid);
+				ShowError(Resx.FitGridToTextCommand_noGrid);
 				return;
 			}
 
 			var quickStyles = page.GetQuickStyles().Where(s => s.Name == "p");
 			if (!quickStyles.Any())
 			{
-				UIHelper.ShowMessage(Resx.FitGridToTextCommand_noText);
+				ShowError(Resx.FitGridToTextCommand_noText);
 				return;
 			}
 
@@ -109,7 +110,7 @@ namespace River.OneMoreAddIn.Commands
 			using var image = new Bitmap(1, 1);
 			using var g = Graphics.FromImage(image);
 
-			var fontSize = float.Parse(style.FontSize);
+			var fontSize = float.Parse(style.FontSize, NumberStyles.Any, CultureInfo.InvariantCulture);
 			using var font = new Font(style.FontFamily, fontSize, FontStyle.Regular);
 
 			// the height of a single line is apparently greater than

@@ -68,11 +68,11 @@ namespace River.OneMoreAddIn.Commands
 			switch (dialog.Scope)
 			{
 				case OneNote.Scope.Children:
-					SortPages(sorting, ascending, true);
+					await SortPages(sorting, ascending, true);
 					break;
 
 				case OneNote.Scope.Pages:
-					SortPages(sorting, ascending, false);
+					await SortPages(sorting, ascending, false);
 					break;
 
 				case OneNote.Scope.Sections:
@@ -94,7 +94,7 @@ namespace River.OneMoreAddIn.Commands
 		// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 		// Pages
 
-		private void SortPages(SortBy sorting, bool ascending, bool children)
+		private async Task SortPages(SortBy sorting, bool ascending, bool children)
 		{
 			#region Notes
 			/*
@@ -107,8 +107,8 @@ namespace River.OneMoreAddIn.Commands
 
 			logger.StartClock();
 
-			using var one = new OneNote();
-			var section = one.GetSection();
+			await using var one = new OneNote();
+			var section = await one.GetSection();
 			var ns = section.GetNamespaceOfPrefix(OneNote.Prefix);
 
 			var pages = section.Elements(ns + "Page").ToList();
@@ -178,7 +178,7 @@ namespace River.OneMoreAddIn.Commands
 
 		private PageNode FindStartingNode(List<PageNode> tree, string pageID)
 		{
-			var start = tree.FirstOrDefault(n => n.Root.Attribute("ID").Value == pageID);
+			var start = tree.Find(n => n.Root.Attribute("ID").Value == pageID);
 			if (start == null)
 			{
 				foreach (var node in tree.Where(n => n.Nodes.Any()))
@@ -249,7 +249,7 @@ namespace River.OneMoreAddIn.Commands
 
 			logger.StartClock();
 
-			using var one = new OneNote();
+			await using var one = new OneNote();
 
 			// get the current notebook with its sections
 			var notebook = await one.GetNotebook();
@@ -382,7 +382,7 @@ namespace River.OneMoreAddIn.Commands
 
 			logger.StartClock();
 
-			using var one = new OneNote();
+			await using var one = new OneNote();
 
 			var root = await one.GetNotebooks();
 			var ns = one.GetNamespace(root);

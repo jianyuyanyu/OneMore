@@ -94,6 +94,16 @@ namespace River.OneMoreAddIn
 
 			var setprovider = new SettingsProvider();
 
+			// TODO: temporary Page tagging
+			if (commands.Find(c => c.Method.Name == "TaggedCmd") is CommandInfo cmd1)
+			{
+				commands.Remove(cmd1);
+			}
+			if (commands.Find(c => c.Method.Name == "TaggingCmd") is CommandInfo cmd2)
+			{
+				commands.Remove(cmd2);
+			}
+
 			// load aliases
 			var settings = setprovider
 				.GetCollection(AliasSheet.CollectionName)?
@@ -103,8 +113,8 @@ namespace River.OneMoreAddIn
 			{
 				foreach (var setting in settings.Elements())
 				{
-					var command = commands
-						.FirstOrDefault(c => c.Method.Name == setting.Attribute("methodName").Value);
+					var command = commands.Find(c =>
+						c.Method.Name == setting.Attribute("methodName").Value);
 
 					if (command != null)
 					{
@@ -165,8 +175,8 @@ namespace River.OneMoreAddIn
 				{
 					foreach (var action in recentActions.Elements())
 					{
-						var command = commands
-							.FirstOrDefault(c => c.Method.Name == action.Attribute("cmd")?.Value);
+						var command = commands.Find(c =>
+							c.Method.Name == action.Attribute("cmd")?.Value);
 
 						if (command != null)
 						{
@@ -181,6 +191,9 @@ namespace River.OneMoreAddIn
 		}
 
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell",
+			"S6605:Collection-specific \"Exists\" method should be used instead of the \"Any\" extension",
+			Justification = "<Pending>")]
 		public void SaveToMRU(Command command, params object[] args)
 		{
 			// ignore commands that pass the ribbon as an argument

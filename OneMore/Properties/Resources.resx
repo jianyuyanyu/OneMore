@@ -134,27 +134,6 @@
     <value>See the project on GitHub</value>
     <comment>button</comment>
   </data>
-  <data name="AboutDialog_LatestMessage" xml:space="preserve">
-    <value>You have the latest version</value>
-    <comment>message box message</comment>
-  </data>
-  <data name="AboutDialog_LatestTitle" xml:space="preserve">
-    <value>You're good to go!</value>
-    <comment>message box title</comment>
-  </data>
-  <data name="AboutDialog_NewVersionMessage" xml:space="preserve">
-    <value>A new version is available:
-
-    {0} - "{1}"
-
-Do you want to update now?
-OneNote will close automatically</value>
-    <comment>message box message showing verison tag and name</comment>
-  </data>
-  <data name="AboutDialog_NewVersionTitle" xml:space="preserve">
-    <value>Update OneMore</value>
-    <comment>message box title</comment>
-  </data>
   <data name="AboutDialog_pleaseLabel.Text" xml:space="preserve">
     <value>Please support future development of OneMore</value>
     <comment>label</comment>
@@ -171,13 +150,13 @@ OneNote will close automatically</value>
     <value>Version {0} with OneNote {1}</value>
     <comment>the version of the add-in</comment>
   </data>
+  <data name="AddCaptionCommand_cannotCaptionBg" xml:space="preserve">
+    <value>Cannot add a caption to a background image on the page. Images must be in an outline container to be captioned.</value>
+    <comment>error message</comment>
+  </data>
   <data name="AddCaptionCommand_Captioned" xml:space="preserve">
     <value>Image already has a caption</value>
     <comment>info message</comment>
-  </data>
-  <data name="AddFormula_linearMessage" xml:space="preserve">
-    <value>Select one or more cells from the same row or the same column</value>
-    <comment>message box</comment>
   </data>
   <data name="AddFormulaCommand_Calculated" xml:space="preserve">
     <value>Calculated</value>
@@ -187,9 +166,97 @@ OneNote will close automatically</value>
     <value>OneMoreAddIn</value>
     <comment>SKIP</comment>
   </data>
+  <data name="AdjustImagesDialog.Text" xml:space="preserve">
+    <value>Resize and Adjust Image</value>
+    <comment>dialog title</comment>
+  </data>
+  <data name="AdjustImagesDialog_absRadio.Text" xml:space="preserve">
+    <value>Absolute</value>
+    <comment>radio button</comment>
+  </data>
+  <data name="AdjustImagesDialog_allLabelBackground" xml:space="preserve">
+    <value>{0} background images</value>
+    <comment>info label</comment>
+  </data>
+  <data name="AdjustImagesDialog_allLabelForeground" xml:space="preserve">
+    <value>{0} foreground images</value>
+    <comment>info label</comment>
+  </data>
+  <data name="AdjustImagesDialog_appliesTo" xml:space="preserve">
+    <value>Applies to</value>
+    <comment>label override</comment>
+  </data>
+  <data name="AdjustImagesDialog_autoSizeRadio.Text" xml:space="preserve">
+    <value>Auto-size</value>
+    <comment>radio</comment>
+  </data>
+  <data name="AdjustImagesDialog_heightLabel.Text" xml:space="preserve">
+    <value>Height</value>
+    <comment>label</comment>
+  </data>
+  <data name="AdjustImagesDialog_imageSizeLabel.Text" xml:space="preserve">
+    <value>Image size</value>
+    <comment>label</comment>
+  </data>
+  <data name="AdjustImagesDialog_limitsBox.Text" xml:space="preserve">
+    <value>Resize all images
+Do not shrink larger images
+Do no enlarge smaller images</value>
+    <comment>combobox</comment>
+  </data>
+  <data name="AdjustImagesDialog_noImages" xml:space="preserve">
+    <value>No images were found on this page.
+
+Images must be in an outline container. Background images cannot be adjusted.</value>
+    <comment>message box</comment>
+  </data>
+  <data name="AdjustImagesDialog_pctRadio.Text" xml:space="preserve">
+    <value>Percentage</value>
+    <comment>radio</comment>
+  </data>
+  <data name="AdjustImagesDialog_preserveBox.Text" xml:space="preserve">
+    <value>Preserve storage size</value>
+    <comment>checkbox</comment>
+  </data>
+  <data name="AdjustImagesDialog_presetRadio.Text" xml:space="preserve">
+    <value>Preset</value>
+    <comment>radio</comment>
+  </data>
+  <data name="AdjustImagesDialog_previewGroup.Text" xml:space="preserve">
+    <value>Preview {0}</value>
+    <comment>group box for single image</comment>
+  </data>
+  <data name="AdjustImagesDialog_repositionBox.Text" xml:space="preserve">
+    <value>Reposition background images</value>
+    <comment>checkbox</comment>
+  </data>
+  <data name="AdjustImagesDialog_resetLinkLabel.Text" xml:space="preserve">
+    <value>Reset values</value>
+    <comment>link label</comment>
+  </data>
+  <data name="AdjustImagesDialog_sizeLink.Text" xml:space="preserve">
+    <value>{0} x {1}</value>
+    <comment>width x height</comment>
+  </data>
+  <data name="AdjustImagesDialog_styleBox.Text" xml:space="preserve">
+    <value>Original
+Gray scale
+Sepia
+Polaroid
+Invert</value>
+    <comment>combobox</comment>
+  </data>
+  <data name="AdjustImagesDialog_viewSizeLabel.Text" xml:space="preserve">
+    <value>View size</value>
+    <comment>label</comment>
+  </data>
   <data name="AliasSheet.Text" xml:space="preserve">
     <value>Define command aliases for use in the Command Palette</value>
     <comment>intro box</comment>
+  </data>
+  <data name="AliasSheet_introBox.Text" xml:space="preserve">
+    <value>Define command aliases for use in the Command Palette.</value>
+    <comment>label</comment>
   </data>
   <data name="AliasSheet_Title" xml:space="preserve">
     <value>Command Aliases</value>
@@ -279,8 +346,12 @@ OneNote will close automatically</value>
     <value>Report may take minutes</value>
     <comment>label</comment>
   </data>
+  <data name="ApplyTableTheme_SelectTable" xml:space="preserve">
+    <value>Move the text cursor into a table cell</value>
+    <comment>message</comment>
+  </data>
   <data name="ArchiveCommand_archived" xml:space="preserve">
-    <value>{0} pages archive to {1}</value>
+    <value>{0} of {1} pages archived to {2}</value>
     <comment>message</comment>
   </data>
   <data name="ArchiveCommand_noDirectory" xml:space="preserve">
@@ -298,6 +369,10 @@ OneNote will close automatically</value>
   <data name="ArchiveCommand_OpenFileTitle" xml:space="preserve">
     <value>Archive Location</value>
     <comment>archive dialog title</comment>
+  </data>
+  <data name="ArrangeContainersCommand_noContainers" xml:space="preserve">
+    <value>No containers found on this page</value>
+    <comment>message</comment>
   </data>
   <data name="ArrangeContainersDialog.Text" xml:space="preserve">
     <value>Arrange Containers</value>
@@ -355,10 +430,6 @@ OneNote will close automatically</value>
     <value>Select a word or phrase from one paragraph</value>
     <comment>message box</comment>
   </data>
-  <data name="BreakingDialog_groupBox.Text" xml:space="preserve">
-    <value>Spacing</value>
-    <comment>group box</comment>
-  </data>
   <data name="BreakingDialog_oneButton.Text" xml:space="preserve">
     <value>One space between sentences</value>
     <comment>radio</comment>
@@ -371,49 +442,65 @@ OneNote will close automatically</value>
     <value>Two spaces between sentences</value>
     <comment>radio</comment>
   </data>
-  <data name="Calculator_ErrClosingParenExpected" xml:space="preserve">
-    <value>Closing parenthesis expected</value>
+  <data name="Calculator_ErrInvalidCountifParams" xml:space="preserve">
+    <value>The countif function requires two parameters</value>
     <comment>error</comment>
   </data>
-  <data name="Calculator_ErrInvalidCellRange" xml:space="preserve">
-    <value>Cell range must be within one column or within one row</value>
+  <data name="Calculator_ErrInvalidFnParamCount" xml:space="preserve">
+    <value>The {0} function must have two parameters</value>
     <comment>error</comment>
   </data>
-  <data name="Calculator_ErrInvalidOperand" xml:space="preserve">
-    <value>Invalid operand</value>
+  <data name="Calculator_ErrInvalidFnParamType" xml:space="preserve">
+    <value>Parameter {0} is not of type {1}</value>
     <comment>error</comment>
   </data>
-  <data name="Calculator_ErrMultipleDecimalPoints" xml:space="preserve">
-    <value>Operand contains multiple decimal points</value>
+  <data name="Calculator_ErrInvalidParamCount" xml:space="preserve">
+    <value>Expected {0} parameters, only given {1}</value>
     <comment>error</comment>
   </data>
-  <data name="Calculator_ErrOperandExpected" xml:space="preserve">
-    <value>Operand expected</value>
+  <data name="Calculator_ErrInvalidParameter" xml:space="preserve">
+    <value>Invalid parameter at cell {0}</value>
     <comment>error</comment>
   </data>
-  <data name="Calculator_ErrOperatorExpected" xml:space="preserve">
-    <value>Operator expected</value>
+  <data name="Calculator_ErrInvalidRange" xml:space="preserve">
+    <value>Invalid cell range "{0}"</value>
     <comment>error</comment>
   </data>
-  <data name="Calculator_ErrUndefinedFunction" xml:space="preserve">
-    <value>Undefined function "{0}"</value>
+  <data name="Calculator_ErrMissingRowColVars" xml:space="preserve">
+    <value>The {0} function requires the col and row variables</value>
     <comment>error</comment>
   </data>
-  <data name="Calculator_ErrUndefinedSymbol" xml:space="preserve">
-    <value>Undefined symbol "{0}"</value>
+  <data name="Calculator_ErrNoClosingParenthesis" xml:space="preserve">
+    <value>No closing parenthesis found to match token at {0}</value>
     <comment>error</comment>
   </data>
-  <data name="Calculator_ErrUnexpectedCharacter" xml:space="preserve">
-    <value>Unexpected character encountered '{0}'</value>
+  <data name="Calculator_ErrUndefinedCellRef" xml:space="preserve">
+    <value>Undefined cell reference "{0}"</value>
     <comment>error</comment>
   </data>
-  <data name="Calculator_ErrUnmatchedClosingParen" xml:space="preserve">
-    <value>Closing parenthesis without matching open parenthesis</value>
+  <data name="Calculator_ErrUndefinedOperator" xml:space="preserve">
+    <value>Undefined operator "{0}"</value>
     <comment>error</comment>
   </data>
-  <data name="Calculator_ErrWrongParamCount" xml:space="preserve">
-    <value>Wrong number of function parameters</value>
+  <data name="Calculator_ErrUndefinedVariable" xml:space="preserve">
+    <value>Undefined variable "{0}"</value>
     <comment>error</comment>
+  </data>
+  <data name="CheckUrlsCommand_checkingMsg" xml:space="preserve">
+    <value>Checking {0} URLs</value>
+    <comment>message</comment>
+  </data>
+  <data name="CheckUrlsCommand_invaldiMsg" xml:space="preserve">
+    <value>Found {0} invalid URLs on this page</value>
+    <comment>message</comment>
+  </data>
+  <data name="CheckUrlsCommand_mappingMsg" xml:space="preserve">
+    <value>Mapping {0} page references</value>
+    <comment>message</comment>
+  </data>
+  <data name="CleanRemindersCommand_count" xml:space="preserve">
+    <value>Cleaned up {0} orphaned reminders</value>
+    <comment>message box</comment>
   </data>
   <data name="ClearLog_Message" xml:space="preserve">
     <value>Clear the log file now?</value>
@@ -423,44 +510,72 @@ OneNote will close automatically</value>
     <value>No log file is available</value>
     <comment>message box message</comment>
   </data>
-  <data name="ClearLog_NoneTitle" xml:space="preserve">
-    <value>It's all good</value>
-    <comment>message box title</comment>
-  </data>
   <data name="ClearLog_Title" xml:space="preserve">
     <value>Confirm</value>
     <comment>message box title</comment>
+  </data>
+  <data name="Clipboard_locked" xml:space="preserve">
+    <value>Cannot copy at this time. The clipboard is locked.</value>
+    <comment>error message</comment>
+  </data>
+  <data name="Clipboard_norestore" xml:space="preserve">
+    <value>Unable to restore clipboard state</value>
+    <comment>message</comment>
   </data>
   <data name="ColorizeDialog_Title" xml:space="preserve">
     <value>Select Language</value>
     <comment>dialog title</comment>
   </data>
+  <data name="ColorizerSheet_applyBox.Text" xml:space="preserve">
+    <value>Always apply the following fonts when colorizing code</value>
+    <comment>checkbox</comment>
+  </data>
+  <data name="ColorizerSheet_enabledLabel.Text" xml:space="preserve">
+    <value>Enabled Languages</value>
+    <comment>label</comment>
+  </data>
   <data name="ColorizerSheet_fixedBox.Text" xml:space="preserve">
     <value>Show only fixed-width fonts</value>
     <comment>checkbox</comment>
   </data>
-  <data name="ColorizeSheet_applyBox.Text" xml:space="preserve">
-    <value>Always apply the following fonts when colorizing code</value>
-    <comment>checkbox</comment>
-  </data>
-  <data name="ColorizeSheet_enabledLabel" xml:space="preserve">
-    <value>Enabled Languages</value>
-    <comment>label</comment>
-  </data>
-  <data name="ColorizeSheet_font2Label.Text" xml:space="preserve">
+  <data name="ColorizerSheet_font2Label.Text" xml:space="preserve">
     <value>Secondary</value>
     <comment>label</comment>
   </data>
-  <data name="ColorizeSheet_fontLabel.Text" xml:space="preserve">
+  <data name="ColorizerSheet_fontLabel.Text" xml:space="preserve">
     <value>Primary</value>
     <comment>label</comment>
   </data>
-  <data name="ColorizeSheet_introBox.Text" xml:space="preserve">
+  <data name="ColorizerSheet_introBox.Text" xml:space="preserve">
     <value>Customize the behavior of the Colorize command. Secondary font applies when collapsing PlantUML</value>
     <comment>label</comment>
   </data>
-  <data name="ColorizeSheet_Title" xml:space="preserve">
+  <data name="ColorizerSheet_Title" xml:space="preserve">
     <value>Colorizer</value>
+  </data>
+  <data name="ColorsSheet_clickLabel.Text" xml:space="preserve">
+    <value>(click to change)</value>
+    <comment>settings sheet</comment>
+  </data>
+  <data name="ColorsSheet_introBox.Text" xml:space="preserve">
+    <value>Customize the default style for horizontal line snippets and task marked by the Strike-Through Completed To Do Tags command</value>
+    <comment>settings sheet</comment>
+  </data>
+  <data name="ColorsSheet_linesGroupBox.Text" xml:space="preserve">
+    <value>Horizontal Lines</value>
+    <comment>settings sheet group box</comment>
+  </data>
+  <data name="ColorsSheet_strikeBox.Text" xml:space="preserve">
+    <value>Apply this color when using the Strikethrough Completed To Do Tags command</value>
+    <comment>settings sheet checkbox</comment>
+  </data>
+  <data name="ColorsSheet_strikeGroupBox.Text" xml:space="preserve">
+    <value>Strikethrough To Do Tags</value>
+    <comment>settings sheet group box</comment>
+  </data>
+  <data name="ColorsSheet_Title" xml:space="preserve">
+    <value>Colors</value>
+    <comment>settings sheet</comment>
   </data>
   <data name="Command_Error" xml:space="preserve">
     <value>Error running command {0}</value>
@@ -518,14 +633,6 @@ OneNote will close automatically</value>
     <value>Cannot copy a folder into itself or one of its children</value>
     <comment>error message</comment>
   </data>
-  <data name="CopyLinkCommand_LinkToPage" xml:space="preserve">
-    <value>Copied link to this page</value>
-    <comment>message box</comment>
-  </data>
-  <data name="CopyLinkCommand_LinkToParagraph" xml:space="preserve">
-    <value>Copied link to this paragraph</value>
-    <comment>message box</comment>
-  </data>
   <data name="CrawlWebCommand_NoHyperlinks" xml:space="preserve">
     <value>No hyperlinks found in range</value>
     <comment>message box</comment>
@@ -558,10 +665,6 @@ OneNote will close automatically</value>
     <value>Would you like to create {0} pages?</value>
     <comment>message box</comment>
   </data>
-  <data name="CreatePagesCommand_Done" xml:space="preserve">
-    <value>Created pages. OneNote will update momentarily</value>
-    <comment>message box</comment>
-  </data>
   <data name="CreatePagesCommand_NoNamesFound" xml:space="preserve">
     <value>A name list was not found on the page</value>
     <comment>message box</comment>
@@ -586,17 +689,9 @@ OneNote will close automatically</value>
     <value>Use the mouse to select an area to crop. Ctrl+D to deselect. Use the slider to rotate the image. Click OK to finish.</value>
     <comment>intro text label</comment>
   </data>
-  <data name="CropImageDialog_noSelection" xml:space="preserve">
-    <value>No selection</value>
-    <comment>status bar text</comment>
-  </data>
   <data name="CropImageDialog_printout" xml:space="preserve">
     <value>This image is from a printout. If it is cropped, it will no longer be associated with that original file. Do you want to continue cropping?</value>
     <comment>message box, question</comment>
-  </data>
-  <data name="CropImageDialog_selectButton.Text" xml:space="preserve">
-    <value>Select All</value>
-    <comment>select all button</comment>
   </data>
   <data name="ctxCleanMenu_Label" xml:space="preserve">
     <value>Clean...</value>
@@ -634,10 +729,6 @@ OneNote will close automatically</value>
     <value>{0} (Ctrl+Alt+Shift + {1})</value>
     <comment>Screentip for My Styles gallery tiles</comment>
   </data>
-  <data name="CustomStylesFilename" xml:space="preserve">
-    <value>CustomStyles.xml</value>
-    <comment>SKIP, filename</comment>
-  </data>
   <data name="DatabaseFilename" xml:space="preserve">
     <value>OneMore.db</value>
     <comment>SKIP, Sqlite database file name</comment>
@@ -661,6 +752,18 @@ OneNote will close automatically</value>
   <data name="DiagnosticsDialog_Text" xml:space="preserve">
     <value>OneMore Diagnostics</value>
     <comment>dialog title</comment>
+  </data>
+  <data name="DiagramCommand_broken" xml:space="preserve">
+    <value>Diagram text is either invalid or cannot find connection between text and image</value>
+    <comment>error message</comment>
+  </data>
+  <data name="DiagramCommand_EmptySelection" xml:space="preserve">
+    <value>Empty selection. Select a valid block of diagram text.</value>
+    <comment>error message</comment>
+  </data>
+  <data name="DiagramCommand_Uri" xml:space="preserve">
+    <value>https://kroki.io/</value>
+    <comment>remote service URI SKIP</comment>
   </data>
   <data name="DialogResetSettings_Text" xml:space="preserve">
     <value>Reset Settings</value>
@@ -706,20 +809,9 @@ First Column Font
 Last Column Font</value>
     <comment>MoreListView</comment>
   </data>
-  <data name="EditTableThemesDialog_fontElementsGroup.Text" xml:space="preserve">
-    <value>Table Elements</value>
-    <comment>group</comment>
-  </data>
   <data name="EditTableThemesDialog_fontsTab.Text" xml:space="preserve">
     <value>Fonts</value>
     <comment>tab</comment>
-  </data>
-  <data name="EditTableThemesDialog_newButton.Text" xml:space="preserve">
-    <value>New Style</value>
-    <comment>toolbutton</comment>
-  </data>
-  <data name="EditTableThemesDialog_NewStyle" xml:space="preserve">
-    <value>New Style</value>
   </data>
   <data name="EditTableThemesDialog_resetButton.Text" xml:space="preserve">
     <value>Reset All</value>
@@ -805,6 +897,10 @@ Last Column Font</value>
     <value>Cycling</value>
     <comment>emoji</comment>
   </data>
+  <data name="Emoji_Delta" xml:space="preserve">
+    <value>Delta</value>
+    <comment>emoji</comment>
+  </data>
   <data name="Emoji_Envelope" xml:space="preserve">
     <value>Envelope</value>
     <comment>emoji</comment>
@@ -827,7 +923,7 @@ Last Column Font</value>
   </data>
   <data name="Emoji_Folder" xml:space="preserve">
     <value>Folder</value>
-    <comment>emoji</comment>
+    <comment>emoji NODUP</comment>
   </data>
   <data name="Emoji_Globe" xml:space="preserve">
     <value>Globe</value>
@@ -843,7 +939,7 @@ Last Column Font</value>
   </data>
   <data name="Emoji_Images" xml:space="preserve">
     <value>Images</value>
-    <comment>emoji</comment>
+    <comment>emoji NODUP</comment>
   </data>
   <data name="Emoji_Interrobang" xml:space="preserve">
     <value>Interrobang</value>
@@ -887,7 +983,7 @@ Last Column Font</value>
   </data>
   <data name="Emoji_Section" xml:space="preserve">
     <value>Section</value>
-    <comment>emoji</comment>
+    <comment>emoji NODUP</comment>
   </data>
   <data name="Emoji_Shazam" xml:space="preserve">
     <value>Shazam!</value>
@@ -919,11 +1015,11 @@ Last Column Font</value>
   </data>
   <data name="Emoji_Tasks" xml:space="preserve">
     <value>Task</value>
-    <comment>emoji</comment>
+    <comment>emoji NODUP</comment>
   </data>
   <data name="Emoji_Tools" xml:space="preserve">
     <value>Tools</value>
-    <comment>emoji</comment>
+    <comment>emoji NODUP</comment>
   </data>
   <data name="Emoji_Travel" xml:space="preserve">
     <value>Travel</value>
@@ -935,7 +1031,7 @@ Last Column Font</value>
   </data>
   <data name="Emoji_Warning" xml:space="preserve">
     <value>Warning</value>
-    <comment>emoji</comment>
+    <comment>emoji NODUP</comment>
   </data>
   <data name="Emoji_Watch" xml:space="preserve">
     <value>Watch</value>
@@ -964,6 +1060,9 @@ Last Column Font</value>
   <data name="Error_NoAttachments" xml:space="preserve">
     <value>No attachments found on page</value>
   </data>
+  <data name="Error_SelectContent" xml:space="preserve">
+    <value>Select some content before proceeding</value>
+  </data>
   <data name="Error_SelectImage" xml:space="preserve">
     <value>Select an image before invoking this command</value>
     <comment>error message box</comment>
@@ -980,10 +1079,6 @@ Last Column Font</value>
     <value>Embed attachments</value>
     <comment>checkbox</comment>
   </data>
-  <data name="ExportDialog_folderLabel.Text" xml:space="preserve">
-    <value>Folder:</value>
-    <comment>label</comment>
-  </data>
   <data name="ExportDialog_formatBox.Text" xml:space="preserve">
     <value>HTML File (*.htm)
 PDF File (*.pdf)
@@ -992,10 +1087,6 @@ XML File (*.xml)
 Markdown File (*.md)
 OneNote File (*.one)</value>
     <comment>combo box</comment>
-  </data>
-  <data name="ExportDialog_formatLabel.Text" xml:space="preserve">
-    <value>Format:</value>
-    <comment>label</comment>
   </data>
   <data name="ExportDialog_groupBox.Text" xml:space="preserve">
     <value>Export {0} Pages</value>
@@ -1049,10 +1140,6 @@ OneNote File (*.one)</value>
     <value>Include reference to keyboard shortcuts page</value>
     <comment>settings</comment>
   </data>
-  <data name="FavoritesSheet_Text" xml:space="preserve">
-    <value>Favorites</value>
-    <comment>settings</comment>
-  </data>
   <data name="FileImportSheet_introBox.Text" xml:space="preserve">
     <value>Customize PowerPoint and PDF import options</value>
     <comment>label</comment>
@@ -1064,6 +1151,18 @@ OneNote File (*.one)</value>
   <data name="FileImportSheet_widthLabel.Text" xml:space="preserve">
     <value>Preferred import image width</value>
     <comment>label</comment>
+  </data>
+  <data name="FileQuickNotesCommand_noQuickNotes" xml:space="preserve">
+    <value>Could not load Quick Notes. Check the location in OneNote Options.</value>
+    <comment>message</comment>
+  </data>
+  <data name="FileQuickNotesCommand_noTargetNotebook" xml:space="preserve">
+    <value>Cannot find target notebook. Open OneMore Settings to specify a target.</value>
+    <comment>message</comment>
+  </data>
+  <data name="FileQuickNotesCommand_noTargetSection" xml:space="preserve">
+    <value>Cannot find target section. Open OneMore Settings to specify a target.</value>
+    <comment>message</comment>
   </data>
   <data name="FitGridToTextCommand_noGrid" xml:space="preserve">
     <value>Enable grid lines before using this command</value>
@@ -1116,7 +1215,8 @@ OneNote File (*.one)</value>
   <data name="FormulaDialog_formatBox.Items" xml:space="preserve">
     <value>Number
 Currency
-Percentage</value>
+Percentage
+Time</value>
     <comment>formats, one per line</comment>
   </data>
   <data name="FormulaDialog_formatLabel.Text" xml:space="preserve">
@@ -1128,18 +1228,15 @@ Percentage</value>
     <comment>label</comment>
   </data>
   <data name="FormulaDialog_helpBox.Text" xml:space="preserve">
-    <value>Entered formula should apply to the first selected cell. This formula will be incremented automatically for additional selected cells.
+    <value>Formula apply to the first selected cell and are incremented automatically for additional selected cells.
 
-Functions: abs, acos, asin, atan, atan2, average, ceiling, cos, cosh, countif, exp, floor, log, log10, max, median, min, mode, pow, range, round, sign, sin, sinh, sqrt, stdev, sum, tan, tanh, trunc, variance
+Functions: abs, acos, arccos, arcsin, arctan, asin, atan, atan2, average, ceil, ceiling, cos, cosh, exp, floor, log, log10, max, median, min, mode, pow, range, rem, root, round, sign, sin, sinh, sqrt, stdev, sum, tan, tanh, trunc, truncate, and variance.
 
-Operators: + - / * ^
+Operators: + - / * ^ %
+Variables: e, phi, pi, tao, tablecols, tablerows
 Cell reference: A1, A2, ... ZZZ999
 Cell range: A1:A22
-Symbols: PI, E</value>
-  </data>
-  <data name="FormulaDialog_helpButton.Text" xml:space="preserve">
-    <value>Help</value>
-    <comment>help checkbox button</comment>
+Relative ranges: A1:cell(0,-1)</value>
   </data>
   <data name="FormulaDialog_selectedLabel.Text" xml:space="preserve">
     <value>Selected cells:</value>
@@ -1169,8 +1266,18 @@ Symbols: PI, E</value>
     <value>Customize the overall behavior of OneMore</value>
     <comment>textbox</comment>
   </data>
-  <data name="GeneralSheet_langLabel.Text" xml:space="preserve">
-    <value>Display language (must restart OneNote)</value>
+  <data name="GeneralSheet_sequentialBox.Text" xml:space="preserve">
+    <value>Allow nonsequential name matching in Command Palettes</value>
+    <comment>checkbox</comment>
+  </data>
+  <data name="GeneralSheet_themeBox.Text" xml:space="preserve">
+    <value>System
+Light
+Dark</value>
+    <comment>combobox</comment>
+  </data>
+  <data name="GeneralSheet_themeLabel.Text" xml:space="preserve">
+    <value>Theme</value>
     <comment>label</comment>
   </data>
   <data name="GeneralSheet_Title" xml:space="preserve">
@@ -1188,6 +1295,20 @@ Symbols: PI, E</value>
   <data name="HasActiveMedia" xml:space="preserve">
     <value>Cannot invoke OneMore commands while there is an active recording. Please stop the recording and try again.</value>
   </data>
+  <data name="HashtagCommand_indexTitle" xml:space="preserve">
+    <value>Tagged Pages</value>
+    <comment>page title</comment>
+  </data>
+  <data name="HashtagCommand_scanning" xml:space="preserve">
+    <value>OneMore is currently creating your hashtag catalog.
+
+Searching for hashtags is unavailable until this is completed.</value>
+  </data>
+  <data name="HashtagCommand_waiting" xml:space="preserve">
+    <value>Your hashtag catalog is scheduled to be created on {0}. You can change this schedule from the OneMore Tray application.
+
+Searching for hashtags is unavailable until this is completed.</value>
+  </data>
   <data name="HashtagContext_jumpParaTip" xml:space="preserve">
     <value>Jump to this paragraph; last updated {0}</value>
     <comment>tooltip</comment>
@@ -1197,16 +1318,24 @@ Symbols: PI, E</value>
     <comment>tooltip</comment>
   </data>
   <data name="HashtagDialog.Title" xml:space="preserve">
-    <value>Find Hashtags</value>
+    <value>Search Hashtags</value>
     <comment>dialog title</comment>
   </data>
   <data name="HashtagDialog_allTags" xml:space="preserve">
     <value>all tags</value>
     <comment>text</comment>
   </data>
+  <data name="HashtagDialog_badLink" xml:space="preserve">
+    <value>Cannot navigate to this page. It may have been deleted</value>
+    <comment>info message</comment>
+  </data>
   <data name="HashtagDialog_checkAllLink.Text" xml:space="preserve">
     <value>Check all</value>
     <comment>link label</comment>
+  </data>
+  <data name="HashtagDialog_hideOfflineMenuItem" xml:space="preserve">
+    <value>Hide Offline Notebooks</value>
+    <comment>context menu item</comment>
   </data>
   <data name="HashtagDialog_introLabel.Text" xml:space="preserve">
     <value>Type any part of one or more hashtags. Wildcards are implied unless a tag is ended with a period. Parenthesis and logical operators are allowed.</value>
@@ -1228,22 +1357,79 @@ Symbols: PI, E</value>
     <value>Scan Now</value>
     <comment>menu button</comment>
   </data>
+  <data name="HashtagDialog_scanLink.Text" xml:space="preserve">
+    <value>New notebooks discovered. Click here to scan.</value>
+    <comment>link label</comment>
+  </data>
+  <data name="HashtagDialog_scheduleButton.Text" xml:space="preserve">
+    <value>Schedule Scan</value>
+    <comment>menu item</comment>
+  </data>
   <data name="HashtagDialog_scopeBox.Text" xml:space="preserve">
-    <value>All
+    <value>All notebooks
 This notebook
-This section</value>
+This section
+This page</value>
     <comment>combobox</comment>
+  </data>
+  <data name="HashtagDialog_sensitiveTip" xml:space="preserve">
+    <value>Case-sensitive search</value>
+    <comment>tooltip</comment>
+  </data>
+  <data name="HashtagDialog_showOfflineMenuItem" xml:space="preserve">
+    <value>Show Offline Notebooks</value>
+    <comment>context menu item</comment>
   </data>
   <data name="HashtagDialog_uncheckAllLink.Text" xml:space="preserve">
     <value>Uncheck all</value>
     <comment>link label</comment>
+  </data>
+  <data name="HashtaggerDialog.Text" xml:space="preserve">
+    <value>Hashtags</value>
+    <comment>dialog title</comment>
+  </data>
+  <data name="HashtaggerDialog_bankBox.Text" xml:space="preserve">
+    <value>Add to tag bank at top of page</value>
+    <comment>checkbox</comment>
+  </data>
+  <data name="HashtaggerDialog_cloudGroup.Text" xml:space="preserve">
+    <value>All hashtags</value>
+    <comment>groupbox</comment>
+  </data>
+  <data name="HashtaggerDialog_commonGroup.Text" xml:space="preserve">
+    <value>Common words on this page</value>
+    <comment>groupbox</comment>
+  </data>
+  <data name="HashtaggerDialog_hideCommonMenuItem" xml:space="preserve">
+    <value>Hide common words</value>
+    <comment>context menu item text</comment>
+  </data>
+  <data name="HashtaggerDialog_hideRecentMenuItem" xml:space="preserve">
+    <value>Hide recently used</value>
+    <comment>context menu item text</comment>
+  </data>
+  <data name="HashtaggerDialog_recentGroup.Text" xml:space="preserve">
+    <value>Recently used tags</value>
+    <comment>groupbox</comment>
+  </data>
+  <data name="HashtaggerDialog_showCommonMenuItem" xml:space="preserve">
+    <value>Show common words</value>
+    <comment>context menu item text</comment>
+  </data>
+  <data name="HashtaggerDialog_showRecentMenuItem" xml:space="preserve">
+    <value>Show recently used</value>
+    <comment>context menu item text</comment>
+  </data>
+  <data name="HashtaggerDialog_tagsLabel.Text" xml:space="preserve">
+    <value>Tags</value>
+    <comment>label</comment>
   </data>
   <data name="HashtagSheet_disabledBox.Text" xml:space="preserve">
     <value>Disable the hashtag service. This will also disable hashtag searching.</value>
     <comment>checkbox</comment>
   </data>
   <data name="HashtagSheet_filterBox.Text" xml:space="preserve">
-    <value>Exclude HTML Hex colors and C# and C++ directives</value>
+    <value>Treat HTML Hex colors and C# and C++ directives as hashtags</value>
     <comment>checkbox</comment>
   </data>
   <data name="HashtagSheet_intervalLabel.Text" xml:space="preserve">
@@ -1254,9 +1440,19 @@ This section</value>
     <value>Customize advanced options for the Hashtag Scanner Service</value>
     <comment>label</comment>
   </data>
-  <data name="HashtagSheet_rebuildBox.Text" xml:space="preserve">
-    <value>Rebuild the hashtag database upon restart</value>
-    <comment>checkbox</comment>
+  <data name="HashtagSheet_prescheduled" xml:space="preserve">
+    <value>A scan is scheduled for {0}. Use the options below to change this or press Cancel to keep the current schedule.</value>
+  </data>
+  <data name="HashtagSheet_resetTooltip" xml:space="preserve">
+    <value>Advanced: Reset the upgrade flag</value>
+    <comment>tooltip</comment>
+  </data>
+  <data name="HashtagSheet_scanNotebooks" xml:space="preserve">
+    <value>Schedule an incremental scan of your newly added notebooks</value>
+  </data>
+  <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
+    <value>Schedule a rebuild of your hashtag catalog</value>
+    <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
     <value>None
@@ -1268,20 +1464,24 @@ Yellow Background</value>
     <value>Apply custom style</value>
     <comment>label</comment>
   </data>
-  <data name="HashtagSheet_Title" xml:space="preserve">
-    <value>Hashtags</value>
-    <comment>sheet title</comment>
+  <data name="HashtagSheet_upgradeLink.Text" xml:space="preserve">
+    <value>Upgrade page tags to inline hashtags</value>
+    <comment>link</comment>
+  </data>
+  <data name="HashtagSheet_warningLabel.Text" xml:space="preserve">
+    <value>This should be used after adding or removing one or more notebooks. It is recommended to schedule rebuilds after-hours, such as midnight.</value>
+    <comment>multiline label</comment>
   </data>
   <data name="HighlightFormulaCommand_NoFormulas" xml:space="preserve">
     <value>No formulas found on this page</value>
     <comment>highlight command message</comment>
   </data>
   <data name="HighlightsSheet_deepRadio.Text" xml:space="preserve">
-    <value>Deep:</value>
+    <value>Deep</value>
     <comment>radio</comment>
   </data>
   <data name="HighlightsSheet_fadedRadio.Text" xml:space="preserve">
-    <value>Faded:</value>
+    <value>Faded</value>
     <comment>radio</comment>
   </data>
   <data name="HighlightsSheet_introBox.Text" xml:space="preserve">
@@ -1289,24 +1489,16 @@ Yellow Background</value>
     <comment>textbox</comment>
   </data>
   <data name="HighlightsSheet_normalRadio.Text" xml:space="preserve">
-    <value>Bright:</value>
+    <value>Bright</value>
     <comment>radio</comment>
   </data>
-  <data name="HighlightsSheet_themeGroup.Text" xml:space="preserve">
+  <data name="HighlightsSheet_themesGroup.Text" xml:space="preserve">
     <value>Themes</value>
     <comment>group</comment>
   </data>
   <data name="HighlightsSheet_Title" xml:space="preserve">
     <value>Highlighter Themes</value>
     <comment>sheet intro</comment>
-  </data>
-  <data name="ImageSheet_plantRemoveBox.Text" xml:space="preserve">
-    <value>Remove PlantUML text and embed it in the image</value>
-    <comment>checkbox</comment>
-  </data>
-  <data name="ImageSheet_plantUriLabel.Text" xml:space="preserve">
-    <value>PlantUML Server Address (leave blank to use default)</value>
-    <comment>label</comment>
   </data>
   <data name="ImagesSheet_imageBrowser" xml:space="preserve">
     <value>Image Viewer</value>
@@ -1331,13 +1523,17 @@ Yellow Background</value>
     <value>PlantUML Options</value>
     <comment>groupbox</comment>
   </data>
+  <data name="ImagesSheet_plantRemoveBox.Text" xml:space="preserve">
+    <value>Remove PlantUML text and embed it in the image</value>
+    <comment>checkbox</comment>
+  </data>
+  <data name="ImagesSheet_plantUriLabel.Text" xml:space="preserve">
+    <value>PlantUML Server Address (leave blank to use default)</value>
+    <comment>label</comment>
+  </data>
   <data name="ImagesSheet_resizeGroup.Text" xml:space="preserve">
     <value>Resize Options</value>
     <comment>groupsbox</comment>
-  </data>
-  <data name="ImagesSheet_Title" xml:space="preserve">
-    <value>Images</value>
-    <comment>sheet</comment>
   </data>
   <data name="ImagesSheet_widthLabel.Text" xml:space="preserve">
     <value>Preferred resize width</value>
@@ -1443,10 +1639,6 @@ Yellow Background</value>
     <value>Your code here...</value>
     <comment>text</comment>
   </data>
-  <data name="InsertBoxCommand_Text" xml:space="preserve">
-    <value>Your content here...</value>
-    <comment>text</comment>
-  </data>
   <data name="InsertCalendarDialog.Text" xml:space="preserve">
     <value>Insert Calendar</value>
     <comment>dialog title</comment>
@@ -1461,10 +1653,6 @@ Yellow Background</value>
   </data>
   <data name="InsertCalendarDialog_firstLabel.Text" xml:space="preserve">
     <value>First day of week</value>
-    <comment>label</comment>
-  </data>
-  <data name="InsertCalendarDialog_formatLabel.Text" xml:space="preserve">
-    <value>Format</value>
     <comment>label</comment>
   </data>
   <data name="InsertCalendarDialog_indentBox.Text" xml:space="preserve">
@@ -1507,9 +1695,6 @@ Yellow Background</value>
     <value>Shift cells right</value>
     <comment>radio</comment>
   </data>
-  <data name="InsertInfoBox_yourContentHere" xml:space="preserve">
-    <value>Your content here...</value>
-  </data>
   <data name="InsertQRCommand_MaxLength" xml:space="preserve">
     <value>Selected text cannot exceed {0} characters</value>
     <comment>message</comment>
@@ -1531,23 +1716,24 @@ Yellow Background</value>
     <comment>page name</comment>
   </data>
   <data name="InsertTocCommand_TOCNotebook" xml:space="preserve">
-    <value>Table of Contents - Notebook {0}</value>
+    <value>Table of Contents📓 {0}</value>
     <comment>page name</comment>
   </data>
   <data name="InsertTocCommand_TOCSections" xml:space="preserve">
-    <value>Table of Contents - Section {0}</value>
+    <value>Table of Contents § {0}</value>
     <comment>page name</comment>
   </data>
   <data name="InsertTocCommand_Top" xml:space="preserve">
     <value>Top of page</value>
     <comment>hyperlink</comment>
   </data>
-  <data name="InsertTocDialog.Text" xml:space="preserve">
-    <value>Table of Contents</value>
-    <comment>dialog title</comment>
+  <data name="InsertTocDialog_levelsLabel.Text" xml:space="preserve">
+    <value>Show Levels</value>
+    <comment>label</comment>
   </data>
   <data name="InsertTocDialog_locationBox.Text" xml:space="preserve">
     <value>At top of page
+At top of page, overlayed
 At current cursor</value>
     <comment>combobox</comment>
   </data>
@@ -1598,15 +1784,29 @@ Custom Heading 3</value>
     <value>Add link to each heading to jump to top of page</value>
     <comment>checkbox</comment>
   </data>
+  <data name="InsertTocForNotebook_RefreshQuestion" xml:space="preserve">
+    <value>There is a table of contents page for this notebook. You can refresh that page or create a new page.
+
+Do you want to refresh the existing page?</value>
+    <comment>message box</comment>
+  </data>
+  <data name="InsertTocForPage_ClearToc" xml:space="preserve">
+    <value>There are no headings on this page. However, there is a table of contents.
+
+Would you like to remove the table of contents from this page?</value>
+    <comment>message box</comment>
+  </data>
+  <data name="InsertTocForSection_RefreshQuestion" xml:space="preserve">
+    <value>There is a table of contents page for this section. You can refresh that page or create a new page.
+
+Do you want to refresh the existing page?</value>
+    <comment>message box</comment>
+  </data>
   <data name="JoinParagraphCommand_Select" xml:space="preserve">
     <value>Select two or more lines to join</value>
     <comment>info message</comment>
   </data>
-  <data name="KeyboardSheet_clearButton.Text" xml:space="preserve">
-    <value>Clear</value>
-    <comment>toolstrip button</comment>
-  </data>
-  <data name="KeyboardSheet_introLabel.Text" xml:space="preserve">
+  <data name="KeyboardSheet_introBox.Text" xml:space="preserve">
     <value>Manage my custom keyboard shortcuts. Select a command and press a key sequence.</value>
     <comment>label</comment>
   </data>
@@ -1618,26 +1818,6 @@ Custom Heading 3</value>
     <value>Reset all</value>
     <comment>toolstrip button</comment>
   </data>
-  <data name="LinesSheet_clickLabel.Text" xml:space="preserve">
-    <value>(click to change)</value>
-    <comment>settings sheet</comment>
-  </data>
-  <data name="LinesSheet_colorLabel.Text" xml:space="preserve">
-    <value>Line color:</value>
-    <comment>settings sheet</comment>
-  </data>
-  <data name="LinesSheet_introBox.Text" xml:space="preserve">
-    <value>Customize the default style for horiztonal line snippets</value>
-    <comment>settings sheet</comment>
-  </data>
-  <data name="LinesSheet_lengthLabel.Text" xml:space="preserve">
-    <value>Length:</value>
-    <comment>settings sheet</comment>
-  </data>
-  <data name="LinesSheet_Title" xml:space="preserve">
-    <value>Horizontal Lines</value>
-    <comment>settings sheet</comment>
-  </data>
   <data name="LinkDialog_groupBox.Text" xml:space="preserve">
     <value>Pages in</value>
     <comment>group box</comment>
@@ -1646,29 +1826,9 @@ Custom Heading 3</value>
     <value>Create linked references to the title of this page</value>
     <comment>label</comment>
   </data>
-  <data name="LinkDialog_notebookRadio.Text" xml:space="preserve">
-    <value>All sections in the current notebook</value>
-    <comment>radio</comment>
-  </data>
-  <data name="LinkDialog_notebooksRadio.Text" xml:space="preserve">
-    <value>All notebooks</value>
-    <comment>radio</comment>
-  </data>
-  <data name="LinkDialog_sectionRadio.Text" xml:space="preserve">
-    <value>The current section</value>
-    <comment>radio</comment>
-  </data>
   <data name="LinkDialog_Text" xml:space="preserve">
     <value>Link References</value>
     <comment>dialog title</comment>
-  </data>
-  <data name="LinkDialog_unindexedBox.Text" xml:space="preserve">
-    <value>Include unindexed pages in query</value>
-    <comment>checkbox</comment>
-  </data>
-  <data name="LinkDialog_unindexedBox.Tooltip" xml:space="preserve">
-    <value>Enable to search newer text that has not yet been indexed by OneNote. This may be slower.</value>
-    <comment>tooltip on checkbox</comment>
   </data>
   <data name="LinkedReferencesCommand_Title" xml:space="preserve">
     <value>Linked References</value>
@@ -1693,18 +1853,6 @@ Custom Heading 3</value>
     <value>Pages in</value>
     <comment>group box</comment>
   </data>
-  <data name="MapDialog_notebookRadio.Text" xml:space="preserve">
-    <value>All sections in the current notebook</value>
-    <comment>radio</comment>
-  </data>
-  <data name="MapDialog_notebooksRadio.Text" xml:space="preserve">
-    <value>All notebooks</value>
-    <comment>radio</comment>
-  </data>
-  <data name="MapDialog_sectionRadio.Text" xml:space="preserve">
-    <value>The current section</value>
-    <comment>radio</comment>
-  </data>
   <data name="MapDialog_synopsisBox.Text" xml:space="preserve">
     <value>Include a synopsis of each page</value>
     <comment>checkbox</comment>
@@ -1713,6 +1861,14 @@ Custom Heading 3</value>
     <value>Create Page Map</value>
     <comment>dialog title</comment>
   </data>
+  <data name="MoreMessageBox_hideBox.Text" xml:space="preserve">
+    <value>Hide this message in the future</value>
+    <comment>checkbox</comment>
+  </data>
+  <data name="MovePageCommand_noPages" xml:space="preserve">
+    <value>There are no pages selected to move</value>
+    <comment>error message</comment>
+  </data>
   <data name="NameStyleDialog_errorLabel.Text" xml:space="preserve">
     <value>Name exists. Choose a different name.</value>
     <comment>label</comment>
@@ -1720,10 +1876,6 @@ Custom Heading 3</value>
   <data name="NameStyleDialog_nameLabel.Text" xml:space="preserve">
     <value>Style Name</value>
     <comment>label</comment>
-  </data>
-  <data name="NameStyleDialog_NewStyle" xml:space="preserve">
-    <value>New Style</value>
-    <comment>dialog title</comment>
   </data>
   <data name="NameStyleDialog_RenameStyle" xml:space="preserve">
     <value>Rename Style</value>
@@ -1745,6 +1897,10 @@ Custom Heading 3</value>
     <value>Disable the navigation service. This will render the Navigator window inoperaable.</value>
     <comment>checkbox</comment>
   </data>
+  <data name="NavigatorSheet_hidePinnedBox.Text" xml:space="preserve">
+    <value>Hide the My Reading List panel</value>
+    <comment>checkbox</comment>
+  </data>
   <data name="NavigatorSheet_intervalLabel.Text" xml:space="preserve">
     <value>Min read time before adding to history</value>
     <comment>label</comment>
@@ -1753,13 +1909,21 @@ Custom Heading 3</value>
     <value>Customize advanced options for the Navigator Service</value>
     <comment>label</comment>
   </data>
-  <data name="NavigatorSheet_Title" xml:space="preserve">
-    <value>Navigator</value>
-    <comment>sheet title</comment>
+  <data name="NavigatorSheet_quickBox.Text" xml:space="preserve">
+    <value>Track Quick Notes</value>
+    <comment>checkbox</comment>
+  </data>
+  <data name="NavigatorWindow_confirmDelete" xml:space="preserve">
+    <value>Are you sure you want to delete the {0} selected records?</value>
+    <comment>messagebox</comment>
   </data>
   <data name="NavigatorWindow_copyTooltip" xml:space="preserve">
     <value>Copy selected items to the clipboard</value>
     <comment>button tooltip</comment>
+  </data>
+  <data name="NavigatorWindow_deleteHistoryButton_Tooltip" xml:space="preserve">
+    <value>Delete selected items from the History list</value>
+    <comment>tooltip</comment>
   </data>
   <data name="NavigatorWindow_disabled" xml:space="preserve">
     <value>The navigation service is disabled. Open Settings to enable the service.</value>
@@ -1796,6 +1960,10 @@ Custom Heading 3</value>
     <value>Network connection is not available</value>
     <comment>error</comment>
   </data>
+  <data name="NextUnreadPageCommand_nomore" xml:space="preserve">
+    <value>No unread pages found in that direction</value>
+    <comment>message</comment>
+  </data>
   <data name="NumberingPage_Message" xml:space="preserve">
     <value>Numbering page {0}</value>
     <comment>progress status dialog</comment>
@@ -1804,10 +1972,6 @@ Custom Heading 3</value>
     <value>Page Numbering</value>
     <comment>dialog title</comment>
   </data>
-  <data name="NumberPagesDialog_alphaRadio.Text" xml:space="preserve">
-    <value>Alpha-numeric</value>
-    <comment>radio button</comment>
-  </data>
   <data name="NumberPagesDialog_cleanBox.Text" xml:space="preserve">
     <value>Remove/cleanup existing numbering</value>
     <comment>checkbox</comment>
@@ -1815,14 +1979,6 @@ Custom Heading 3</value>
   <data name="NumberPagesDialog_introLabel.Text" xml:space="preserve">
     <value>Choose the numbering style</value>
     <comment>label</comment>
-  </data>
-  <data name="NumberPagesDialog_numberingGroup.Text" xml:space="preserve">
-    <value>Numbering</value>
-    <comment>group</comment>
-  </data>
-  <data name="NumberPagesDialog_numRadio.Text" xml:space="preserve">
-    <value>Numeric</value>
-    <comment>radio button</comment>
   </data>
   <data name="OneMore_GitHub" xml:space="preserve">
     <value>https://github.com/stevencohn/OneMore</value>
@@ -1854,10 +2010,6 @@ Custom Heading 3</value>
     <value>Outline Formatting</value>
     <comment>dialog title</comment>
   </data>
-  <data name="OutlineDialog_alphaRadio.Text" xml:space="preserve">
-    <value>Alpha-numeric</value>
-    <comment>radio button</comment>
-  </data>
   <data name="OutlineDialog_cleanBox.Text" xml:space="preserve">
     <value>Remove/cleanup existing numbering</value>
     <comment>checkbox</comment>
@@ -1886,14 +2038,6 @@ Custom Heading 3</value>
     <value>Applied to both standard and custom Headings</value>
     <comment>tooltip</comment>
   </data>
-  <data name="OutlineDialog_numberingGroup.Text" xml:space="preserve">
-    <value>Numbering</value>
-    <comment>group box title</comment>
-  </data>
-  <data name="OutlineDialog_numRadio.Text" xml:space="preserve">
-    <value>Numeric</value>
-    <comment>radio button</comment>
-  </data>
   <data name="OutlineDialog_removeTagsBox.Text" xml:space="preserve">
     <value>Remove tags</value>
     <comment>checkbox</comment>
@@ -1912,16 +2056,6 @@ Custom Heading 3</value>
   </data>
   <data name="OutlookTaskReport_Importance" xml:space="preserve">
     <value>Importance</value>
-    <comment>report</comment>
-  </data>
-  <data name="OutlookTaskReport_importances" xml:space="preserve">
-    <value>Low
-Medium
-High</value>
-    <comment>report</comment>
-  </data>
-  <data name="OutlookTaskReport_Percent" xml:space="preserve">
-    <value>% Complete</value>
     <comment>report</comment>
   </data>
   <data name="OutlookTaskReport_statuses" xml:space="preserve">
@@ -1997,26 +2131,53 @@ Apply to this notebook</value>
   <data name="phrase_AdvancedOptions" xml:space="preserve">
     <value>Advanced Options</value>
   </data>
+  <data name="phrase_AllNotebooks" xml:space="preserve">
+    <value>All notebooks</value>
+  </data>
+  <data name="phrase_AllSectionInTheCurrentNotebook" xml:space="preserve">
+    <value>All sections in the current notebook</value>
+  </data>
   <data name="phrase_AppendToThisPage" xml:space="preserve">
     <value>Append to this page</value>
   </data>
   <data name="phrase_CreateANewPage" xml:space="preserve">
     <value>Create a new page</value>
   </data>
+  <data name="phrase_NewStyle" xml:space="preserve">
+    <value>New Style</value>
+  </data>
   <data name="phrase_PathNotFound" xml:space="preserve">
     <value>Path not found</value>
   </data>
-  <data name="PlantUml_broken" xml:space="preserve">
-    <value>PlantUML text is either invalid or cannot find connection between text and image</value>
-    <comment>error message</comment>
+  <data name="phrase_PctComplete" xml:space="preserve">
+    <value>% Complete</value>
   </data>
-  <data name="PlantUml_EmptySelection" xml:space="preserve">
-    <value>Empty selection. Select a valid block of PlantUML text.</value>
-    <comment>error message</comment>
+  <data name="phrase_priorityOptions" xml:space="preserve">
+    <value>Low
+Medium
+High</value>
+    <comment>report</comment>
   </data>
-  <data name="PlantUml_Error" xml:space="preserve">
-    <value>Invalid syntax or incomplete selection of PlantUML</value>
-    <comment>error message</comment>
+  <data name="phrase_QuickNote" xml:space="preserve">
+    <value>Quick Note</value>
+  </data>
+  <data name="phrase_scopeOptions" xml:space="preserve">
+    <value>In all notebooks
+In this notebook
+In this section</value>
+    <comment>drop down</comment>
+  </data>
+  <data name="phrase_SelectAll" xml:space="preserve">
+    <value>Select All</value>
+  </data>
+  <data name="phrase_SelectNone" xml:space="preserve">
+    <value>Select None</value>
+  </data>
+  <data name="phrase_TheCurrentSection" xml:space="preserve">
+    <value>The current section</value>
+  </data>
+  <data name="phrase_YourContentHere" xml:space="preserve">
+    <value>Your content here...</value>
   </data>
   <data name="PlantUmlCommand_PlantUrl" xml:space="preserve">
     <value>http://www.plantuml.com/plantuml/png/</value>
@@ -2041,6 +2202,12 @@ Apply to this notebook</value>
   <data name="Plugin_Title" xml:space="preserve">
     <value>Plugin</value>
     <comment>Open File Dialog title</comment>
+  </data>
+  <data name="Plugin_trialCompleted" xml:space="preserve">
+    <value>Trial run completed
+
+Cache: {0}</value>
+    <comment>message</comment>
   </data>
   <data name="Plugin_Unsuccessful" xml:space="preserve">
     <value>Plugin did not complete successfully. See log file.</value>
@@ -2090,38 +2257,45 @@ Apply to this notebook</value>
     <value>Run</value>
     <comment>ok button</comment>
   </data>
-  <data name="PluginDialog_pluginsLabel.Text" xml:space="preserve">
-    <value>Plugins</value>
-    <comment>label</comment>
-  </data>
   <data name="PluginDialog_skipLockRadio.Text" xml:space="preserve">
     <value>Skip locked sections</value>
     <comment>radio</comment>
   </data>
   <data name="PluginDialog_targetBox.Text" xml:space="preserve">
     <value>Current page
-Current notebook</value>
+Current section and its pages
+Current notebook and its sections
+Current notebook and its pages
+All notebooks and their pages</value>
     <comment>combobox</comment>
   </data>
   <data name="PluginDialog_timeoutLabel.Text" xml:space="preserve">
     <value>Tmeout</value>
     <comment>label</comment>
   </data>
+  <data name="PluginDialog_trialBox.Text" xml:space="preserve">
+    <value>Trial run - keep cache file and do not update OneNote</value>
+    <comment>checkbox</comment>
+  </data>
   <data name="PluginDialog_updateRadio.Text" xml:space="preserve">
     <value>Update current page</value>
     <comment>radio button</comment>
+  </data>
+  <data name="PluginDialog_userArgsLabel.Text" xml:space="preserve">
+    <value>User Arguments</value>
+    <comment>label</comment>
   </data>
   <data name="PluginsSheet_ConfirmDelete" xml:space="preserve">
     <value>Delete plugin "{0}"</value>
     <comment>question</comment>
   </data>
-  <data name="PluginsSheet_introLabel.Text" xml:space="preserve">
+  <data name="PluginsSheet_introBox.Text" xml:space="preserve">
     <value>Manage my plugins</value>
     <comment>label</comment>
   </data>
-  <data name="PluginsSheet_Title" xml:space="preserve">
-    <value>Plugins</value>
-    <comment>sheet title</comment>
+  <data name="PreviewMarkdownCommand_Title" xml:space="preserve">
+    <value>Markdown Preview</value>
+    <comment>dialog title</comment>
   </data>
   <data name="ProgramName" xml:space="preserve">
     <value>OneMore</value>
@@ -2136,12 +2310,11 @@ Current notebook</value>
     <comment>error message box</comment>
   </data>
   <data name="Pronunciate_NetError" xml:space="preserve">
-    <value>Could not fetch definition of word {0}
-Try again later</value>
+    <value>Could not fetch {0} pronunciation of "{1}". Either word does not exist or there was a temporary network failure.</value>
     <comment>error message box</comment>
   </data>
   <data name="Pronunciate_NoWord" xml:space="preserve">
-    <value>Could not find word {0}</value>
+    <value>Could not fetch {0} pronunciation of "{1}"</value>
     <comment>error message box</comment>
   </data>
   <data name="PronunciateDialog.Text" xml:space="preserve">
@@ -2225,6 +2398,52 @@ Year (2023)
     <value>Set the page title to the first fiew words of the note</value>
     <comment>checkbox</comment>
   </data>
+  <data name="QuickPaletteCommand_basic_category" xml:space="preserve">
+    <value>basic text</value>
+    <comment>category</comment>
+  </data>
+  <data name="QuickPaletteCommand_basics" xml:space="preserve">
+    <value>Bold
+Italic
+Underline
+Strikethrough
+Subscript
+Superscript</value>
+    <comment>basic style attributes</comment>
+  </data>
+  <data name="QuickPaletteCommand_color_category" xml:space="preserve">
+    <value>font colors</value>
+    <comment>category</comment>
+  </data>
+  <data name="QuickPaletteCommand_colors" xml:space="preserve">
+    <value>Blue
+Green
+Orange
+Purple
+Red
+Yellow</value>
+    <comment>font color attributes</comment>
+  </data>
+  <data name="QuickPaletteCommand_highlight_category" xml:space="preserve">
+    <value>highlight colors</value>
+    <comment>category</comment>
+  </data>
+  <data name="QuickPaletteCommand_highlights" xml:space="preserve">
+    <value>Blue Highlight
+Green Highlight
+Orange Highlight
+Purple Highlight
+Red Highlight
+Yellow Highlight</value>
+  </data>
+  <data name="QuickPaletteCommand_Intro" xml:space="preserve">
+    <value>Choose a style attribute to apply to the selected text</value>
+    <comment>label</comment>
+  </data>
+  <data name="QuickPaletteCommand_Title" xml:space="preserve">
+    <value>Quick Palette</value>
+    <comment>dialog title</comment>
+  </data>
   <data name="RecalculateFormulaCommand_NoFormula" xml:space="preserve">
     <value>No formula found in the selected table</value>
     <comment>recalculate command message</comment>
@@ -2240,18 +2459,6 @@ Year (2023)
   <data name="RefreshPageLinksDialog_groupBox.Text" xml:space="preserve">
     <value>Pages in</value>
     <comment>group box</comment>
-  </data>
-  <data name="RefreshPageLinksDialog_notebookRadio.Text" xml:space="preserve">
-    <value>All sections in the current notebook</value>
-    <comment>radio</comment>
-  </data>
-  <data name="RefreshPageLinksDialog_notebooksRadio.Text" xml:space="preserve">
-    <value>All notebooks</value>
-    <comment>radio</comment>
-  </data>
-  <data name="RefreshPageLinksDialog_sectionRadio.Text" xml:space="preserve">
-    <value>The current section</value>
-    <comment>radio</comment>
   </data>
   <data name="RefreshPageLinksDialog_Text" xml:space="preserve">
     <value>Refresh Page References</value>
@@ -2269,23 +2476,9 @@ Year (2023)
     <value>There is no reminder on this paragraph</value>
     <comment>message box</comment>
   </data>
-  <data name="RemindCommand_Reuse" xml:space="preserve">
-    <value>Click Yes to update this existing report, No to create a new report, or Cancel</value>
-    <comment>message box</comment>
-  </data>
   <data name="RemindDialog_dueDateLabel.Text" xml:space="preserve">
     <value>Due date</value>
     <comment>label</comment>
-  </data>
-  <data name="RemindDialog_percentLabel.Text" xml:space="preserve">
-    <value>% Complete</value>
-    <comment>label</comment>
-  </data>
-  <data name="RemindDialog_priorityBox.Text" xml:space="preserve">
-    <value>Low
-Medium
-High</value>
-    <comment>combobox</comment>
   </data>
   <data name="RemindDialog_priorityLabel.Text" xml:space="preserve">
     <value>Priority</value>
@@ -2344,7 +2537,7 @@ Deferred</value>
     <comment>toast message</comment>
   </data>
   <data name="Reminder_PastStart" xml:space="preserve">
-    <value>Task is past its start date of {0}, "{1}". Click here to navigate to this task</value>
+    <value>Task is past its start date of {0}; due {1}. "{2}". Click here to navigate to this task</value>
     <comment>toast message</comment>
   </data>
   <data name="Reminder_ToastTitle" xml:space="preserve">
@@ -2475,17 +2668,9 @@ Select No to keep one empty line between paragraphs</value>
     <value>Generate report for reminders in this scope</value>
     <comment>label</comment>
   </data>
-  <data name="ReportRemindersDialog_notebookRadio.Text" xml:space="preserve">
-    <value>All sections in the current notebook</value>
-    <comment>radio</comment>
-  </data>
-  <data name="ReportRemindersDialog_notebooksRadio.Text" xml:space="preserve">
-    <value>All notebooks</value>
-    <comment>radio</comment>
-  </data>
-  <data name="ReportRemindersDialog_sectionRadio.Text" xml:space="preserve">
-    <value>The current section</value>
-    <comment>radio</comment>
+  <data name="ReportRemindersDialog_showCompletedBox.Text" xml:space="preserve">
+    <value>Include completed reminders</value>
+    <comment>checkbox</comment>
   </data>
   <data name="ReportRemindersReuseDialog_newRadio.Text" xml:space="preserve">
     <value>Create a new report page</value>
@@ -2499,88 +2684,12 @@ Select No to keep one empty line between paragraphs</value>
     <value>Old or New</value>
     <comment>title</comment>
   </data>
-  <data name="ResizeImagesDialog.Text" xml:space="preserve">
-    <value>Resize and Adjust Image</value>
-    <comment>dialog title</comment>
-  </data>
-  <data name="ResizeImagesDialog_absRadio.Text" xml:space="preserve">
-    <value>Absolute</value>
-    <comment>radio button</comment>
-  </data>
-  <data name="ResizeImagesDialog_allLabel.Text" xml:space="preserve">
-    <value>all images on this page</value>
-    <comment>info label</comment>
-  </data>
-  <data name="ResizeImagesDialog_appliesTo" xml:space="preserve">
-    <value>Applies to</value>
-    <comment>label override</comment>
-  </data>
-  <data name="ResizeImagesDialog_autoSizeRadio.Text" xml:space="preserve">
-    <value>Auto-size</value>
-    <comment>radio</comment>
-  </data>
-  <data name="ResizeImagesDialog_heightLabel.Text" xml:space="preserve">
-    <value>Height</value>
-    <comment>label</comment>
-  </data>
-  <data name="ResizeImagesDialog_imageSizeLabel.Text" xml:space="preserve">
-    <value>Image size</value>
-    <comment>label</comment>
-  </data>
-  <data name="ResizeImagesDialog_limitsBox.Text" xml:space="preserve">
-    <value>Resize all images
-Do not shrink larger images
-Do no enlarge smaller images</value>
-    <comment>combobox</comment>
-  </data>
-  <data name="ResizeImagesDialog_noImages" xml:space="preserve">
-    <value>No images were found on this page.
-
-Images must be in an outline container. Background images cannot be adjusted.</value>
-    <comment>message box</comment>
-  </data>
-  <data name="ResizeImagesDialog_pctRadio.Text" xml:space="preserve">
-    <value>Percentage</value>
-    <comment>radio</comment>
-  </data>
-  <data name="ResizeImagesDialog_preserveBox.Text" xml:space="preserve">
-    <value>Preserve storage size</value>
-    <comment>checkbox</comment>
-  </data>
-  <data name="ResizeImagesDialog_presetRadio.Text" xml:space="preserve">
-    <value>Preset</value>
-    <comment>radio</comment>
-  </data>
-  <data name="ResizeImagesDialog_previewGroup.Text" xml:space="preserve">
-    <value>Preview {0}</value>
-    <comment>group box for single image</comment>
-  </data>
-  <data name="ResizeImagesDialog_repositionBox.Text" xml:space="preserve">
-    <value>Reposition background images</value>
-    <comment>checkbox</comment>
-  </data>
-  <data name="ResizeImagesDialog_resetLinkLabel.Text" xml:space="preserve">
-    <value>Reset values</value>
-    <comment>link label</comment>
-  </data>
-  <data name="ResizeImagesDialog_sizeLink.Text" xml:space="preserve">
-    <value>{0} x {1}</value>
-    <comment>width x height</comment>
-  </data>
-  <data name="ResizeImagesDialog_styleBox.Text" xml:space="preserve">
-    <value>Original
-Gray scale
-Sepia
-Polaroid
-Invert</value>
-    <comment>combobox</comment>
-  </data>
-  <data name="ResizeImagesDialog_viewSizeLabel.Text" xml:space="preserve">
-    <value>View size</value>
-    <comment>label</comment>
-  </data>
   <data name="ribAboutButton_Label" xml:space="preserve">
     <value>About OneMore</value>
+    <comment>ribbon main</comment>
+  </data>
+  <data name="ribAboutButton_Screentip" xml:space="preserve">
+    <value>Show information about OneMore</value>
     <comment>ribbon main</comment>
   </data>
   <data name="ribAddCaptionButton_Label" xml:space="preserve">
@@ -2622,6 +2731,22 @@ Invert</value>
   <data name="ribAddFormulaButton_Screentip" xml:space="preserve">
     <value>Add or edit a formula in selected table cells (F5)</value>
     <comment>ribbon table</comment>
+  </data>
+  <data name="ribAddTagBankButton_Label" xml:space="preserve">
+    <value>Add Tag Bank</value>
+    <comment>ribbon search</comment>
+  </data>
+  <data name="ribAddTagBankButton_Screentip" xml:space="preserve">
+    <value>Add top-of-page tag outline</value>
+    <comment>ribbon search</comment>
+  </data>
+  <data name="ribAdjustImagesButton_Label" xml:space="preserve">
+    <value>Resize and Adjust</value>
+    <comment>ribbon images</comment>
+  </data>
+  <data name="ribAdjustImagesButton_Screentip" xml:space="preserve">
+    <value>Resize and adjust selected images</value>
+    <comment>ribbon images</comment>
   </data>
   <data name="ribAnalyzeButton_Label" xml:space="preserve">
     <value>Analyze Data Storage</value>
@@ -2687,24 +2812,77 @@ Invert</value>
     <value>Arrange Containers</value>
     <comment>ribbon button NODUP</comment>
   </data>
-  <data name="RibbonBarSheet_editGroup.Text" xml:space="preserve">
-    <value>Edit Commands</value>
-    <comment>settings dialog, ribbon bar options</comment>
-  </data>
   <data name="RibbonBarSheet_editIconBox.Text" xml:space="preserve">
     <value>Show only icons for edit commands</value>
     <comment>settings dialog, ribbon bar options</comment>
   </data>
-  <data name="RibbonBarSheet_formulaGroup.Text" xml:space="preserve">
-    <value>Formula Commands</value>
-    <comment>settings dialog, ribbon bar options</comment>
+  <data name="RibbonBarSheet_editRibbonBox.Text" xml:space="preserve">
+    <value>Edit Commands</value>
+    <comment>checkbox</comment>
   </data>
   <data name="RibbonBarSheet_formulaIconBox.Text" xml:space="preserve">
     <value>Show only icons for formula commands</value>
     <comment>settings dialog, ribbon bar options</comment>
   </data>
+  <data name="RibbonBarSheet_formulaRibbonBox.Text" xml:space="preserve">
+    <value>Formula Commands</value>
+    <comment>checkbox</comment>
+  </data>
+  <data name="RibbonBarSheet_hashtagsIconBox.Text" xml:space="preserve">
+    <value>Show only icons for hashtag commands</value>
+    <comment>settings dialog, ribbon bar options</comment>
+  </data>
+  <data name="RibbonBarSheet_hashtagsRibbonBox.Text" xml:space="preserve">
+    <value>Hashtag Commands</value>
+    <comment>checkbox</comment>
+  </data>
   <data name="RibbonBarSheet_introBox.Text" xml:space="preserve">
-    <value>Choose which commands to include in the ribbon bar and whether to display icons or icons and lables. Restart OneNote to see changes.</value>
+    <value>Choose optional preset grouping to add to the ribbon bar</value>
+    <comment>settings dialog, ribbon bar options</comment>
+  </data>
+  <data name="RibbonBarSheet_layoutBox.Text" xml:space="preserve">
+    <value>Aa a group in the Home tab
+As a separate OneMore tab</value>
+    <comment>combobox</comment>
+  </data>
+  <data name="RibbonBarSheet_layoutLabel.Text" xml:space="preserve">
+    <value>Layout</value>
+    <comment>label</comment>
+  </data>
+  <data name="RibbonBarSheet_positionBox.Text" xml:space="preserve">
+    <value>Clipboard Group
+Basic Text Group
+Styles Group
+Tags Group
+Email Group
+Meetings Group
+After last group</value>
+    <comment>combobox</comment>
+  </data>
+  <data name="RibbonBarSheet_positionGroup.Text" xml:space="preserve">
+    <value>Position</value>
+    <comment>groupbox</comment>
+  </data>
+  <data name="RibbonBarSheet_positionIntroLabel.Text" xml:space="preserve">
+    <value>Select the location of the OneMore ribbon group.</value>
+    <comment>intro label</comment>
+  </data>
+  <data name="RibbonBarSheet_positionLabel.Text" xml:space="preserve">
+    <value>Position after</value>
+    <comment>label</comment>
+  </data>
+  <data name="RibbonBarSheet_positionTabBox.Text" xml:space="preserve">
+    <value>Home Tab
+Insert Tab
+Draw Tab
+History Tab
+Review Tab
+View Tab
+Help Tab</value>
+    <comment>combobox</comment>
+  </data>
+  <data name="RibbonBarSheet_quickGroup.Text" xml:space="preserve">
+    <value>Quick Commands</value>
     <comment>settings dialog, ribbon bar options</comment>
   </data>
   <data name="RibbonBarSheet_Title" xml:space="preserve">
@@ -2737,11 +2915,19 @@ Invert</value>
   </data>
   <data name="ribCheckForUpdatesButton_Label" xml:space="preserve">
     <value>Check for Updates</value>
-    <comment>command</comment>
+    <comment>command NODUP</comment>
+  </data>
+  <data name="ribCheckUrlsButton_Label" xml:space="preserve">
+    <value>Check URLs</value>
+    <comment>ribbon references</comment>
+  </data>
+  <data name="ribCheckUrlsButton_Screentip" xml:space="preserve">
+    <value>Check for and highlight invalid URLs</value>
+    <comment>ribbon references</comment>
   </data>
   <data name="ribChooseColorizerButton_Label" xml:space="preserve">
     <value>Colorize</value>
-    <comment>ribbon edit</comment>
+    <comment>ribbon edit NODUP</comment>
   </data>
   <data name="ribChooseFavoriteButton_Label" xml:space="preserve">
     <value>Choose Favorite</value>
@@ -2749,6 +2935,14 @@ Invert</value>
   <data name="ribCleanMenu_Label" xml:space="preserve">
     <value>Clean</value>
     <comment>ribbon menu</comment>
+  </data>
+  <data name="ribCleanRemindersButton_Label" xml:space="preserve">
+    <value>Clean Reminders</value>
+    <comment>ribbon reminders</comment>
+  </data>
+  <data name="ribCleanRemindersButton_Screentip" xml:space="preserve">
+    <value>Clean broken reminders on this page</value>
+    <comment>ribbon reminders</comment>
   </data>
   <data name="ribClearBackgroundButton_Label" xml:space="preserve">
     <value>Clear Background Color</value>
@@ -2788,7 +2982,7 @@ Invert</value>
   </data>
   <data name="ribColorizeMenu_Label" xml:space="preserve">
     <value>Colorize</value>
-    <comment>ribbon edit</comment>
+    <comment>ribbon edit NODUP</comment>
   </data>
   <data name="ribCommandPaletteButton_Label" xml:space="preserve">
     <value>Command Palette</value>
@@ -2813,6 +3007,14 @@ Invert</value>
   <data name="ribCompressImagesButton_Screentip" xml:space="preserve">
     <value>Compress images by converting PNG to JPG</value>
     <comment>ribbon images</comment>
+  </data>
+  <data name="ribConvertMarkdownButton_Label" xml:space="preserve">
+    <value>Convert Markdown</value>
+    <comment>ribbon edit</comment>
+  </data>
+  <data name="ribConvertMarkdownButton_Screentip" xml:space="preserve">
+    <value>Convert page or selected markdown to OneNote format</value>
+    <comment>ribbon edit</comment>
   </data>
   <data name="ribCopyAcrossButton_Label" xml:space="preserve">
     <value>Copy Across</value>
@@ -2865,6 +3067,14 @@ Invert</value>
   <data name="ribCopyLinkToParagraphButton_Screentip" xml:space="preserve">
     <value>Copy a hyperlink to the current paragraph</value>
     <comment>ribbon references</comment>
+  </data>
+  <data name="ribCopyPageContentButton_Label" xml:space="preserve">
+    <value>Copy Selected Content</value>
+    <comment>ribbon page</comment>
+  </data>
+  <data name="ribCopyPageContentButton_Screentip" xml:space="preserve">
+    <value>Copy selected content to a new page</value>
+    <comment>ribbon page</comment>
   </data>
   <data name="ribCrawlWebPageButton_Label" xml:space="preserve">
     <value>Import Hyperlinks</value>
@@ -2964,7 +3174,7 @@ Invert</value>
   </data>
   <data name="ribEditMenu_Label" xml:space="preserve">
     <value>Edit</value>
-    <comment>ribbon menu</comment>
+    <comment>ribbon menu NODUP</comment>
   </data>
   <data name="ribEditStylesButton_Label" xml:space="preserve">
     <value>Edit Styles</value>
@@ -3059,8 +3269,8 @@ Invert</value>
     <comment>ribbon table</comment>
   </data>
   <data name="ribFindHashtagsButton_Label" xml:space="preserve">
-    <value>Find Hashtags</value>
-    <comment>ribbon references</comment>
+    <value>Search Hashtags</value>
+    <comment>ribbon references NODUP</comment>
   </data>
   <data name="ribFinishBiLinkButton_Label" xml:space="preserve">
     <value>Finish Bidirectional Link</value>
@@ -3086,6 +3296,14 @@ Invert</value>
     <value>Download and insert referenced images</value>
     <comment>ribbon references</comment>
   </data>
+  <data name="ribHashtaggerButton_Label" xml:space="preserve">
+    <value>Insert Hashtags</value>
+    <comment>ribbon search</comment>
+  </data>
+  <data name="ribHashtaggerButton_Screentip" xml:space="preserve">
+    <value>Pick from a smart list of words and tags to insert hashtags</value>
+    <comment>ribbon search</comment>
+  </data>
   <data name="ribHighlightButton_Label" xml:space="preserve">
     <value>Rotating Highlighter</value>
     <comment>ribbon edit</comment>
@@ -3099,7 +3317,7 @@ Invert</value>
     <comment>ribbon table</comment>
   </data>
   <data name="ribHighlightFormulaButton_Screentip" xml:space="preserve">
-    <value>High cells with formula in current table</value>
+    <value>Select cells with formula in current table</value>
     <comment>ribbon table</comment>
   </data>
   <data name="ribHighlightLastButton_Label" xml:space="preserve">
@@ -3344,7 +3562,7 @@ Invert</value>
   </data>
   <data name="ribLoadStylesButton_Label" xml:space="preserve">
     <value>Load Styles</value>
-    <comment>ribbon styles</comment>
+    <comment>ribbon styles NODUP</comment>
   </data>
   <data name="ribLoadStylesButton_Screentip" xml:space="preserve">
     <value>Load My Styles from a definition file</value>
@@ -3360,7 +3578,7 @@ Invert</value>
   </data>
   <data name="ribManageFavoritesButton_Label" xml:space="preserve">
     <value>Manage Favorites</value>
-    <comment>favorites menu command</comment>
+    <comment>favorites menu command NODUP</comment>
   </data>
   <data name="ribManagePluginsButton_Label" xml:space="preserve">
     <value>Manage Saved Plugins</value>
@@ -3386,6 +3604,38 @@ Invert</value>
     <value>Merge selected pages</value>
     <comment>ribbon page</comment>
   </data>
+  <data name="ribMermaidButton_Label" xml:space="preserve">
+    <value>Draw Mermaid Diagram</value>
+    <comment>ribbon image</comment>
+  </data>
+  <data name="ribMermaidButton_Screentip" xml:space="preserve">
+    <value>Render Mermaid image from selected text</value>
+    <comment>ribbon image</comment>
+  </data>
+  <data name="ribMovePageBottomButton_Label" xml:space="preserve">
+    <value>Move to Bottom</value>
+    <comment>ribbon page</comment>
+  </data>
+  <data name="ribMovePageBottomButton_Screentip" xml:space="preserve">
+    <value>Move selected pages to bottom of list</value>
+    <comment>ribbon page</comment>
+  </data>
+  <data name="ribMovePageContentButton_Label" xml:space="preserve">
+    <value>Move Selected Content</value>
+    <comment>ribbon page</comment>
+  </data>
+  <data name="ribMovePageContentButton_Screentip" xml:space="preserve">
+    <value>Move selected content to a new page</value>
+    <comment>ribbon page</comment>
+  </data>
+  <data name="ribMovePageTopButton_Label" xml:space="preserve">
+    <value>Move to Top</value>
+    <comment>ribbon page</comment>
+  </data>
+  <data name="ribMovePageTopButton_Screentip" xml:space="preserve">
+    <value>Move selected pages to top of list</value>
+    <comment>ribbon page</comment>
+  </data>
   <data name="ribNameUrlsButton_Label" xml:space="preserve">
     <value>Replace URLs with Titles</value>
     <comment>ribbon references</comment>
@@ -3396,7 +3646,7 @@ Invert</value>
   </data>
   <data name="ribNavigatorButton_Label" xml:space="preserve">
     <value>Navigator</value>
-    <comment>ribbon main</comment>
+    <comment>ribbon main NODUP</comment>
   </data>
   <data name="ribNavigatorButton_Screentip" xml:space="preserve">
     <value>Open the OneMore Navigator window</value>
@@ -3409,6 +3659,14 @@ Invert</value>
   <data name="ribNewStyleButton_Screentip" xml:space="preserve">
     <value>Create a new style from the current selection</value>
     <comment>ribbon styles</comment>
+  </data>
+  <data name="ribNextUnreadPageButton_Label" xml:space="preserve">
+    <value>Next Unread Page</value>
+    <comment>ribbon search</comment>
+  </data>
+  <data name="ribNextUnreadPageButton_Screentip" xml:space="preserve">
+    <value>Move to the next unread page</value>
+    <comment>ribbon search</comment>
   </data>
   <data name="ribNoSpellCheckButton_Screentip" xml:space="preserve">
     <value>Disable spell check for entire page (F4)</value>
@@ -3438,6 +3696,14 @@ Invert</value>
     <value>Add or update numbering of all sections in this notebook</value>
     <comment>ribbon numbering</comment>
   </data>
+  <data name="ribOneMoreBasicsGroup_Label" xml:space="preserve">
+    <value>Basics</value>
+    <comment>ribbon</comment>
+  </data>
+  <data name="ribOneMoreEvenMoreGroup_Label" xml:space="preserve">
+    <value>More</value>
+    <comment>ribbon</comment>
+  </data>
   <data name="ribOneMoreGroup_Label" xml:space="preserve">
     <value>OneMore</value>
     <comment>ribbon Group NODUP</comment>
@@ -3445,6 +3711,22 @@ Invert</value>
   <data name="ribOneMoreMenu_Label" xml:space="preserve">
     <value>More</value>
     <comment>ribbon main button</comment>
+  </data>
+  <data name="ribOneMoreSnippetsGroup_Label" xml:space="preserve">
+    <value>Snippets</value>
+    <comment>ribbon</comment>
+  </data>
+  <data name="ribOneMoreStylesGroup_Label" xml:space="preserve">
+    <value>Styles</value>
+    <comment>ribbon</comment>
+  </data>
+  <data name="ribOneMoreTableGroup_Label" xml:space="preserve">
+    <value>Table</value>
+    <comment>ribbon</comment>
+  </data>
+  <data name="ribOneMoreTagGroup_Label" xml:space="preserve">
+    <value>Search</value>
+    <comment>ribbon</comment>
   </data>
   <data name="ribOpenImageWithButton_Label" xml:space="preserve">
     <value>Open Image With</value>
@@ -3460,7 +3742,7 @@ Invert</value>
   </data>
   <data name="ribOutlineButton_Label" xml:space="preserve">
     <value>Outline Formatting</value>
-    <comment>ribbon numbering</comment>
+    <comment>ribbon numbering NODUP</comment>
   </data>
   <data name="ribOutlineButton_Screentip" xml:space="preserve">
     <value>Numbering headings on this page</value>
@@ -3502,6 +3784,10 @@ Invert</value>
     <value>Paste and Keep Text Only (Ctrl + Shift + V)</value>
     <comment>ribbon edit</comment>
   </data>
+  <data name="ribPinPageButton_Label" xml:space="preserve">
+    <value>Add Page To My Reading List</value>
+    <comment>navigator</comment>
+  </data>
   <data name="ribPlantUmlButton_Label" xml:space="preserve">
     <value>Draw PlantUML</value>
     <comment>ribbon images</comment>
@@ -3516,7 +3802,27 @@ Invert</value>
   </data>
   <data name="ribPluginsMenu_Label" xml:space="preserve">
     <value>Plugins</value>
-    <comment>ribbon menu</comment>
+    <comment>ribbon file NODUP</comment>
+  </data>
+  <data name="ribPluginsMenu_Screentip" xml:space="preserve">
+    <value>Run and manage custom plugins</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribPreviewMarkdownButton_Label" xml:space="preserve">
+    <value>Preview Markdown</value>
+    <comment>ribbon edit</comment>
+  </data>
+  <data name="ribPreviewMarkdownButton_Screentip" xml:space="preserve">
+    <value>Preview page or selected text as markdown</value>
+    <comment>ribbon edit</comment>
+  </data>
+  <data name="ribPreviousUnreadPageButton_Label" xml:space="preserve">
+    <value>Previous Unread Page</value>
+    <comment>ribbon search</comment>
+  </data>
+  <data name="ribPreviousUnreadPageButton_Screentip" xml:space="preserve">
+    <value>Move to the previous unread page</value>
+    <comment>ribbon search</comment>
   </data>
   <data name="ribPronunciateButton_Label" xml:space="preserve">
     <value>Insert Pronunciation</value>
@@ -3528,6 +3834,14 @@ Invert</value>
   </data>
   <data name="ribProofingMenu_Label" xml:space="preserve">
     <value>Proofing Language</value>
+    <comment>ribbon menu</comment>
+  </data>
+  <data name="ribQuickPaletteButton_Label" xml:space="preserve">
+    <value>Quick Palette</value>
+    <comment>ribbon menu</comment>
+  </data>
+  <data name="ribQuickPaletteButton_Screentip" xml:space="preserve">
+    <value>Open the Quick Palette window</value>
     <comment>ribbon menu</comment>
   </data>
   <data name="ribRecalculateFormulaButton_Label" xml:space="preserve">
@@ -3592,7 +3906,7 @@ Invert</value>
   </data>
   <data name="ribRemoveDuplicatesButton_Label" xml:space="preserve">
     <value>Remove Duplicate Pages</value>
-    <comment>ribbon clean</comment>
+    <comment>ribbon clean NODUP</comment>
   </data>
   <data name="ribRemoveDuplicatesButton_Screentip" xml:space="preserve">
     <value>Identify and remove duplicate pages</value>
@@ -3646,6 +3960,14 @@ Invert</value>
     <value>Remove paragraph, heading, and line spacing</value>
     <comment>ribbon clean</comment>
   </data>
+  <data name="ribRemoveTagBankButton_Label" xml:space="preserve">
+    <value>Remove Tag Bank</value>
+    <comment>ribbon search</comment>
+  </data>
+  <data name="ribRemoveTagBankButton_Screentip" xml:space="preserve">
+    <value>Remove top-of-page tag outline</value>
+    <comment>ribbon search</comment>
+  </data>
   <data name="ribRemoveTagsButton_Label" xml:space="preserve">
     <value>Remove Tags</value>
     <comment>ribbon clean</comment>
@@ -3670,13 +3992,21 @@ Invert</value>
     <value>Generate a summary report of reminders</value>
     <comment>ribbon reminders</comment>
   </data>
-  <data name="ribResizeImagesButton_Label" xml:space="preserve">
-    <value>Resize and Adjust</value>
-    <comment>ribbon images</comment>
+  <data name="ribResetTasksButton_Label" xml:space="preserve">
+    <value>Reset All Completed Tasks</value>
+    <comment>ribbon reminders</comment>
   </data>
-  <data name="ribResizeImagesButton_Screentip" xml:space="preserve">
-    <value>Resize and adjust selected images</value>
-    <comment>ribbon images</comment>
+  <data name="ribResetTasksButton_Screentip" xml:space="preserve">
+    <value>Uncheck and reset all completed tasks on this page</value>
+    <comment>ribbon reminders</comment>
+  </data>
+  <data name="ribRestartTimerButton_Label" xml:space="preserve">
+    <value>Restart Timer</value>
+    <comment>ribbon extras</comment>
+  </data>
+  <data name="ribRestartTimerButton_Screentip" xml:space="preserve">
+    <value>Restart the Timer, setting it back to zero</value>
+    <comment>ribbon extras</comment>
   </data>
   <data name="ribRestoreAutosizeButton_Label" xml:space="preserve">
     <value>Restore Container Widths</value>
@@ -3718,6 +4048,22 @@ Invert</value>
     <value>Save a new snippet from the selected content</value>
     <comment>ribbon snippets</comment>
   </data>
+  <data name="ribScanHashtagsButton_Label" xml:space="preserve">
+    <value>Scan Hashtags</value>
+    <comment>ribbon search</comment>
+  </data>
+  <data name="ribScanHashtagsButton_Screentip" xml:space="preserve">
+    <value>Scan hashtags immediately</value>
+    <comment>ribbon search</comment>
+  </data>
+  <data name="ribScanHashtagsOnPageButton_Label" xml:space="preserve">
+    <value>Scan Hashtags On This Page</value>
+    <comment>search menu</comment>
+  </data>
+  <data name="ribScheduleHashtagScanButton_Label" xml:space="preserve">
+    <value>Schedule Hashtag Scan</value>
+    <comment>palette command</comment>
+  </data>
   <data name="ribSearchAndReplaceButton_Label" xml:space="preserve">
     <value>Search and Replace</value>
     <comment>ribbon search NODUP</comment>
@@ -3756,11 +4102,19 @@ Invert</value>
   </data>
   <data name="ribSelectImagesButton_Label" xml:space="preserve">
     <value>Select All Images</value>
-    <comment>ribbon edit</comment>
+    <comment>ribbon images</comment>
   </data>
   <data name="ribSelectImagesButton_Screentip" xml:space="preserve">
     <value>Select all images on the page</value>
-    <comment>ribbon edit</comment>
+    <comment>ribbon images</comment>
+  </data>
+  <data name="ribSelectInkButton_Label" xml:space="preserve">
+    <value>Select All Ink</value>
+    <comment>ribbon images</comment>
+  </data>
+  <data name="ribSelectInkButton_Screentip" xml:space="preserve">
+    <value>Select all ink on the page</value>
+    <comment>ribbon images</comment>
   </data>
   <data name="ribSelectStyleButton_Label" xml:space="preserve">
     <value>Select Similar Text</value>
@@ -3769,6 +4123,14 @@ Invert</value>
   <data name="ribSelectStyleButton_Screentip" xml:space="preserve">
     <value>Select text with similar formatting</value>
     <comment>ribbon edit</comment>
+  </data>
+  <data name="ribSelectTablesButton_Label" xml:space="preserve">
+    <value>Select All Tables</value>
+    <comment>table menu</comment>
+  </data>
+  <data name="ribSelectTablesButton_Screentip" xml:space="preserve">
+    <value>Select all tables on the page</value>
+    <comment>table menu</comment>
   </data>
   <data name="ribSettingsButton_Label" xml:space="preserve">
     <value>Settings</value>
@@ -3788,6 +4150,14 @@ Invert</value>
   </data>
   <data name="ribShowXmlButton_Screentip" xml:space="preserve">
     <value>Show XML of hierarchy and current page (Ctrl + Shift + Alt + X)</value>
+    <comment>ribbon extras</comment>
+  </data>
+  <data name="ribShutdownTimerButton_Label" xml:space="preserve">
+    <value>Stop Timer</value>
+    <comment>ribbon extras</comment>
+  </data>
+  <data name="ribShutdownTimerButton_Screentip" xml:space="preserve">
+    <value>Stop and close the Timer window</value>
     <comment>ribbon extras</comment>
   </data>
   <data name="ribSnippetsMenu_Label" xml:space="preserve">
@@ -3880,7 +4250,7 @@ Invert</value>
   </data>
   <data name="ribStatusMenu_Label" xml:space="preserve">
     <value>Status</value>
-    <comment>ribbon snippets</comment>
+    <comment>ribbon snippets NODUP</comment>
   </data>
   <data name="ribStrikeoutTasksButton_Label" xml:space="preserve">
     <value>Strikethrough Completed To Do Tags</value>
@@ -3892,7 +4262,7 @@ Invert</value>
   </data>
   <data name="ribStylizeImagesButton_Label" xml:space="preserve">
     <value>Stylize Images</value>
-    <comment>ribbon images</comment>
+    <comment>ribbon images NODUP</comment>
   </data>
   <data name="ribStylizeImagesButton_Screentip" xml:space="preserve">
     <value>Recolor images using selected style</value>
@@ -3905,22 +4275,6 @@ Invert</value>
   <data name="ribTableThemesButton_Label" xml:space="preserve">
     <value>Table Styles</value>
     <comment>ribbon main</comment>
-  </data>
-  <data name="ribTaggedButton_Label" xml:space="preserve">
-    <value>Find Tagged Pages</value>
-    <comment>ribbon search NODUP</comment>
-  </data>
-  <data name="ribTaggedButton_Screentip" xml:space="preserve">
-    <value>Find pages with custom tags</value>
-    <comment>ribbon search</comment>
-  </data>
-  <data name="ribTaggingButton_Label" xml:space="preserve">
-    <value>Tag Page</value>
-    <comment>ribbon search</comment>
-  </data>
-  <data name="ribTaggingButton_Screentip" xml:space="preserve">
-    <value>Add custom tags to this page</value>
-    <comment>ribbon search</comment>
   </data>
   <data name="ribTextToTableButton_Label" xml:space="preserve">
     <value>Convert Text to Table</value>
@@ -3962,6 +4316,22 @@ Invert</value>
     <value>Trim leading whitespace from selected text</value>
     <comment>ribbon edit</comment>
   </data>
+  <data name="ribUnnameUrlsButton_Label" xml:space="preserve">
+    <value>Replace URL Titles with Addresses</value>
+    <comment>ribbon reference</comment>
+  </data>
+  <data name="ribUnnameUrlsButton_Screentip" xml:space="preserve">
+    <value>Replace URL titles with basic Web addresses</value>
+    <comment>ribbon reference</comment>
+  </data>
+  <data name="ribUpdatePageTimeButton_Label" xml:space="preserve">
+    <value>Update Page Time</value>
+    <comment>page menu</comment>
+  </data>
+  <data name="ribUpdatePageTimeButton_Screentip" xml:space="preserve">
+    <value>Update page to current date/time</value>
+    <comment>page menu</comment>
+  </data>
   <data name="ribUpdateSubpageButton_Label" xml:space="preserve">
     <value>Update Embedded Pages</value>
     <comment>ribbon page</comment>
@@ -3978,6 +4348,30 @@ Invert</value>
     <value>Convert text to uppercase (Ctrl + Shift + Alt + U)</value>
     <comment>ribbon edit</comment>
   </data>
+  <data name="ribViewNotebookInBrowserButton_Label" xml:space="preserve">
+    <value>View Notebook In Browser</value>
+    <comment>notebook context menu</comment>
+  </data>
+  <data name="ribViewNotebookInBrowserButton_Screentip" xml:space="preserve">
+    <value>View notebook in web browser</value>
+    <comment>notebook context menu</comment>
+  </data>
+  <data name="ribViewPageInBrowserButton_Label" xml:space="preserve">
+    <value>View Page In Browser</value>
+    <comment>page menu, page context menu</comment>
+  </data>
+  <data name="ribViewPageInBrowserButton_Screentip" xml:space="preserve">
+    <value>View page in web browser</value>
+    <comment>page menu, page context menu</comment>
+  </data>
+  <data name="ribViewSectionInBrowserButton_Label" xml:space="preserve">
+    <value>View Section In Browser</value>
+    <comment>section context menu</comment>
+  </data>
+  <data name="ribViewSectionInBrowserButton_Screentip" xml:space="preserve">
+    <value>View section in web browser</value>
+    <comment>section context menu</comment>
+  </data>
   <data name="ribWordCountButton_Label" xml:space="preserve">
     <value>Word Count</value>
     <comment>ribbon page</comment>
@@ -3991,7 +4385,7 @@ Invert</value>
     <comment>Save as dialog error message</comment>
   </data>
   <data name="SaveAsMany_Success" xml:space="preserve">
-    <value>Saved {0} pages to {1}</value>
+    <value>Saved {0} of {1} pages to {2}</value>
     <comment>save many message</comment>
   </data>
   <data name="SaveSnippet_NeedSelection" xml:space="preserve">
@@ -4014,25 +4408,51 @@ Invert</value>
     <value>Snippet name:</value>
     <comment>label</comment>
   </data>
-  <data name="ScopeSelector_notebookButton.Text" xml:space="preserve">
-    <value>All sections in the current notebook</value>
+  <data name="ScanningCueFile" xml:space="preserve">
+    <value>HashtagScanner.json</value>
+    <comment>SKIP</comment>
+  </data>
+  <data name="ScheduleScanDialog_hintLabel.Text" xml:space="preserve">
+    <value>It is best to schedule the scan during off-hours, such as midnight</value>
+    <comment>label</comment>
+  </data>
+  <data name="ScheduleScanDialog_introBox.Text" xml:space="preserve">
+    <value>The hashtag catalog has not yet been created. Choose below when OneMore should build the catalog.</value>
+    <comment>multilinelabel</comment>
+  </data>
+  <data name="ScheduleScanDialog_laterRadio.Text" xml:space="preserve">
+    <value>Schedule the scan at a later time</value>
     <comment>radio</comment>
   </data>
-  <data name="ScopeSelector_notebooksButton.Text" xml:space="preserve">
-    <value>All notebooks</value>
+  <data name="ScheduleScanDialog_nowRadio.Text" xml:space="preserve">
+    <value>Run the scan now</value>
     <comment>radio</comment>
+  </data>
+  <data name="ScheduleScanDialog_nowWarning" xml:space="preserve">
+    <value>Hashtag scanning can result in slower responsiveness while using OneNote or the inability to restart OneNote until the scan completes.
+
+Are you sure you want to run the scan now</value>
+    <comment>message box</comment>
+  </data>
+  <data name="ScheduleScanDialog_Title" xml:space="preserve">
+    <value>Schedule Hashtag Scanning</value>
+    <comment>dialog title</comment>
+  </data>
+  <data name="ScheduleScanDialog_warningLabel.Text" xml:space="preserve">
+    <value>OneNote may appear sluggish while scanning. If OneNote is closed during the scan, it cannot be opened until the scan completes.</value>
+    <comment>multiline label</comment>
   </data>
   <data name="ScopeSelector_pageButton.Text" xml:space="preserve">
     <value>This page</value>
     <comment>radio</comment>
   </data>
-  <data name="ScopeSelector_sectionButton.Text" xml:space="preserve">
-    <value>The current section</value>
-    <comment>radio</comment>
-  </data>
   <data name="ScopeSelector_selectedButton.Text" xml:space="preserve">
     <value>Selected notebooks...</value>
     <comment>radio</comment>
+  </data>
+  <data name="SearchAndReplaceCommand_Results" xml:space="preserve">
+    <value>Replaced {0} matches on {1} pages</value>
+    <comment>message box</comment>
   </data>
   <data name="SearchAndReplaceDialog_matchBox.Text" xml:space="preserve">
     <value>Match case</value>
@@ -4045,6 +4465,13 @@ Invert</value>
   <data name="SearchAndReplaceDialog_regBox.Text" xml:space="preserve">
     <value>Use regular expressions</value>
     <comment>checkbox</comment>
+  </data>
+  <data name="SearchAndReplaceDialog_scopBox" xml:space="preserve">
+    <value>This page
+This section
+This notebook
+All notebooks</value>
+    <comment>combobox</comment>
   </data>
   <data name="SearchAndReplaceDialog_substitutions" xml:space="preserve">
     <value>Valid substitution parameters: {0}</value>
@@ -4069,12 +4496,6 @@ Invert</value>
   <data name="SearchDialog_introLabel.Text" xml:space="preserve">
     <value>Enter one or more keywords, "quoted phrases", and use uppercase AND and OR</value>
     <comment>intro label</comment>
-  </data>
-  <data name="SearchDialog_scopeBox.Items" xml:space="preserve">
-    <value>In all notebooks
-In this notebook
-In this section</value>
-    <comment>drop down</comment>
   </data>
   <data name="SearchDialog_Title" xml:space="preserve">
     <value>Search and Move/Copy</value>
@@ -4116,15 +4537,11 @@ In this section</value>
     <value>URL Pattern</value>
     <comment>url col</comment>
   </data>
-  <data name="SearchEngineSheet_deleteLabel.Text" xml:space="preserve">
-    <value>Delete:</value>
-    <comment>label NODUP</comment>
-  </data>
   <data name="SearchEngineSheet_downButton.Text" xml:space="preserve">
     <value>Move down</value>
     <comment>button</comment>
   </data>
-  <data name="SearchEngineSheet_introLabel.Text" xml:space="preserve">
+  <data name="SearchEngineSheet_introBox.Text" xml:space="preserve">
     <value>URL Patterns must contain a string replacement token, such as &amp;q={0}
 
 Search engines will appear in the page context menu, right-click.</value>
@@ -4136,6 +4553,10 @@ Search engines will appear in the page context menu, right-click.</value>
   </data>
   <data name="SearchQF_DescriptionCopy" xml:space="preserve">
     <value>Pick the location where selected pages should be copied</value>
+    <comment>QuickFiling description</comment>
+  </data>
+  <data name="SearchQF_DescriptionIndex" xml:space="preserve">
+    <value>Pick the location to create the index page</value>
     <comment>QuickFiling description</comment>
   </data>
   <data name="SearchQF_DescriptionMove" xml:space="preserve">
@@ -4166,68 +4587,17 @@ Search engines will appear in the page context menu, right-click.</value>
     <value>Tools</value>
     <comment>Ribbon OneMore menu separator</comment>
   </data>
-  <data name="SettingsDialog_aliasNode.Text" xml:space="preserve">
-    <value>Command Aliases</value>
-  </data>
   <data name="SettingsDialog_closeWindows" xml:space="preserve">
     <value>Multiple OneNote window are open. Close these windows and restart OneNote to apply new settings</value>
     <comment>message</comment>
-  </data>
-  <data name="SettingsDialog_contextNode.Text" xml:space="preserve">
-    <value>Context Menu</value>
-    <comment>treenode</comment>
-  </data>
-  <data name="SettingsDialog_generalNode.Text" xml:space="preserve">
-    <value>General Options</value>
-    <comment>tree node</comment>
-  </data>
-  <data name="SettingsDialog_hashtagsNode_Text" xml:space="preserve">
-    <value>Hashtags</value>
-    <comment>treenode</comment>
-  </data>
-  <data name="SettingsDialog_highlightNode.Text" xml:space="preserve">
-    <value>Highlighter Themes</value>
-    <comment>treenode</comment>
-  </data>
-  <data name="SettingsDialog_imagesNode.Text" xml:space="preserve">
-    <value>Images</value>
-    <comment>treenode</comment>
   </data>
   <data name="SettingsDialog_keyboardNode.Text" xml:space="preserve">
     <value>Keyboard Shortcuts</value>
     <comment>treenode</comment>
   </data>
-  <data name="SettingsDialog_linesNode.Text" xml:space="preserve">
-    <value>Horizontal Lines</value>
-    <comment>settings dialog</comment>
-  </data>
-  <data name="SettingsDialog_navigatorNode.Text" xml:space="preserve">
-    <value>Navigator</value>
-    <comment>tree node</comment>
-  </data>
-  <data name="SettingsDialog_pluginsNode.Text" xml:space="preserve">
-    <value>Plugins</value>
-    <comment>tree node</comment>
-  </data>
-  <data name="SettingsDialog_quickNotesNode.Text" xml:space="preserve">
-    <value>Quick Notes</value>
-    <comment>tree node</comment>
-  </data>
   <data name="SettingsDialog_Restart" xml:space="preserve">
     <value>One or more changes require OneNote to be restarted. Do you want to restart OneNote now?</value>
     <comment>restart message</comment>
-  </data>
-  <data name="SettingsDialog_ribbonNode.Text" xml:space="preserve">
-    <value>Ribbon Bar</value>
-    <comment>treenode</comment>
-  </data>
-  <data name="SettingsDialog_searchNode.Text" xml:space="preserve">
-    <value>Search Engines</value>
-    <comment>treenode</comment>
-  </data>
-  <data name="SettingsDialog_snippetshNode_Text" xml:space="preserve">
-    <value>Snippets</value>
-    <comment>tree node</comment>
   </data>
   <data name="SettingsDialog_Text" xml:space="preserve">
     <value>OneMore Settings</value>
@@ -4277,10 +4647,6 @@ Search engines will appear in the page context menu, right-click.</value>
     <value>No hierarchy</value>
     <comment>message</comment>
   </data>
-  <data name="ShowXmlDialog_notebooksTab.Text" xml:space="preserve">
-    <value>Notebooks</value>
-    <comment>tab</comment>
-  </data>
   <data name="ShowXmlDialog_okButton.Text" xml:space="preserve">
     <value>Update Page</value>
     <comment>ok button</comment>
@@ -4305,10 +4671,6 @@ Search engines will appear in the page context menu, right-click.</value>
     <value>Save window location</value>
     <comment>checkbox</comment>
   </data>
-  <data name="ShowXmlDialog_selectButton.Text" xml:space="preserve">
-    <value>Select all</value>
-    <comment>button</comment>
-  </data>
   <data name="ShowXmlDialog_WARNING" xml:space="preserve">
     <value>This is a dangerous operation!
 
@@ -4325,13 +4687,9 @@ Are you sure you want to continue?</value>
     <value>Delete snippet "{0}"</value>
     <comment>question</comment>
   </data>
-  <data name="SnippetsSheet_introLabel.Text" xml:space="preserve">
+  <data name="SnippetsSheet_introBox.Text" xml:space="preserve">
     <value>Manage my snippets</value>
     <comment>label</comment>
-  </data>
-  <data name="SnippetsSheet_Text" xml:space="preserve">
-    <value>Snippets</value>
-    <comment>SnippetsSheet</comment>
   </data>
   <data name="SortDialog.Text" xml:space="preserve">
     <value>Sort</value>
@@ -4535,14 +4893,6 @@ Notebooks</value>
     <value>New</value>
     <comment>button</comment>
   </data>
-  <data name="StyleDialog_NewText" xml:space="preserve">
-    <value>New Style</value>
-    <comment>dialog title</comment>
-  </data>
-  <data name="StyleDialog_optionsGroup.Text" xml:space="preserve">
-    <value>Options</value>
-    <comment>groupbox</comment>
-  </data>
   <data name="StyleDialog_pageColorBox.Text" xml:space="preserve">
     <value>Change the page color when applying these styles</value>
     <comment>checkbox</comment>
@@ -4610,20 +4960,14 @@ Heading - include in TOC</value>
     <comment>message</comment>
   </data>
   <data name="StylizeImagesDialog_backBox.Text" xml:space="preserve">
-    <value>Apply to background images</value>
+    <value>Apply to background images
+Background images: {0}, selected: {1}</value>
     <comment>checkbox</comment>
-  </data>
-  <data name="StylizeImagesDialog_backImagesLabel.Text" xml:space="preserve">
-    <value>Background images: {0}, selected: {1}</value>
-    <comment>label</comment>
   </data>
   <data name="StylizeImagesDialog_foreBox.Text" xml:space="preserve">
-    <value>Apply to foreground images</value>
+    <value>Apply to foreground images
+Foreground images: {0}, selected: {1}</value>
     <comment>checkbox</comment>
-  </data>
-  <data name="StylizeImagesDialog_foreImagesLabel.Text" xml:space="preserve">
-    <value>Foreground images: {0}, selected: {1}</value>
-    <comment>label</comment>
   </data>
   <data name="StylizeImagesDialog_styleBox.Text" xml:space="preserve">
     <value>Gray scale
@@ -4640,68 +4984,13 @@ Invert</value>
     <value>OneMore Table Theme {0}</value>
     <comment>Screentip for table theme gallery tiles</comment>
   </data>
-  <data name="TaggedDialog_checkAllLabel.Text" xml:space="preserve">
-    <value>Check all pages</value>
-    <comment>check all nodes link label</comment>
+  <data name="TabOneMore_Label" xml:space="preserve">
+    <value>OneMore</value>
+    <comment>ribbon</comment>
   </data>
-  <data name="TaggedDialog_clearAllLabel.Text" xml:space="preserve">
-    <value>Uncheck all pages</value>
-    <comment>uncheck all nodes llnk label</comment>
-  </data>
-  <data name="TaggedDialog_clearLabel.Text" xml:space="preserve">
-    <value>Clear all</value>
-    <comment>clear tags link label</comment>
-  </data>
-  <data name="TaggedDialog_indexButton.Text" xml:space="preserve">
-    <value>Index</value>
-    <comment>index button</comment>
-  </data>
-  <data name="TaggedDialog_introLabel.Text" xml:space="preserve">
-    <value>Enter one or more tags separated by commas. Use the minus operator to exclude individual tags</value>
-    <comment>label</comment>
-  </data>
-  <data name="TaggedDialog_opBox.Items" xml:space="preserve">
-    <value>All
-Any</value>
-    <comment>listbox</comment>
-  </data>
-  <data name="TaggedDialog_scopeBox.Items" xml:space="preserve">
-    <value>In all notebooks
-In this notebook
-In this section</value>
-    <comment>drop down</comment>
-  </data>
-  <data name="TaggedDialog_tagsLabel.Text" xml:space="preserve">
-    <value>Tags:</value>
-    <comment>label</comment>
-  </data>
-  <data name="TaggedDialog_Title" xml:space="preserve">
-    <value>Find Tagged Pages</value>
-    <comment>dialog title</comment>
-  </data>
-  <data name="TaggingDialog.Text" xml:space="preserve">
-    <value>Page Tags</value>
-    <comment>dialog title</comment>
-  </data>
-  <data name="TaggingDialog_clearLabel.Text" xml:space="preserve">
-    <value>Remove all</value>
-    <comment>linklabel</comment>
-  </data>
-  <data name="TaggingDialog_commonGroup.Text" xml:space="preserve">
-    <value>Common words on this page</value>
-    <comment>groupbox</comment>
-  </data>
-  <data name="TaggingDialog_introLabel.Text" xml:space="preserve">
-    <value>Separate tags with commas</value>
-    <comment>intro label</comment>
-  </data>
-  <data name="TaggingDialog_recentGroup.Text" xml:space="preserve">
-    <value>Recently used</value>
-    <comment>groupbox</comment>
-  </data>
-  <data name="TaggingDialog_tagLabel.Text" xml:space="preserve">
-    <value>Page Tags</value>
-    <comment>header label</comment>
+  <data name="TagBankCommand_confirm" xml:space="preserve">
+    <value>The tag bank contains text. Are you sure you want to remove it?</value>
+    <comment>messagebox</comment>
   </data>
   <data name="TextToTable_NoText" xml:space="preserve">
     <value>No text is selected</value>
@@ -4819,17 +5108,9 @@ In this section</value>
     <value>OneMore update available</value>
     <comment>panel title</comment>
   </data>
-  <data name="UpdateDialog_upLastUpdatedLabel.Text" xml:space="preserve">
-    <value>Last updated:</value>
-    <comment>label</comment>
-  </data>
   <data name="UpdateDialog_upOKButton.Text" xml:space="preserve">
     <value>Update</value>
     <comment>button</comment>
-  </data>
-  <data name="UpdateDialog_upReleaseNotesLink.Text" xml:space="preserve">
-    <value>Release notes</value>
-    <comment>link</comment>
   </data>
   <data name="UpdateDialog_upVersionLabel.Text" xml:space="preserve">
     <value>Update version:</value>
@@ -4851,6 +5132,9 @@ In this section</value>
   <data name="word_All" xml:space="preserve">
     <value>All</value>
   </data>
+  <data name="word_Alphanumeric" xml:space="preserve">
+    <value>Alpha-numeric</value>
+  </data>
   <data name="word_Apply" xml:space="preserve">
     <value>Apply</value>
   </data>
@@ -4862,6 +5146,9 @@ In this section</value>
   </data>
   <data name="word_Caption" xml:space="preserve">
     <value>Caption</value>
+  </data>
+  <data name="word_Clear" xml:space="preserve">
+    <value>Clear</value>
   </data>
   <data name="word_Close" xml:space="preserve">
     <value>Close</value>
@@ -4877,6 +5164,9 @@ In this section</value>
   </data>
   <data name="word_Completed" xml:space="preserve">
     <value>Completed</value>
+  </data>
+  <data name="word_Constraint" xml:space="preserve">
+    <value>Constraint</value>
   </data>
   <data name="word_Contrast" xml:space="preserve">
     <value>Contrast</value>
@@ -4902,14 +5192,23 @@ In this section</value>
   <data name="word_Element" xml:space="preserve">
     <value>Element</value>
   </data>
+  <data name="word_Empty" xml:space="preserve">
+    <value>Empty</value>
+  </data>
   <data name="word_Extract" xml:space="preserve">
     <value>Extract</value>
   </data>
   <data name="word_Favorites" xml:space="preserve">
     <value>Favorites</value>
   </data>
+  <data name="word_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
   <data name="word_Font" xml:space="preserve">
     <value>Font</value>
+  </data>
+  <data name="word_Format" xml:space="preserve">
+    <value>Format</value>
   </data>
   <data name="word_Function" xml:space="preserve">
     <value>Function</value>
@@ -4923,8 +5222,17 @@ In this section</value>
   <data name="word_Grayscale" xml:space="preserve">
     <value>Grayscale</value>
   </data>
+  <data name="word_Hashtags" xml:space="preserve">
+    <value>Hashtags</value>
+  </data>
   <data name="word_History" xml:space="preserve">
     <value>History</value>
+  </data>
+  <data name="word_Images" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="word_Indent" xml:space="preserve">
+    <value>Indent</value>
   </data>
   <data name="word_Index" xml:space="preserve">
     <value>word_Index</value>
@@ -4938,6 +5246,9 @@ In this section</value>
   <data name="word_Language" xml:space="preserve">
     <value>Language</value>
   </data>
+  <data name="word_Length" xml:space="preserve">
+    <value>Length</value>
+  </data>
   <data name="word_Limit" xml:space="preserve">
     <value>Limit</value>
   </data>
@@ -4950,6 +5261,9 @@ In this section</value>
   <data name="word_Name" xml:space="preserve">
     <value>Name</value>
   </data>
+  <data name="word_Navigator" xml:space="preserve">
+    <value>Navigator</value>
+  </data>
   <data name="word_No" xml:space="preserve">
     <value>No</value>
   </data>
@@ -4959,8 +5273,17 @@ In this section</value>
   <data name="word_Notebook" xml:space="preserve">
     <value>Notebook</value>
   </data>
+  <data name="word_Notebooks" xml:space="preserve">
+    <value>Notebooks</value>
+  </data>
   <data name="word_Notes" xml:space="preserve">
     <value>Notes</value>
+  </data>
+  <data name="word_Numbering" xml:space="preserve">
+    <value>Numbering</value>
+  </data>
+  <data name="word_Numeric" xml:space="preserve">
+    <value>Numeric</value>
   </data>
   <data name="word_OK" xml:space="preserve">
     <value>OK</value>
@@ -4979,6 +5302,9 @@ In this section</value>
   </data>
   <data name="word_Planned" xml:space="preserve">
     <value>Planned</value>
+  </data>
+  <data name="word_Plugins" xml:space="preserve">
+    <value>Plugins</value>
   </data>
   <data name="word_Preview" xml:space="preserve">
     <value>Preview</value>
@@ -5004,6 +5330,9 @@ In this section</value>
   <data name="word_Save" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="word_Schedule" xml:space="preserve">
+    <value>Schedule</value>
+  </data>
   <data name="word_Scope" xml:space="preserve">
     <value>Scope</value>
   </data>
@@ -5018,6 +5347,9 @@ In this section</value>
   </data>
   <data name="word_Silenced" xml:space="preserve">
     <value>Silenced</value>
+  </data>
+  <data name="word_Snippets" xml:space="preserve">
+    <value>Snippets</value>
   </data>
   <data name="word_Start" xml:space="preserve">
     <value>Start</value>
@@ -5095,152 +5427,11 @@ In this section</value>
     <value>Word Counts</value>
     <comment>page title</comment>
   </data>
-  <data name="Architecture" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Architecture.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="sponsor_dark" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Commands\Tools\sponsor-dark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Automobile" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\automobile.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="BallotBox" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\BallotBox.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Bell" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Bell.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Bullet" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\bullet.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Calendar" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\calendar.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Camera" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\camera.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="CheckMark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\checkmark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Circle" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\circle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Clipboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Clipboard.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Cloud" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\cloud.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Copyright" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\copyright.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Cross" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\cross.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Cycling" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\cyclist.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Envelope" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\envelope.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Eyes" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\eyes.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Family" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\family.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Financial" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\financial.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Flag" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\flag.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Folder" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Folder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Globe" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Globe.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Hammer" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\hammer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Heart" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Heart.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Interrobang" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Interrobang.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Journal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\journal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="LeftwardsArrow" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\leftwardsarrow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Lock" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Lock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Memo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\memo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Passwords" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\passwords.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Pencil" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\pencil.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Pushpin" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\pushpin.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Recycle" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Recycle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="RightwardsArrow" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\rightwardsarrow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Section" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\section.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Shazam" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\shazam.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Smiley" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\smiley.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Software" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\software.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Sports" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\sports.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Sports1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Sports.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="SportsEU" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\SportsEU.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Star" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\star.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Summary" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\summary.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Tasks" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\tasks.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Tools" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Tools.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Travel" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\travel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Video" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Video.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Warning" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\Warning.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Watch" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\watch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="XMark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Commands\Snippets\Emoji\Images\xmark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="sponsor_light" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Commands\Tools\sponsor-light.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ribInsertNoteBoxButton" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ribbon\images\ribinsertnoteboxbutton.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -5254,11 +5445,152 @@ In this section</value>
   <data name="ribSearchHashtagsButton" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Ribbon\Images\ribSearchHashtagsButton.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\bold.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="e_Architecture" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Architecture.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Copy" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Images\Copy.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="e_Automobile" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Automobile.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_BallotBox" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_BallotBox.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Bell" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Bell.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Bullet" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Bullet.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Calendar" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Calendar.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Camera" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Camera.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_CheckMark" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_CheckMark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Circle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Circle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Clipboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Clipboard.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Cloud" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Cloud.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Copyright" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Copyright.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Cross" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Cross.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Cycling" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Cycling.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Delta" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Delta.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Envelope" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Envelope.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Eyes" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Eyes.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Family" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Family.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Financial" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Financial.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Flag" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Flag.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Folder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Folder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Globe" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Globe.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Hammer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Hammer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Heart" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Heart.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Interrobang" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Interrobang.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Journal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Journal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_LeftwardsArrow" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_LeftwardsArrow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Lock" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Lock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Memo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Memo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Passwords" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Passwords.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Pencil" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Pencil.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Pushpin" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Pushpin.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Recycle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Recycle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_RightwardsArrow" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_RightwardsArrow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Section" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Section.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Shazam" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Shazam.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Smiley" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Smiley.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Software" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Software.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Sports" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Sports.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_SportsEU" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_SportsEU.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Star" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Star.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Summary" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Summary.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Tasks" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Tasks.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Tools" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Tools.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Travel" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Travel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Video" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Video.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Warning" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Warning.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_Watch" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_Watch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="e_XMark" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Emoji\e_XMark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="CustomStyles" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\customstyles.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -5275,9 +5607,6 @@ In this section</value>
   <data name="DarkTableStyles" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\darktablestyles.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Delete" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\delete.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="DoubleLine" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\doubleline.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -5286,9 +5615,6 @@ In this section</value>
   </data>
   <data name="Equal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\equal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Exit" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Images\Exit.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ExpandArrow" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\expandarrow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -5302,14 +5628,8 @@ In this section</value>
   <data name="FolderOpen" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\folderopen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="FontColor" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\fontcolor.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Grid40" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Images\Grid40.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Italic" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\italic.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Label" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\label.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -5323,9 +5643,6 @@ In this section</value>
   <data name="Logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\logo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="NewStyle" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\newstyle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="NoSpellCheck" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\nospellcheck.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -5338,21 +5655,6 @@ In this section</value>
   <data name="Open" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\open.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Refresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\refresh.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Rename" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\rename.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Reorder" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\reorder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Restart" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Images\Restart.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="SaveAs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\saveas.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="SectionGroup" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\sectiongroup.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -5361,15 +5663,6 @@ In this section</value>
   </data>
   <data name="Snippets" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\snippets.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Strikethrough" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\strikethrough.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Subscript" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\subscript.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Superscript" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\superscript.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="TableStyles" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\tablestyles.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -5380,14 +5673,95 @@ In this section</value>
   <data name="TextHighlightColorPicker" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\texthighlightcolorpicker.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Underline" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>images\underline.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Unlocked" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\unlocked.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="UpArrow" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>images\uparrow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Bold.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Copy" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Copy.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Delete" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Delete.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_FileOpen" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_FileOpen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_FolderClose" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_FolderClose.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_FolderOpen" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_FolderOpen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_FontColor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_FontColor.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Help" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Help.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Highlighter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Highlighter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Italic" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Italic.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_MoveDown" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_MoveDown.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_MoveUp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_MoveUp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_NewStyle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_NewStyle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Refresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Refresh.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Rename" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Rename.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Reorder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Reorder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Reset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Reset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Restart" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Restart.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_SaveAs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_SaveAs.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Search" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Search.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_SearchTags" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_SearchTags.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_SelectAll" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_SelectAll.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Sort" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Sort.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Stop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Stop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Strikethrough" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Strikethrough.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Subscript" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Subscript.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Superscript" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Superscript.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="m_Underline" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\m_Underline.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Emojis" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Commands\Snippets\Emoji\Emojis.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
@@ -5404,8 +5778,20 @@ In this section</value>
   <data name="Ribbon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ribbon\ribbon.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="RibbonTabHome" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Ribbon\RibbonTabHome.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="RibbonTabOneMore" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Ribbon\RibbonTabOneMore.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="DefaultStyles" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\styles\defaultstyles.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="DarkTheme" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\UI\DarkTheme.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="LightTheme" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\UI\LightTheme.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="_0336_OneNoteApplication_2013" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>0336.OneNoteApplication_2013.xsd;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>

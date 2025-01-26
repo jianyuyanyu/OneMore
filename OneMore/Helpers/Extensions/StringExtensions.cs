@@ -126,6 +126,22 @@ namespace River.OneMoreAddIn
 
 
 		/// <summary>
+		/// Determines if the current string is one of a given set of values
+		/// </summary>
+		/// <param name="item"></param>
+		/// <param name="items"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		public static bool In(this string item, params string[] items)
+		{
+			if (items == null)
+				throw new ArgumentNullException("items");
+
+			return items.Contains(item);
+		}
+
+
+		/// <summary>
 		/// Strip all HTML from the given string
 		/// </summary>
 		/// <param name="s"></param>
@@ -326,10 +342,8 @@ namespace River.OneMoreAddIn
 		/// </summary>
 		/// <param name="s"></param>
 		/// <returns></returns>
-		public static XElement ToXmlWrapper(this string s)
+		public static XElement ToXmlWrapper(this string s, string name = "wrapper")
 		{
-			// ensure proper XML
-
 			// OneNote doesn't like &nbsp; inside CDATAs but &#160; is OK
 			// and is the same as \u00A0 but 1-byte
 			var value = s.Replace("&nbsp;", "&#160;");
@@ -340,7 +354,18 @@ namespace River.OneMoreAddIn
 			// quote unquote language attribute, e.g., lang=yo to lang="yo" (or two part en-US)
 			value = Regex.Replace(value, @"(\s)lang=([\w\-]+)([\s/>])", "$1lang=\"$2\"$3");
 
-			return XElement.Parse($"<wrapper>{value}</wrapper>");
+			// escape &
+			//value = System.Security.SecurityElement.Escape(value);
+
+			try
+			{
+				return XElement.Parse($"<{name}>{value}</{name}>", LoadOptions.PreserveWhitespace);
+			}
+			catch
+			{
+				Logger.Current.WriteLine($"error wrapping /{value}/");
+				throw;
+			}
 		}
 
 

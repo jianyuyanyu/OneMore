@@ -12,6 +12,7 @@ namespace River.OneMoreAddIn
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using System.Threading.Tasks;
+	using System.Windows.Forms;
 	using System.Windows.Media.Imaging;
 	using WindowsInput;
 	using WindowsInput.Native;
@@ -29,6 +30,9 @@ namespace River.OneMoreAddIn
 		//Message: OpenClipboard Failed (Exception from HRESULT: 0x800401D0 (CLIPBRD_E_CANT_OPEN))
 		//HResult: 0x800401D0 (-2147221040)
 		private const int CLIPBRD_E_CANT_OPEN = -2147221040;
+
+		private const int RetryTimes = 5;
+		private const int RetryDelay = 200;
 
 
 
@@ -135,8 +139,9 @@ namespace River.OneMoreAddIn
 		/// Restores the state of the clipboard to the content preserved using StashState()
 		/// </summary>
 		/// <returns></returns>
-		public async Task RestoreState()
+		public async Task<bool> RestoreState()
 		{
+			var success = true;
 			await SingleThreaded.Invoke(() =>
 			{
 				// avoids 0x800401D0/CLIPBRD_E_CANT_OPEN due to thread contentions
@@ -165,18 +170,21 @@ namespace River.OneMoreAddIn
 					{
 						try
 						{
-							Win.Clipboard.SetDataObject(data, true);
+							Clipboard.SetDataObject(data, true, RetryTimes, RetryDelay);
 						}
 						catch (COMException ex)
 							when (ex.ErrorCode == CLIPBRD_E_CANT_OPEN)
 						{
-							logger.WriteLine("clipboard possibly locked by another application", ex);
+							success = false;
+							logger.WriteLine(
+								"error in RestoreState; clipboard possibly locked by another application", ex);
 						}
 					}
 				}
 			});
 
 			stash.Clear();
+			return success;
 		}
 
 
@@ -215,16 +223,32 @@ namespace River.OneMoreAddIn
 		/// </summary>
 		/// <param name="text"></param>
 		/// <returns></returns>
-		public async Task SetHtml(string text)
+		public async Task<bool> SetHtml(string text)
 		{
+			var success = true;
 			await SingleThreaded.Invoke(() =>
 			{
 				// avoids 0x800401D0/CLIPBRD_E_CANT_OPEN due to thread contentions
 				lock (gate)
 				{
-					Win.Clipboard.SetText(text, Win.TextDataFormat.Html);
+					try
+					{
+						var data = new Win.DataObject();
+						data.SetText(text, Win.TextDataFormat.Html);
+						Clipboard.SetDataObject(data, true, RetryTimes, RetryDelay);
+						//Win.Clipboard.SetText(text, Win.TextDataFormat.Html);
+					}
+					catch (COMException ex)
+						when (ex.ErrorCode == CLIPBRD_E_CANT_OPEN)
+					{
+						success = false;
+						logger.WriteLine(
+							"error in SetHTML; clipboard possibly locked by another application", ex);
+					}
 				}
 			});
+
+			return success;
 		}
 
 
@@ -233,16 +257,38 @@ namespace River.OneMoreAddIn
 		/// </summary>
 		/// <param name="text"></param>
 		/// <returns></returns>
-		public async Task SetText(string text)
+		public async Task<bool> SetText(string text, bool unicode = false)
 		{
+			var success = true;
 			await SingleThreaded.Invoke(() =>
 			{
 				// avoids 0x800401D0/CLIPBRD_E_CANT_OPEN due to thread contentions
 				lock (gate)
 				{
-					Win.Clipboard.SetText(text, Win.TextDataFormat.Text);
+					try
+					{
+						var data = new Win.DataObject();
+						data.SetText(text, Win.TextDataFormat.Text);
+
+						if (unicode)
+						{
+							data.SetText(text, Win.TextDataFormat.UnicodeText);
+						}
+
+						Clipboard.SetDataObject(data, true, RetryTimes, RetryDelay);
+						//Win.Clipboard.SetText(text, Win.TextDataFormat.Text);
+					}
+					catch (COMException ex)
+						when (ex.ErrorCode == CLIPBRD_E_CANT_OPEN)
+					{
+						success = false;
+						logger.WriteLine(
+							"error in SetText; clipboard possibly locked by another application", ex);
+					}
 				}
 			});
+
+			return success;
 		}
 
 

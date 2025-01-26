@@ -39,15 +39,15 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using (var one = new OneNote(out var page, out _))
+			await using (var one = new OneNote(out var page, out _))
 			{
 				if (!page.ConfirmBodyContext())
 				{
-					UIHelper.ShowError(Resx.Error_BodyContext);
+					ShowError(Resx.Error_BodyContext);
 					return;
 				}
 
-				_ = one.GetPage().GetPageColor(out _, out black);
+				_ = (await one.GetPage()).GetPageColor(out _, out black);
 			}
 
 			// transform RTF and Xaml data on clipboard to HTML
@@ -58,7 +58,7 @@ namespace River.OneMoreAddIn.Commands
 			// paste what's remaining from clipboard, letting OneNote do the
 			// heavy lifting of converting the HTML into one:xml schema
 
-			using (var one = new OneNote())
+			await using (var one = new OneNote())
 			{
 				// since the Hotkey message loop is watching all input, explicitly setting
 				// focus on the OneNote main window provides a direct path for SendKeys
@@ -114,7 +114,10 @@ namespace River.OneMoreAddIn.Commands
 					var formats = string.Join(",", Clipboard.GetDataObject().GetFormats(false));
 					logger.WriteLine($"PasteRtf clipboard:({formats})");
 				}
-			});
+			})
+			{
+				Name = $"{nameof(PasteRtfCommand)}Thread"
+			};
 
 			thread.SetApartmentState(ApartmentState.STA);
 			thread.Start();
@@ -580,7 +583,7 @@ namespace River.OneMoreAddIn.Commands
 
 			for (int i = 0; i < parts.Length; i++)
 			{
-				if (double.TryParse(parts[i], out var value))
+				if (double.TryParse(parts[i], NumberStyles.Any, CultureInfo.InvariantCulture, out var value))
 				{
 					parts[i] = Math.Ceiling(value * DeltaSize).ToString(CultureInfo.InvariantCulture);
 				}

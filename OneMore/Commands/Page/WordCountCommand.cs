@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2020 Steven M Cohn.  All rights reserved.
+// Copyright © 2020 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -49,7 +49,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			regex = new Regex(CJKPattern);
 
-			using (one = new OneNote())
+			await using (one = new OneNote())
 			{
 				scope = args.Length > 0 && args[0] is OneNote.Scope ascope
 					? ascope
@@ -59,15 +59,15 @@ namespace River.OneMoreAddIn.Commands
 				{
 					// words on the current page...
 
-					var count = WordsOnPage(one.CurrentPageId, out var wholePage);
+					var (count, wholePage) = await WordsOnPage(one.CurrentPageId);
 
 					if (wholePage)
 					{
-						UIHelper.ShowMessage(string.Format(Resx.WordCountCommand_Count, count));
+						ShowInfo(string.Format(Resx.WordCountCommand_Count, count));
 					}
 					else
 					{
-						UIHelper.ShowMessage(string.Format(Resx.WordCountCommand_Selected, count));
+						ShowInfo(string.Format(Resx.WordCountCommand_Selected, count));
 					}
 				}
 				else
@@ -80,16 +80,19 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private int WordsOnPage(string pageID, out bool wholePage)
+		private async Task<(int, bool)> WordsOnPage(string pageID)
 		{
-			var page = one.GetPage(pageID,
+			var page = await one.GetPage(pageID,
 				// only use Selection for current page,
 				// otherwise counts might be off for pages other than the current page
 				scope == OneNote.Scope.Self
 					? OneNote.PageDetail.Selection
 					: OneNote.PageDetail.Basic);
 
-			var runs = page.GetSelectedElements(true);
+			var runs = scope == OneNote.Scope.Self
+				? new SelectionRange(page).GetSelections(defaulToAnytIfNoRange: true)
+				: page.Root.Descendants(ns + "T");
+
 			var count = 0;
 
 			foreach (var run in runs)
@@ -115,8 +118,10 @@ namespace River.OneMoreAddIn.Commands
 				}
 			}
 
-			wholePage = page.SelectionScope == SelectionScope.Empty;
-			return count;
+			// presume whole page if any non-selected runs were included
+			var wholePage = runs.Any(e => e.Attribute("selected") is null);
+
+			return (count, wholePage);
 		}
 
 
@@ -125,7 +130,7 @@ namespace River.OneMoreAddIn.Commands
 			grandTotal = grandTotalPages = 0;
 
 			one.CreatePage(one.CurrentSectionId, out var pageId);
-			var page = one.GetPage(pageId);
+			var page = await one.GetPage(pageId);
 			page.Title = Resx.WordCountsCommand_Title;
 			page.SetMeta(MetaNames.WordCount, "true");
 			page.Root.SetAttributeValue("lang", "yo");
@@ -144,7 +149,7 @@ namespace River.OneMoreAddIn.Commands
 
 				if (scope == OneNote.Scope.Pages)
 				{
-					var section = one.GetSection();
+					var section = await one.GetSection();
 					progress.SetMaximum(section.Elements().Count());
 
 					var notebook = await one.GetNotebook(one.CurrentNotebookId, OneNote.Scope.Self);
@@ -182,7 +187,7 @@ namespace River.OneMoreAddIn.Commands
 						ReportSection(page, container, section);
 					});
 
-					ReportGrantTotal(container);
+					ReportGrandTotal(container);
 				}
 
 				progress.SetMessage("Updating report...");
@@ -220,7 +225,7 @@ namespace River.OneMoreAddIn.Commands
 				.Where(e =>
 					e.Attribute("ID").Value != page.PageId &&
 					e.Attribute("isInRecycleBin") == null)
-				.ForEach(child =>
+				.ForEach(async child =>
 			{
 				var row = table.AddRow();
 
@@ -230,7 +235,7 @@ namespace River.OneMoreAddIn.Commands
 
 				row[0].SetContent(new Paragraph(name));
 
-				var count = WordsOnPage(child.Attribute("ID").Value, out _);
+				var (count, _) = await WordsOnPage(child.Attribute("ID").Value);
 
 				pages++;
 				total += count;
@@ -254,7 +259,7 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private void ReportGrantTotal(XElement container)
+		private void ReportGrandTotal(XElement container)
 		{
 			var table = new Table(ns, 1, 2)
 			{

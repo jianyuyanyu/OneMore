@@ -63,8 +63,8 @@ namespace River.OneMoreAddIn.Settings
 			{
 				Localize(new string[]
 				{
-					"introLabel",
-					"clearButton",
+					"introBox",
+					"clearButton=word_Clear",
 					"resetButton=word_Reset",
 					"resetAllButton"
 				});
@@ -73,11 +73,12 @@ namespace River.OneMoreAddIn.Settings
 				keyColumn.HeaderText = Resx.KeyboardSheet_keyColumn_HeaderText;
 			}
 
-			toolstrip.Rescale();
-
 			gridView.AutoGenerateColumns = false;
 			gridView.Columns[0].DataPropertyName = "Description";
 			gridView.Columns[1].DataPropertyName = "Hotkey";
+
+			(_, float scaleY) = UI.Scaling.GetScalingFactors();
+			gridView.RowTemplate.Height = (int)(16 * scaleY);
 
 			this.ribbon = ribbon;
 
@@ -100,6 +101,7 @@ namespace River.OneMoreAddIn.Settings
 					Resx.ResourceManager.GetString(a.Attr.ResID, AddIn.Culture),
 					new Hotkey(a.Attr.DefaultKeys)
 					))
+				.Where(k => !string.IsNullOrWhiteSpace(k.Description))
 				.OrderBy(k => k.Description)
 				.ToList();
 

@@ -47,10 +47,10 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var c = (char)args[0];
 
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 			if (!page.ConfirmBodyContext())
 			{
-				UIHelper.ShowError(Resx.Error_BodyContext);
+				ShowError(Resx.Error_BodyContext);
 				return;
 			}
 
@@ -58,11 +58,11 @@ namespace River.OneMoreAddIn.Commands
 			var color = dark ? "#D0D0D0" : "#202020";
 			var length = LineCharCount;
 
-			var settings = new SettingsProvider().GetCollection(nameof(LinesSheet));
+			var settings = new SettingsProvider().GetCollection(nameof(ColorsSheet));
 			if (settings != null)
 			{
-				color = settings.Get<Color>("color", ColorTranslator.FromHtml(color)).ToRGBHtml();
-				length = (int)settings.Get<decimal>("length", length);
+				color = settings.Get<Color>("lineColor", ColorTranslator.FromHtml(color)).ToRGBHtml();
+				length = (int)settings.Get<decimal>("lineLength", length);
 			}
 
 			var current =

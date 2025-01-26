@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2020 Steven M Cohn.  All rights reserved.
+// Copyright © 2020 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -35,10 +35,10 @@ namespace River.OneMoreAddIn.Commands
 			var keyword = (string)args[0];
 			Resx.Culture = AddIn.Culture;
 
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 			if (!page.ConfirmBodyContext())
 			{
-				UIHelper.ShowError(Resx.Error_BodyContext);
+				ShowError(Resx.Error_BodyContext);
 				return;
 			}
 
@@ -53,27 +53,38 @@ namespace River.OneMoreAddIn.Commands
 
 			// find anchor and optional selected content...
 
-			var cursor = page.GetTextCursor();
+			var range = new SelectionRange(page);
+			range.GetSelection();
+
 			XElement content;
 			XElement anchor = null;
 
-			if (// cursor is not null if selection range is empty
-				cursor != null &&
-				// selection range is a single line containing a hyperlink
-				!(page.SelectionSpecial && page.SelectionScope == SelectionScope.Empty))
+			if (range.Scope == SelectionScope.TextCursor)
 			{
 				content = new XElement(ns + "OE",
 					new XAttribute("style", normalStyle.ToCss()),
-					new XElement(ns + "T", new XCData(Resx.InsertInfoBox_yourContentHere)
+					new XElement(ns + "T",
+						new XAttribute("selected", "all"),
+						new XCData(Resx.phrase_YourContentHere)
 					));
+
+				var editor = new PageEditor(page);
+				editor.ExtractSelectedContent();
+				anchor = editor.Anchor;
 			}
 			else
 			{
-				content = page.ExtractSelectedContent(out anchor);
+				var editor = new PageEditor(page)
+				{
+					// the extracted content will be selected=all, keep it that way
+					KeepSelected = true
+				};
 
-				content.Descendants().Attributes()
-					.Where(a => a.Name == "selected")
-					.Remove();
+				content = editor.ExtractSelectedContent();
+				anchor = editor.Anchor;
+
+				editor.Deselect();
+				editor.FollowWithCurosr(content);
 			}
 
 			// inner table...
@@ -130,63 +141,26 @@ namespace River.OneMoreAddIn.Commands
 
 			if (anchor == null)
 			{
-				page.AddNextParagraph(outer.Root);
-				//page.InsertParagraph(outer.Root, true);
-			}
-			else if (anchor.HasElements)
-			{
-				// selected text was a subset of runs under an OE
-				anchor.AddAfterSelf(new XElement(ns + "OE", outer.Root));
+				var editor = new PageEditor(page);
+				editor.AddNextParagraph(outer.Root);
 			}
 			else
 			{
-				// selected text was all of an OE
-				anchor.Add(outer.Root);
+				var localName = anchor.Name.LocalName;
+				var box = new XElement(ns + "OE", outer.Root);
+
+				if (localName.In("OE", "HTMLBlock"))
+				{
+					anchor.AddAfterSelf(box);
+				}
+				else // if (localName.In("OEChildren", "Outline"))
+				{
+					anchor.AddFirst(box);
+				}
 			}
 
 			await one.Update(page);
 		}
 	}
 }
-/*
-<one:OE>
-  <one:Table bordersVisible="true">
-    <one:Columns>
-      <one:Column index="0" width="500" isLocked="true" />
-    </one:Columns>
-    <one:Row>
-      <one:Cell shadingColor="#FFF8F7">
-        <one:OEChildren>
-          <one:OE>
-            <one:Table bordersVisible="false">
-              <one:Columns>
-                <one:Column index="0" />
-                <one:Column index="1" />
-              </one:Columns>
-              <one:Row>
-                <one:Cell>
-                  <one:OEChildren>
-                    <one:OE style="font-family:'Segoe UI Symbol';font-size:22.0pt;color:#B43512;text-align:center">
-                      <one:T><![CDATA[<span style='font-weight:bold'>⚠</span>]]></one:T>
-                    </one:OE>
-                  </one:OEChildren>
-                </one:Cell>
-                <one:Cell>
-                  <one:OEChildren>
-                    <one:OE style="font-family:'Segoe UI';font-size:11.0pt;color:black">
-                      <one:T><![CDATA[<span style='font-weight:bold;background:white'>Warning</span>]]></one:T>
-                    </one:OE>
-                    <one:OE style="font-family:'Segoe UI';font-size:11.0pt;color:#333333">
-                      <one:T><![CDATA[Warning block]]></one:T>
-                    </one:OE>
-                  </one:OEChildren>
-                </one:Cell>
-              </one:Row>
-            </one:Table>
-          </one:OE>
-        </one:OEChildren>
-      </one:Cell>
-    </one:Row>
-  </one:Table>
-</one:OE>
-*/
+

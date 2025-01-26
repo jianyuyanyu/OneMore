@@ -9,12 +9,11 @@ namespace River.OneMoreAddIn.Commands
 	using System.ComponentModel;
 	using System.Drawing;
 	using System.Globalization;
-	using System.Text.RegularExpressions;
 	using System.Windows.Forms;
 	using Resx = Properties.Resources;
 
 
-	internal partial class HashtagContextControl : UserControl
+	internal partial class HashtagContextControl : MoreUserControl
 	{
 		private int radius = 5;
 
@@ -29,12 +28,20 @@ namespace River.OneMoreAddIn.Commands
 		public HashtagContextControl(HashtagContext item)
 			: this()
 		{
+			var hintColor = manager.GetColor("HintText");
+			var grayColor = manager.GetColor("GrayText");
+			var hoverColor = manager.GetColor("HoverColor");
+
 			PageID = item.PageID;
+
+			checkbox.Enabled = item.Available;
 
 			pageLink.Text = $"{item.HierarchyPath}/{item.PageTitle}";
 			var oid = string.IsNullOrWhiteSpace(item.TitleID) ? string.Empty : item.TitleID;
 			pageLink.Links.Add(0, pageLink.Text.Length, (item.PageID, oid));
+			pageLink.HoverColor = hoverColor;
 			tooltip.SetToolTip(pageLink, Resx.HashtagContext_jumpTip);
+			pageLink.Enabled = item.Available;
 
 			// LastModified...
 
@@ -51,24 +58,24 @@ namespace River.OneMoreAddIn.Commands
 
 			foreach (var snippet in item.Snippets)
 			{
-				var fore = snippet.DirectHit
-					? SystemColors.HotTrack
-					: SystemColors.GrayText;
+				var fore = snippet.DirectHit ? hintColor : grayColor;
 
 				var link = new MoreLinkLabel
 				{
 					Text = snippet.Snippet,
-					ActiveLinkColor = SystemColors.GrayText,
+					ActiveLinkColor = grayColor,
 					AutoSize = true,
 					Cursor = Cursors.Hand,
+					Enabled = item.Available,
 					ForeColor = fore,
-					HoverColor = Color.MediumOrchid,
+					HoverColor = hoverColor,
 					LinkColor = fore,
 					Location = new Point(30, 40),
 					Margin = new Padding(20, 6, 10, 6),
 					Size = new Size(530, 20),
 					TabStop = true,
-					VisitedLinkColor = SystemColors.GrayText
+					VisitedLinkColor = grayColor,
+					StrictColors = true
 				};
 
 				link.LinkClicked += NavigateTo;
@@ -87,6 +94,8 @@ namespace River.OneMoreAddIn.Commands
 			{
 				Height += snippetsPanel.Height - height;
 			}
+
+			Tag = item;
 		}
 
 
@@ -159,8 +168,12 @@ namespace River.OneMoreAddIn.Commands
 
 			try
 			{
-				var (PageID, ObjectID) = ((string PageID, string ObjectID))e.Link.LinkData;
-				await new OneNote().NavigateTo(PageID, ObjectID);
+				var (pageID, objectID) = ((string pageID, string objectID))e.Link.LinkData;
+				var success = await new OneNote().NavigateTo(pageID, objectID);
+				if (!success)
+				{
+					MoreMessageBox.ShowError(this, Resx.HashtagDialog_badLink);
+				}
 			}
 			catch (Exception exc)
 			{

@@ -7,7 +7,6 @@ namespace River.OneMoreAddIn.Commands
 	using River.OneMoreAddIn.Helpers.Office;
 	using System;
 	using System.Drawing;
-	using System.Linq;
 	using System.Windows.Forms;
 
 
@@ -86,7 +85,7 @@ namespace River.OneMoreAddIn.Commands
 
 		private void HitTest(object sender, MouseEventArgs e)
 		{
-			var swatch = palette.FirstOrDefault(s => s.Bounds.Contains(e.Location));
+			var swatch = palette.Find(s => s.Bounds.Contains(e.Location));
 			if (swatch != active)
 			{
 				using var g = paletteBox.CreateGraphics();
@@ -111,7 +110,7 @@ namespace River.OneMoreAddIn.Commands
 
 		private void ChooseColor(object sender, MouseEventArgs e)
 		{
-			var swatch = palette.FirstOrDefault(s => s.Bounds.Contains(e.Location));
+			var swatch = palette.Find(s => s.Bounds.Contains(e.Location));
 			if (swatch != null)
 			{
 				Color = swatch.Color;

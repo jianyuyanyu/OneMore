@@ -15,7 +15,7 @@ namespace River.OneMoreAddIn
 	using Resx = Properties.Resources;
 
 
-	internal sealed class FavoritesProvider : IDisposable
+	internal sealed class FavoritesProvider : Loggable, IAsyncDisposable
 	{
 		public enum FavoriteStatus
 		{
@@ -55,7 +55,6 @@ namespace River.OneMoreAddIn
 
 		private readonly string path;
 		private readonly IRibbonUI ribbon;
-		private readonly ILogger logger;
 
 		private OneNote one;
 		private XElement books;
@@ -65,24 +64,30 @@ namespace River.OneMoreAddIn
 
 		public FavoritesProvider(IRibbonUI ribbon)
 		{
-			logger = Logger.Current;
 			path = Path.Combine(PathHelper.GetAppDataPath(), Resx.FavoritesFilename);
 			this.ribbon = ribbon;
 		}
 
 
-		public void Dispose()
+		public async ValueTask DisposeAsync()
 		{
-			if (!disposed)
+			await DisposeAsyncCore().ConfigureAwait(false);
+			// DO NOT call this otherwise OneNote will not shutdown properly
+			//GC.SuppressFinalize(this);
+		}
+
+
+		async ValueTask DisposeAsyncCore()
+		{
+			if (!disposed && one is not null)
 			{
-				one?.Dispose();
+				await one.DisposeAsync();
 				disposed = true;
 			}
 		}
 
 
-
-		public void AddFavorite(bool addSection = false)
+		public async Task AddFavorite(bool addSection = false)
 		{
 			XElement root = null;
 
@@ -113,7 +118,7 @@ namespace River.OneMoreAddIn
 
 			one ??= new OneNote();
 
-			var info = addSection ? one.GetSectionInfo() : one.GetPageInfo();
+			var info = addSection ? await one.GetSectionInfo() : await one.GetPageInfo();
 			var notebookID = one.CurrentNotebookId;
 
 			var name = info.Name;
@@ -186,7 +191,7 @@ namespace River.OneMoreAddIn
 			var root = XElement.Load(path, LoadOptions.None);
 
 			var favorites = root.Elements()
-				.Where(e => e.Attribute("notebookID") != null)
+				.Where(e => e.Attribute("notebookID") is not null)
 				.ToList();
 
 			favorites.Remove();
@@ -237,7 +242,7 @@ namespace River.OneMoreAddIn
 					root.Add(favorite.Root);
 				}
 
-				using var provider = new FavoritesProvider(ribbon);
+				await using var provider = new FavoritesProvider(ribbon);
 				provider.SaveFavorites(root);
 			}
 			else
@@ -259,7 +264,10 @@ namespace River.OneMoreAddIn
 				try
 				{
 					notebook = await one.GetNotebook(favorite.NotebookID, OneNote.Scope.Pages);
-					notebooks.Add(favorite.NotebookID, notebook);
+					if (notebook is not null)
+					{
+						notebooks.Add(favorite.NotebookID, notebook);
+					}
 				}
 				catch (COMException exc) when ((uint)exc.ErrorCode == ErrorCodes.hrObjectMissing)
 				{
@@ -271,7 +279,7 @@ namespace River.OneMoreAddIn
 				}
 			}
 
-			if (notebook != null &&
+			if (notebook is not null &&
 				notebook.Descendants().Any(e => e.Attribute("ID")?.Value == favorite.ObjectID))
 			{
 				favorite.Status = FavoriteStatus.Known;
@@ -289,15 +297,24 @@ namespace River.OneMoreAddIn
 			books ??= await one.GetNotebooks();
 
 			var parts = favorite.Location.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+			if (parts.Length < 3)
+			{
+				// corrupt screentip attribute in XML? (populates Location)
+				// must be at least: /notebook/section/title
+				logger.WriteLine($"invalid favorite location {favorite.Location} [{favorite.Name}]");
+				favorite.Status = FavoriteStatus.Suspect;
+				return false;
+			}
+
 			var notebook = notebooks.Values.FirstOrDefault(n => n.Attribute("name")?.Value == parts[0]);
-			if (notebook == null)
+			if (notebook is null)
 			{
 				// first part should be name of notebook
 				var nx = books.GetNamespaceOfPrefix(OneNote.Prefix);
 				var book = books.Elements(nx + "Notebook")
 					.FirstOrDefault(n => n.Attribute("name")?.Value == parts[0]);
 
-				if (book == null)
+				if (book is null)
 				{
 					logger.WriteLine($"broken link to favorite notebook {favorite.Location}");
 					favorite.Status = FavoriteStatus.Suspect;
@@ -320,8 +337,8 @@ namespace River.OneMoreAddIn
 			var node = notebook;
 			for (int i = 1; i < parts.Length; i++)
 			{
-				node = node.Elements().FirstOrDefault(n => n.Attribute("name").Value == parts[i]);
-				if (node == null)
+				node = node.Elements().FirstOrDefault(n => n.Attribute("name")?.Value == parts[i]);
+				if (node is null)
 				{
 					logger.WriteLine($"broken link to favorite parts[{i}] {favorite.Location}");
 					favorite.Status = FavoriteStatus.Suspect;
