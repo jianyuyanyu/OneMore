@@ -58,7 +58,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			if (!Office.IsInstalled("Outlook"))
 			{
-				UIHelper.ShowInfo("Outlook must be installed to use this command");
+				ShowInfo("Outlook must be installed to use this command");
 				return;
 			}
 
@@ -87,7 +87,7 @@ namespace River.OneMoreAddIn.Commands
 
 			// import...
 
-			using (one = new OneNote(out page, out ns))
+			await using (one = new OneNote(out page, out ns))
 			{
 				if (dialog.ShowDetailedTable)
 				{
@@ -98,14 +98,14 @@ namespace River.OneMoreAddIn.Commands
 					await GenerateListReport(tasks);
 				}
 
-				BindTasks(tasks);
+				await BindTasks(tasks);
 			}
 		}
 
 
 		private async Task UpdateTableReport(string guid)
 		{
-			using (one = new OneNote(out page, out ns, OneNote.PageDetail.Basic))
+			await using (one = new OneNote(out page, out ns, OneNote.PageDetail.Basic))
 			{
 				var meta = page.Root.Descendants(ns + "Meta")
 					.FirstOrDefault(e =>
@@ -115,7 +115,7 @@ namespace River.OneMoreAddIn.Commands
 
 				if (meta == null)
 				{
-					UIHelper.ShowInfo("Outlook task table not found. It may have been deleted");
+					ShowInfo("Outlook task table not found. It may have been deleted");
 					return;
 				}
 
@@ -128,7 +128,7 @@ namespace River.OneMoreAddIn.Commands
 
 				if (!taskIDs.Any())
 				{
-					UIHelper.ShowInfo("Table contains no Outlook tasks. Rows may have been deleted");
+					ShowInfo("Table contains no Outlook tasks. Rows may have been deleted");
 					return;
 				}
 
@@ -198,7 +198,7 @@ namespace River.OneMoreAddIn.Commands
 			row[2].SetContent(new Paragraph(Resx.OutlookTaskReport_DateStarted).SetStyle(HeaderCss));
 			row[3].SetContent(new Paragraph(Resx.OutlookTaskReport_DateDue).SetStyle(HeaderCss));
 			row[4].SetContent(new Paragraph(Resx.OutlookTaskReport_Importance).SetStyle(HeaderCss));
-			row[5].SetContent(new Paragraph(Resx.OutlookTaskReport_Percent).SetStyle(HeaderCss));
+			row[5].SetContent(new Paragraph(Resx.phrase_PctComplete).SetStyle(HeaderCss));
 
 			PrepareTableContext();
 
@@ -215,7 +215,8 @@ namespace River.OneMoreAddIn.Commands
 			var nowf = DateTime.Now.ToShortFriendlyString();
 			var guid = Guid.NewGuid().ToString("b").ToUpper();
 
-			page.AddNextParagraph(
+			var editor = new PageEditor(page);
+			editor.AddNextParagraph(
 				new Paragraph(Resx.OutlookTaskReport_Title).SetQuickStyle(heading2Index),
 				new Paragraph($"{Resx.ReminderReport_LastUpdated} {nowf} " +
 					$"(<a href=\"onemore://ImportOutlookTasksCommand/refresh/{guid}\">{Resx.word_Refresh}</a>)")
@@ -239,7 +240,7 @@ namespace River.OneMoreAddIn.Commands
 			// wth only CR instead of NLCR so allow for any possibility
 			var delims = new[] { Environment.NewLine, "\r", "\n" };
 
-			importances = Resx.OutlookTaskReport_importances
+			importances = Resx.phrase_priorityOptions
 				.Split(delims, StringSplitOptions.RemoveEmptyEntries);
 
 			statuses = Resx.OutlookTaskReport_statuses
@@ -355,20 +356,22 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var ordered = tasks.OrderBy(t => t.FolderPath).ThenBy(t => t.Subject);
 
+			var editor = new PageEditor(page);
+
 			foreach (var task in ordered)
 			{
 				//logger.WriteLine($"importing \"{task.FolderPath}/{task.Subject}\"");
-				page.InsertParagraph(MakeTaskReference(task));
+				editor.InsertParagraph(MakeTaskReference(task));
 			}
 
 			await one.Update(page);
 		}
 
 
-		private void BindTasks(IEnumerable<OutlookTask> tasks)
+		private async Task BindTasks(IEnumerable<OutlookTask> tasks)
 		{
 			// re-fetch page to get IDs of new paragraphs...
-			page = one.GetPage(page.PageId, OneNote.PageDetail.Basic);
+			page = await one.GetPage(page.PageId, OneNote.PageDetail.Basic);
 			ns = page.Namespace;
 
 			// find the containing Outline to optimize the lookup loop below

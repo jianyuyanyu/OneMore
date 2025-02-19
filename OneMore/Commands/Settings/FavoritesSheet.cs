@@ -9,8 +9,8 @@ namespace River.OneMoreAddIn.Settings
 	using Microsoft.Office.Core;
 	using System;
 	using System.ComponentModel;
-	using System.Drawing;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using System.Windows.Forms;
 	using Favorite = FavoritesProvider.Favorite;
 	using FavoriteStatus = FavoritesProvider.FavoriteStatus;
@@ -23,6 +23,7 @@ namespace River.OneMoreAddIn.Settings
 		private readonly IRibbonUI ribbon;
 		private readonly bool shortcuts;
 		private BindingList<Favorite> favorites;
+		private Task validator;
 		private bool updated = false;
 
 
@@ -32,27 +33,20 @@ namespace River.OneMoreAddIn.Settings
 			InitializeComponent();
 
 			Name = "FavoritesSheet";
-			Title = Resx.FavoritesSheet_Text;
+			Title = Resx.word_Favorites;
 
 			if (NeedsLocalizing())
 			{
 				Localize(new string[]
 				{
-					"introLabel",
 					"optionsBox=word_Options",
 					"shortcutsBox",
-					"sortButton",
-					"upButton",
-					"downButton",
-					"deleteLabel",
-					"deleteButton"
+					"deleteButton=word_Delete"
 				});
 
 				nameColumn.HeaderText = Resx.word_Name;
 				locationColumn.HeaderText = Resx.FavoritesSheet_locationColumn_HeaderText;
 			}
-
-			toolStrip.Rescale();
 
 			gridView.AutoGenerateColumns = false;
 			gridView.Columns[0].DataPropertyName = "Name";
@@ -67,12 +61,32 @@ namespace River.OneMoreAddIn.Settings
 
 		private async void LoadData(object sender, EventArgs e)
 		{
-			using var provider = new FavoritesProvider(null);
+			(_, float scaleY) = UI.Scaling.GetScalingFactors();
+			gridView.RowTemplate.Height = (int)(16 * scaleY);
+
+			await using var provider = new FavoritesProvider(null);
 			var list = provider.LoadFavorites();
-			await provider.ValidateFavorites(list);
+
+			// capture Task so it can be completed later in RowEnter
+			validator = provider.ValidateFavorites(list);
+
 			favorites = new BindingList<Favorite>(list);
 
 			gridView.DataSource = favorites;
+		}
+
+
+		private async void FinishValidationOnRowEnter(object sender, DataGridViewCellEventArgs e)
+		{
+			// executed once (by unsetting 'validator') to update the data source binding
+			// after validation is completed
+
+			if (validator is not null)
+			{
+				await Task.WhenAll(validator);
+				validator = null;
+				favorites.ResetBindings();
+			}
 		}
 
 
@@ -85,7 +99,7 @@ namespace River.OneMoreAddIn.Settings
 					gridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText =
 						Resx.Favorites_unknown;
 
-					e.CellStyle.BackColor = Color.Pink;
+					e.CellStyle.ForeColor = manager.GetColor("ErrorText");
 					e.FormattingApplied = true;
 				}
 				else if (favorite.Status == FavoriteStatus.Suspect)
@@ -93,7 +107,8 @@ namespace River.OneMoreAddIn.Settings
 					gridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText =
 						Resx.Favorites_suspect;
 
-					e.CellStyle.BackColor = Color.LightGoldenrodYellow;
+					e.CellStyle.BackColor = manager.GetColor("Info");
+					e.CellStyle.ForeColor = manager.GetColor("InfoText");
 					e.FormattingApplied = true;
 				}
 			}
@@ -122,12 +137,9 @@ namespace River.OneMoreAddIn.Settings
 				? favorites[first].Name
 				: $"({gridView.SelectedRows.Count})";
 
-			var result = MessageBox.Show(
+			var result = UI.MoreMessageBox.Show(this,
 				string.Format(Resx.FavoritesSheet_DeleteMessage, text),
-				"OneMore",
-				MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-				MessageBoxDefaultButton.Button2,
-				MessageBoxOptions.DefaultDesktopOnly);
+				MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
 			if (result != DialogResult.Yes)
 				return;
@@ -144,48 +156,24 @@ namespace River.OneMoreAddIn.Settings
 			first--;
 			if (first < 0 && gridView.Rows.Count > 0)
 			{
-				gridView.Rows[0].Cells[0].Selected = true;
+				gridView.Rows[0].Selected = true;
 			}
 			else if (first < gridView.Rows.Count && first >= 0)
 			{
-				gridView.Rows[first].Cells[0].Selected = true;
+				gridView.Rows[first].Selected = true;
 			}
 		}
 
 
 		private void MoveItemDown(object sender, EventArgs e)
 		{
-			if (gridView.SelectedCells.Count > 0)
-			{
-				int colIndex = gridView.SelectedCells[0].ColumnIndex;
-				int rowIndex = gridView.SelectedCells[0].RowIndex;
-				if (rowIndex < favorites.Count - 1)
-				{
-					var item = favorites[rowIndex];
-					favorites.RemoveAt(rowIndex);
-					favorites.Insert(rowIndex + 1, item);
-
-					gridView.Rows[rowIndex + 1].Cells[colIndex].Selected = true;
-				}
-			}
+			gridView.MoveSelectedItemDown(favorites);
 		}
 
 
 		private void MoveItemUp(object sender, EventArgs e)
 		{
-			if (gridView.SelectedCells.Count > 0)
-			{
-				int colIndex = gridView.SelectedCells[0].ColumnIndex;
-				int rowIndex = gridView.SelectedCells[0].RowIndex;
-				if (rowIndex > 0 && rowIndex < favorites.Count)
-				{
-					var item = favorites[rowIndex];
-					favorites.RemoveAt(rowIndex);
-					favorites.Insert(rowIndex - 1, item);
-
-					gridView.Rows[rowIndex - 1].Cells[colIndex].Selected = true;
-				}
-			}
+			gridView.MoveSelectedItemUp(favorites);
 		}
 
 
@@ -231,8 +219,11 @@ namespace River.OneMoreAddIn.Settings
 					root.Add(favorite.Root);
 				}
 
-				using var provider = new FavoritesProvider(ribbon);
-				provider.SaveFavorites(root);
+				Task.Run(async () =>
+				{
+					await using var provider = new FavoritesProvider(ribbon);
+					provider.SaveFavorites(root);
+				});
 			}
 			else if (shortcuts != shortcutsBox.Checked)
 			{

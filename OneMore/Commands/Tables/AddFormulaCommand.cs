@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2020 Steven M Cohn.  All rights reserved.
+// Copyright © 2020 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -44,11 +44,11 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 
 			if (!page.ConfirmBodyContext())
 			{
-				UIHelper.ShowInfo(one.Window, Resx.FormulaCommand_SelectOne);
+				ShowInfo(Resx.FormulaCommand_SelectOne);
 				return;
 			}
 
@@ -67,7 +67,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (anchor == null)
 			{
-				UIHelper.ShowInfo(one.Window, Resx.FormulaCommand_SelectOne);
+				ShowInfo(Resx.FormulaCommand_SelectOne);
 				return;
 			}
 
@@ -76,17 +76,24 @@ namespace River.OneMoreAddIn.Commands
 
 			if (range == TableSelectionRange.Rectangular)
 			{
-				UIHelper.ShowInfo(one.Window, Resx.FormulaCommand_Linear);
+				ShowInfo(Resx.FormulaCommand_Linear);
 				return;
 			}
 
-			using var dialog = new FormulaDialog();
+			using var dialog = new FormulaDialog(table);
 
 			// display selected cell names
-			dialog.SetCellNames(
-				string.Join(", ", cells.Select(c => c.Coordinates))); // + $" ({rangeType})");
+			if (cells.Count == 1)
+			{
+				dialog.SetCellNames(cells[0].Coordinates);
+			}
+			else
+			{
+				dialog.SetCellNames(
+					$"{cells[0].Coordinates} - {cells[cells.Count - 1].Coordinates}");
+			}
 
-			var cell = cells.First();
+			var cell = cells[0];
 
 			// display formula of first cell if any
 			var formula = new Formula(cell);
@@ -104,6 +111,10 @@ namespace River.OneMoreAddIn.Commands
 				{
 					dialog.Tagged = true;
 				}
+				else
+				{
+					tagIndex = null;
+				}
 			}
 
 			if (dialog.ShowDialog(owner) != DialogResult.OK)
@@ -116,7 +127,7 @@ namespace River.OneMoreAddIn.Commands
 				tagIndex = page.AddTagDef(BoltSymbol, Resx.AddFormulaCommand_Calculated);
 			}
 
-			StoreFormula(cells,
+			StoreFormula(table, cells,
 				dialog.Formula, dialog.Format, dialog.DecimalPlaces,
 				range, tagIndex);
 
@@ -127,8 +138,8 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private void StoreFormula(
-			IEnumerable<TableCell> cells,
+		private static void StoreFormula(
+			Table table, IEnumerable<TableCell> cells,
 			string expression, FormulaFormat format, int dplaces,
 			TableSelectionRange rangeType, string tagIndex)
 		{
@@ -145,7 +156,7 @@ namespace River.OneMoreAddIn.Commands
 				return;
 			}
 
-			var regex = new Regex(@"([a-zA-Z]{1,3})(\d{1,3})");
+			var regex = new Regex(@"\b(?<c>[a-zA-Z]{1,3})(?<r>\d{1,3})\b");
 
 			int offset = 0;
 			foreach (var cell in cells)
@@ -162,14 +173,18 @@ namespace River.OneMoreAddIn.Commands
 						if (rangeType == TableSelectionRange.Columns)
 						{
 							col = TableCell.IndexToLetters(
-								TableCell.LettersToIndex(match.Groups[1].Value) + offset);
+								TableCell.LettersToIndex(match.Groups["c"].Value) + offset);
 
-							row = match.Groups[2].Value;
+							row = match.Groups["r"].Value;
 						}
 						else
 						{
-							col = match.Groups[1].Value;
-							row = (int.Parse(match.Groups[2].Value) + offset).ToString();
+							col = match.Groups["c"].Value;
+
+							var r = int.Parse(match.Groups["r"].Value);
+							row = match.Groups["o"].Success
+								? $"-{(table.RowCount - r + offset)}"
+								: (r + offset).ToString();
 						}
 
 						builder.Replace(match.Value, $"{col}{row}", match.Index, match.Length);

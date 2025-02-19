@@ -1,10 +1,8 @@
 ﻿//************************************************************************************************
-// Copyright © 2016 Steven M Cohn.  All rights reserved.
+// Copyright © 2016 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
-#pragma warning disable S1155 // "Any()" should be used to test for emptiness
 #pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions
-#pragma warning disable S4136 // Method overloads should be grouped together
 
 namespace River.OneMoreAddIn.Models
 {
@@ -17,9 +15,7 @@ namespace River.OneMoreAddIn.Models
 	using System.Linq;
 	using System.Media;
 	using System.Security.Cryptography;
-	using System.Text;
 	using System.Text.RegularExpressions;
-	using System.Xml;
 	using System.Xml.Linq;
 
 
@@ -39,7 +35,7 @@ namespace River.OneMoreAddIn.Models
 		/// <param name="root"></param>
 		public Page(XElement root)
 		{
-			if (root != null)
+			if (root is not null)
 			{
 				Namespace = root.GetNamespaceOfPrefix(OneNote.Prefix);
 				PageId = root.Attribute("ID")?.Value;
@@ -47,8 +43,6 @@ namespace River.OneMoreAddIn.Models
 
 				Root = root;
 			}
-
-			SelectionScope = SelectionScope.Unknown;
 		}
 
 
@@ -58,9 +52,12 @@ namespace River.OneMoreAddIn.Models
 		/// be used to optimize the page just prior to saving.
 		/// </summary>
 		/// <param name="root">The root element of the page</param>
-		private void ComputeHashes(XElement root)
+		private static void ComputeHashes(XElement root)
 		{
-			using var algo = MD5.Create();
+			// MD5 should be sufficient and performs best but is not FIPS compliant
+			// so use SHA1 instead. Computers are configured to enable/disable FIPS via
+			// HKLM\SYSTEM\CurrentControlSet\Control\Lsa\FipsAlgorithmPolicy\Enabled
+			using var algo = SHA1.Create();
 
 			// 1st generation child elements of the Page
 			foreach (var child in root.Elements())
@@ -70,7 +67,7 @@ namespace River.OneMoreAddIn.Models
 					child.Name.LocalName != "Meta")
 				{
 					var att = child.Attribute(HashAttributeName);
-					if (att == null)
+					if (att is null)
 					{
 						child.Add(new XAttribute(
 							HashAttributeName,
@@ -89,14 +86,14 @@ namespace River.OneMoreAddIn.Models
 		/// <param name="keep">Keeps all Outlines to force full page update</param>
 		public void OptimizeForSave(bool keep)
 		{
-			// MD5 should be sufficient and performs better than any other algorithm
-			using var algo = MD5.Create();
+			// see note above regarding SHA1 vs MD5
+			using var algo = SHA1.Create();
 
 			// 1st generation child elements of the Page
 			foreach (var child in Root.Elements().ToList())
 			{
 				var att = child.Attribute(HashAttributeName);
-				if (att != null)
+				if (att is not null)
 				{
 					att.Remove();
 
@@ -114,11 +111,20 @@ namespace River.OneMoreAddIn.Models
 		#endregion Hashing
 
 
-		public bool IsValid => Root != null;
+		/// <summary>
+		/// Gets all Outlines, skipping the reserved tag bank.
+		/// </summary>
+		public IEnumerable<XElement> BodyOutlines => Root
+			.Elements(Namespace + "Outline")
+			.Where(e => !e.Elements(Namespace + "Meta")
+				.Any(m => m.Attribute("name").Value.Equals(MetaNames.TaggingBank)));
+
+
+		public bool IsValid => Root is not null;
 
 
 		/// <summary>
-		/// Gest the namespace used to create new elements for the page
+		/// Gets the namespace used to create new elements for the page
 		/// </summary>
 		public XNamespace Namespace { get; private set; }
 
@@ -130,30 +136,9 @@ namespace River.OneMoreAddIn.Models
 
 
 		/// <summary>
-		/// Used as a signal to GetSelectedText that editor scanning is in reverse
-		/// </summary>
-		public bool ReverseScanning { get; set; }
-
-
-		/// <summary>
 		/// Gets the root element of the page
 		/// </summary>
 		public XElement Root { get; private set; }
-
-
-		/// <summary>
-		/// Gets the most recently known selection state where none means unknown, all
-		/// means there is an obvious selection region, and partial means the selection
-		/// region is zero.
-		/// </summary>
-		public SelectionScope SelectionScope { get; private set; }
-
-
-		/// <summary>
-		/// Gets an indication that the text cursor is positioned over either a hyperlink
-		/// or a MathML equation, both of which return zero-length selection ranges.
-		/// </summary>
-		public bool SelectionSpecial { get; private set; }
 
 
 		// TODO: this is inconsistent! It gets the plain text but allows setting complex CDATA
@@ -168,7 +153,7 @@ namespace River.OneMoreAddIn.Models
 					.Elements(Namespace + "T")
 					.Select(e => e.GetCData().GetWrapper().Value);
 
-				return titles == null ? null : string.Concat(titles);
+				return titles.Any() ? string.Concat(titles) : null;
 			}
 
 			set
@@ -201,22 +186,9 @@ namespace River.OneMoreAddIn.Models
 
 
 		/// <summary>
-		/// Appends content to the current page
-		/// </summary>
-		/// <param name="content"></param>
-		/// <returns></returns>
-		public XElement AddContent(IEnumerable<XElement> content)
-		{
-			var container = EnsureContentContainer();
-			container.Add(content);
-			return container;
-		}
-
-
-		/// <summary>
 		/// Appends HTML content to the current page
 		/// </summary>
-		/// <param name="html"></param>
+		/// <param name="html">Must have the HTML and BODY wrappers</param>
 		public void AddHtmlContent(string html)
 		{
 			var container = EnsureContentContainer();
@@ -228,29 +200,6 @@ namespace River.OneMoreAddIn.Models
 
 
 		/// <summary>
-		/// Adds the given content after the selected insertion point; this will not
-		/// replace selected regions.
-		/// </summary>
-		/// <param name="content">The content to add</param>
-		public void AddNextParagraph(XElement content)
-		{
-			InsertParagraph(content, false);
-		}
-
-
-		public void AddNextParagraph(params XElement[] content)
-		{
-			// consumer will build content array in document-order but InsertParagraph inserts
-			// just prior to the insertion point which will reverse the order of content items
-			// so insert them in reverse order intentionally so they show up correctly
-			for (var i = content.Length - 1; i >= 0; i--)
-			{
-				InsertParagraph(content[i], false);
-			}
-		}
-
-
-		/// <summary>
 		/// Adds the given QuickStyleDef element in the proper document order, just after
 		/// the TagDef elements if there are any
 		/// </summary>
@@ -258,7 +207,7 @@ namespace River.OneMoreAddIn.Models
 		public void AddQuickStyleDef(XElement def)
 		{
 			var tagdef = Root.Elements(Namespace + "TagDef").LastOrDefault();
-			if (tagdef == null)
+			if (tagdef is null)
 			{
 				Root.AddFirst(def);
 			}
@@ -283,8 +232,12 @@ namespace River.OneMoreAddIn.Models
 			int index = 0;
 			if (tags?.Any() == true)
 			{
-				var tag = tags.FirstOrDefault(e => e.Attribute("symbol").Value == symbol);
-				if (tag != null)
+				var tag = tags.FirstOrDefault(e =>
+					e.Attribute("symbol").Value == symbol &&
+					e.Attribute("fontColor").Value == "automatic" &&
+					e.Attribute("highlightColor").Value == "none");
+
+				if (tag is not null)
 				{
 					return tag.Attribute("index").Value;
 				}
@@ -310,8 +263,12 @@ namespace River.OneMoreAddIn.Models
 			var tags = Root.Elements(Namespace + "TagDef");
 			if (tags?.Any() == true)
 			{
-				var tag = tags.FirstOrDefault(e => e.Attribute("symbol").Value == tagdef.Symbol);
-				if (tag != null)
+				var tag = tags.FirstOrDefault(e =>
+					e.Attribute("symbol").Value == tagdef.Symbol &&
+					e.Attribute("fontColor").Value == tagdef.FontColor &&
+					e.Attribute("highlightColor").Value == tagdef.HighlightColor);
+
+				if (tag is not null)
 				{
 					return;
 				}
@@ -326,6 +283,9 @@ namespace River.OneMoreAddIn.Models
 		/// </summary>
 		/// <param name="mapping"></param>
 		/// <param name="outline"></param>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell",
+			"S2325:Methods and properties that don't access instance data should be static",
+			Justification = "false positive")]
 		public void ApplyStyleMapping(List<QuickStyleMapping> mapping, XElement outline)
 		{
 			// reverse sort the styles so logic doesn't overwrite subsequent index references
@@ -337,41 +297,13 @@ namespace River.OneMoreAddIn.Models
 					var elements = outline.Descendants()
 						.Where(e => e.Attribute("quickStyleIndex")?.Value == map.OriginalIndex);
 
-					if (elements?.Any() == true)
+					if (elements.Any())
 					{
 						var index = map.Style.Index.ToString();
 
 						foreach (var element in elements)
 						{
 							element.Attribute("quickStyleIndex").Value = index;
-						}
-					}
-				}
-			}
-		}
-
-
-		/// <summary>
-		/// Apply the given tagdef mappings to all descendants of the specified outline
-		/// </summary>
-		/// <param name="mapping"></param>
-		/// <param name="outline"></param>
-		public void ApplyTagDefMapping(List<TagDefMapping> mapping, XElement outline)
-		{
-			// reverse sort the indexes so logic doesn't overwrite subsequent index references
-			foreach (var map in mapping.OrderByDescending(s => s.TagDef.IndexValue))
-			{
-				if (map.OriginalIndex != map.TagDef.Index)
-				{
-					// apply new index to child outline elements
-					var elements = outline.Descendants(Namespace + "Tag")
-						.Where(e => e.Attribute("index")?.Value == map.OriginalIndex);
-
-					if (elements?.Any() == true)
-					{
-						foreach (var element in elements)
-						{
-							element.Attribute("index").Value = map.TagDef.Index;
 						}
 					}
 				}
@@ -431,229 +363,16 @@ namespace River.OneMoreAddIn.Models
 
 
 		/// <summary>
-		/// Invokes an edit function on the selected text. The selection may be either infered
-		/// from the current cursor position or explicitly highlighted as a selected region.
-		/// No assumptions are made as to the resultant content or the order in which parts of
-		/// context are edited.
-		/// </summary>
-		/// <param name="edit">
-		/// A Func that accepts an XNode and returns an XNode. The accepted XNode is either an
-		/// XText or a "span" XElement. The returned XNode can be either the original unmodified,
-		/// the original modified, or a new XNode. Regardless, the returned XNode will replace
-		/// the current XNode in the content.
-		/// </param>
-		/// <returns></returns>
-		public bool EditSelected(Func<XNode, XNode> edit)
-		{
-			var cursor = GetTextCursor(true);
-			if (cursor != null)
-			{
-				return EditNode(cursor, edit);
-			}
-
-			return EditSelected(Root, edit);
-		}
-
-
-		public bool EditNode(XElement cursor, Func<XNode, XNode> edit)
-		{
-			var updated = false;
-
-			// T elements can only be a child of an OE but can also have other T siblings...
-			// Each T will have one CDATA with one or more XText and SPAN XElements.
-			// OneNote handles nested spans by normalizing them into consecutive spans
-
-			// Just FYI, because we use XElement.Parse to build the DOM, XText nodes will be
-			// singular but may be surrounded by SPAN elements; i.e., there shouldn't be two
-			// consecutive XText nodes next to each other
-
-			// indicate to GetSelectedText() that we're scanning in reverse
-			ReverseScanning = true;
-
-			// is there a preceding T?
-			if ((cursor.PreviousNode is XElement prev) && !prev.GetCData().EndsWithWhitespace())
-			{
-				var cdata = prev.GetCData();
-				var wrapper = cdata.GetWrapper();
-				var nodes = wrapper.Nodes().ToList();
-
-				// reverse, extracting text and stopping when matching word delimiter
-				for (var i = nodes.Count - 1; i >= 0; i--)
-				{
-					if (nodes[i] is XText text)
-					{
-						// ends with delimiter so can't be part of current word
-						if (text.Value.EndsWithWhitespace())
-							break;
-
-						// extract last word and pump through the editor
-						var pair = text.Value.SplitAtLastWord();
-						if (pair.Item1 == null)
-						{
-							// entire content of this XText
-							edit(text);
-						}
-						else
-						{
-							// last word of this XText
-							text.Value = pair.Item2;
-							text.AddAfterSelf(edit(new XText(pair.Item1)));
-						}
-
-						// remaining text has a word delimiter
-						if (text.Value.StartsWithWhitespace())
-							break;
-					}
-					else if (nodes[i] is XElement span)
-					{
-						// ends with delimiter so can't be part of current word
-						if (span.Value.EndsWithWhitespace())
-							break;
-
-						// extract last word and pump through editor
-						var word = span.ExtractLastWord();
-						if (word == null)
-						{
-							// edit entire contents of SPAN
-							edit(span);
-						}
-						else
-						{
-							// last word of this SPAN
-							var spawn = new XElement(span.Name, span.Attributes(), word);
-							edit(spawn);
-							span.AddAfterSelf(spawn);
-						}
-
-						// remaining text has a word delimiter
-						if (span.Value.StartsWithWhitespace())
-							break;
-					}
-				}
-
-				// rebuild CDATA with edited content
-				cdata.Value = wrapper.GetInnerXml();
-				updated = true;
-			}
-
-			// indicate to GetSelectedText() that we're scanning forward
-			ReverseScanning = false;
-
-			// is there a following T?
-			if ((cursor.NextNode is XElement next) && !next.GetCData().StartsWithWhitespace())
-			{
-				var cdata = next.GetCData();
-				var wrapper = cdata.GetWrapper();
-				var nodes = wrapper.Nodes().ToList();
-
-				// extract text and stop when matching word delimiter
-				for (var i = 0; i < nodes.Count; i++)
-				{
-					if (nodes[i] is XText text)
-					{
-						// starts with delimiter so can't be part of current word
-						if (text.Value.StartsWithWhitespace())
-							break;
-
-						// extract first word and pump through editor
-						var pair = text.Value.SplitAtFirstWord();
-						if (pair.Item1 == null)
-						{
-							// entire content of this XText
-							edit(text);
-						}
-						else
-						{
-							// first word of this XText
-							text.Value = pair.Item2;
-							text.AddBeforeSelf(edit(new XText(pair.Item1)));
-						}
-
-						// remaining text has a word delimiter
-						if (text.Value.EndsWithWhitespace())
-							break;
-					}
-					else if (nodes[i] is XElement span)
-					{
-						// ends with delimiter so can't be part of current word
-						if (span.Value.StartsWithWhitespace())
-							break;
-
-						// extract first word and pump through editor
-						var word = span.ExtractFirstWord();
-						if (word == null)
-						{
-							// eidt entire contents of SPAN
-							edit(span);
-						}
-						else
-						{
-							// first word of this SPAN
-							var spawn = new XElement(span.Name, span.Attributes(), word);
-							edit(spawn);
-							span.AddBeforeSelf(spawn);
-						}
-
-						// remaining text has a word delimiter
-						if (span.Value.EndsWithWhitespace())
-							break;
-					}
-				}
-
-				// rebuild CDATA with edited content
-				cdata.Value = wrapper.GetInnerXml();
-				updated = true;
-			}
-
-			return updated;
-		}
-
-
-		public bool EditSelected(XElement root, Func<XNode, XNode> edit)
-		{
-			// detect all selected text (cdata within T runs)
-			var cdatas = root.Descendants(Namespace + "T")
-				.Where(e => e.Attributes("selected").Any(a => a.Value == "all")
-					&& e.FirstNode?.NodeType == XmlNodeType.CDATA)
-				.Select(e => e.FirstNode as XCData);
-
-			if (cdatas?.Any() != true)
-			{
-				return false;
-			}
-
-			foreach (var cdata in cdatas)
-			{
-				// edit every XText and SPAN in the T wrapper
-				var wrapper = cdata.GetWrapper();
-
-				// use ToList, otherwise enumeration will stop after first ReplaceWith
-				foreach (var node in wrapper.Nodes().ToList())
-				{
-					node.ReplaceWith(edit(node));
-				}
-
-				var text = wrapper.GetInnerXml();
-
-				// special case for <br> + EOL
-				text = text.Replace("<br>", "<br>\n");
-
-				// build CDATA with editing content
-				cdata.Value = text;
-			}
-
-			return true;
-		}
-
-
-		/// <summary>
 		/// Ensures the page contains at least one OEChildren elements and returns it
 		/// </summary>
-		public XElement EnsureContentContainer()
+		public XElement EnsureContentContainer(bool last = true)
 		{
 			XElement container;
-			var outline = Root.Elements(Namespace + "Outline").LastOrDefault();
-			if (outline == null)
+			var outline = last
+				? Root.Elements(Namespace + "Outline").LastOrDefault()
+				: Root.Elements(Namespace + "Outline").FirstOrDefault();
+
+			if (outline is null)
 			{
 				container = new XElement(Namespace + "OEChildren");
 				outline = new XElement(Namespace + "Outline", container);
@@ -661,8 +380,11 @@ namespace River.OneMoreAddIn.Models
 			}
 			else
 			{
-				container = outline.Elements(Namespace + "OEChildren").LastOrDefault();
-				if (container == null)
+				container = last
+					? outline.Elements(Namespace + "OEChildren").LastOrDefault()
+					: outline.Elements(Namespace + "OEChildren").FirstOrDefault();
+
+				if (container is null)
 				{
 					container = new XElement(Namespace + "OEChildren");
 					outline.Add(container);
@@ -671,7 +393,7 @@ namespace River.OneMoreAddIn.Models
 
 			// check Outline size
 			var size = outline.Elements(Namespace + "Size").FirstOrDefault();
-			if (size == null)
+			if (size is null)
 			{
 				// this size is close to OneNote defaults when a new Outline is created
 				outline.AddFirst(new XElement(Namespace + "Size",
@@ -710,13 +432,13 @@ namespace River.OneMoreAddIn.Models
 				.Elements(Namespace + "Size")
 				.FirstOrDefault();
 
-			if (element == null)
+			if (element is null)
 			{
 				return;
 			}
 
 			var attr = element.Attribute("width");
-			if (attr != null)
+			if (attr is not null)
 			{
 				var outlinePoints = double.Parse(attr.Value, CultureInfo.InvariantCulture);
 
@@ -732,86 +454,12 @@ namespace River.OneMoreAddIn.Models
 					attr.Value = stringPoints.ToString("#0.00", CultureInfo.InvariantCulture);
 
 					// must include isSetByUser or width doesn't take effect!
-					if (element.Attribute("isSetByUser") == null)
+					if (element.Attribute("isSetByUser") is null)
 					{
 						element.Add(new XAttribute("isSetByUser", "true"));
 					}
 				}
 			}
-		}
-
-
-		/// <summary>
-		/// Extract the selected content on the current page, wrapped in its own
-		/// OEChildren container
-		/// </summary>
-		/// <param name="firstParent">
-		/// The cloest element preceding the selected content; use this as a reference
-		/// when inserting replacement content.
-		/// </param>
-		/// <returns>A new OEChildren containing the selected content</returns>
-		public XElement ExtractSelectedContent(out XElement firstParent)
-		{
-			var content = new XElement(Namespace + "OEChildren");
-			firstParent = null;
-
-			var runs = Root.Elements(Namespace + "Outline")
-				.Descendants(Namespace + "T")
-				.Where(e => e.Attributes().Any(a => a.Name == "selected" && a.Value == "all"))
-				.ToList();
-
-			if (!runs.Any())
-			{
-				// not "text" so look for selected image(s)...
-				runs = Root.Elements(Namespace + "Outline")
-					.Descendants(Namespace + "Image")
-					.Where(e => e.Attributes().Any(a => a.Name == "selected" && a.Value == "all"))
-					.ToList();
-			}
-
-			if (runs.Any())
-			{
-				// content will eventually be added after the first parent
-				firstParent = runs[0].Parent;
-
-				// if text is in the middle of a soft-break block then need to split the block
-				// into two so the code box can be inserted, maintaining its relative position
-				if (runs[runs.Count - 1].NextNode != null)
-				{
-					var nextNodes = runs[runs.Count - 1].NodesAfterSelf().ToList();
-					nextNodes.Remove();
-
-					firstParent.AddAfterSelf(new XElement(Namespace + "OE",
-						firstParent.Attributes(),
-						nextNodes
-						));
-				}
-
-				// collect the content
-				foreach (var run in runs)
-				{
-					// new OE for run
-					var oe = new XElement(Namespace + "OE", run.Parent.Attributes());
-
-					// if run is part of a bullet or number list then include the one:List
-					if (run.PreviousNode is XElement list && list.Name.LocalName == "List")
-					{
-						list.Remove();
-						oe.Add(list);
-					}
-
-					// remove run from current parent
-					run.Remove();
-
-					// add run into new OE parent
-					oe.Add(run);
-
-					// add new OE to content
-					content.Add(oe);
-				}
-			}
-
-			return content;
 		}
 
 
@@ -825,155 +473,6 @@ namespace River.OneMoreAddIn.Models
 			return Root.Elements(Namespace + "Meta")
 				.FirstOrDefault(e => e.Attribute("name").Value == name)?
 				.Attribute("content").Value;
-		}
-
-
-
-		/// <summary>
-		/// Gets a collection of fully selected text runs
-		/// </summary>
-		/// <param name="all">
-		/// If no selected elements are found and this value is true then return all elements;
-		/// otherwise if no selection and this value is false then return an empty collection.
-		/// Default value is true.
-		/// </param>
-		/// <returns>
-		/// A collection of fully selected text runs. The collection will be empty if the
-		/// selected range is zero characters or one of the known special cases
-		/// </returns>
-		public IEnumerable<XElement> GetSelectedElements(bool all = true)
-		{
-			var selected = Root.Elements(Namespace + "Outline")
-				.Where(e => !e.Elements(Namespace + "Meta")
-					.Any(m => m.Attribute("name").Value.Equals(MetaNames.TaggingBank)))
-				.Descendants(Namespace + "T")
-				.Where(e => e.Attributes().Any(a => a.Name == "selected" && a.Value == "all"));
-
-			if (selected == null || selected.Count() == 0)
-			{
-				SelectionScope = SelectionScope.Unknown;
-
-				return all
-					? Root.Elements(Namespace + "Outline").Descendants(Namespace + "T")
-					: new List<XElement>();
-			}
-
-			// if exactly one then it could be an empty [] or it could be a special case
-			if (selected.Count() == 1)
-			{
-				var cursor = selected.First();
-				if (cursor.FirstNode.NodeType == XmlNodeType.CDATA)
-				{
-					var cdata = cursor.FirstNode as XCData;
-
-					// empty or link or xml-comment because we can't tell the difference between
-					// a zero-selection zero-selection link and a partial or fully selected link.
-					// Note that XML comments are used to wrap mathML equations
-					if (cdata.Value.Length == 0 ||
-						Regex.IsMatch(cdata.Value, @"<a\s+href.+?</a>", RegexOptions.Singleline) ||
-						Regex.IsMatch(cdata.Value, @"<!--.+?-->", RegexOptions.Singleline))
-					{
-						SelectionScope = SelectionScope.Empty;
-
-						return all
-							? Root.Elements(Namespace + "Outline").Descendants(Namespace + "T")
-							: new List<XElement>();
-					}
-				}
-			}
-
-			SelectionScope = SelectionScope.Region;
-
-			// return zero or more elements
-			return selected;
-		}
-
-
-		/// <summary>
-		/// Gets the currently selected text. If the text cursor is positioned over a word but
-		/// with zero selection length then that word is returned; othewise, text from the selected
-		/// region is returned.
-		/// </summary>
-		/// <returns>A string of the selected text</returns>
-		public string GetSelectedText()
-		{
-			var builder = new StringBuilder();
-
-			// not editing... just using EditSelected to extract the current text,
-			// ignoring inline span styling
-
-			EditSelected((s) =>
-			{
-				if (s is XText text)
-				{
-					if (ReverseScanning)
-						builder.Insert(0, text.Value);
-					else
-						builder.Append(text.Value);
-				}
-				else if (s is not XComment)
-				{
-					if (ReverseScanning)
-						builder.Insert(0, ((XElement)s).Value);
-					else
-						builder.Append(((XElement)s).Value);
-				}
-
-				return s;
-			});
-
-			return builder.ToString();
-		}
-
-
-		/// <summary>
-		/// Gets the T element of a zero-width selection. Visually, this appears as the current
-		/// cursor insertion point and can be used to infer the current word or phrase in text.
-		/// </summary>
-		/// <param name="allowPageTitle">
-		/// True to include the page title, otherwise just the body of the page
-		/// </param>
-		/// <returns>
-		/// Returns the one:T XElement of an empty cursor and Page.SelectionScope
-		/// is set to Empty or Special if the cursor is on a hyperlink or mathML equation
-		/// and sets SelectionSpecial to true if the selection range is not empty.
-		/// Returns null if there is a selected range greater than zero and sets
-		/// the SelectionScope to Region.
-		/// </returns>
-		public XElement GetTextCursor(bool allowPageTitle = false)
-		{
-			var root = allowPageTitle ? Root.Elements() : Root.Elements(Namespace + "Outline");
-
-			var selected = root.Descendants(Namespace + "T")
-				.Where(e => e.Attributes().Any(a => a.Name == "selected" && a.Value == "all"));
-
-			if (!selected.Any())
-			{
-				SelectionScope = SelectionScope.Empty;
-				return null;
-			}
-
-			var count = selected.Count();
-			if (count == 1)
-			{
-				var cursor = selected.First();
-				var cdata = cursor.GetCData();
-
-				// empty, link, or xml-comment because we can't tell the difference between
-				// a zero-selection link and a partial or fully selected link. Note that XML
-				// comments are used to wrap mathML equations
-				if (cdata.Value.Length == 0 ||
-					Regex.IsMatch(cdata.Value, @"^<a\s+href.+?</a>$", RegexOptions.Singleline) ||
-					Regex.IsMatch(cdata.Value, @"^<!--.+?-->$", RegexOptions.Singleline))
-				{
-					SelectionScope = SelectionScope.Empty;
-					SelectionSpecial = cdata.Value.Length > 0;
-					return cursor;
-				}
-			}
-
-			SelectionScope = SelectionScope.Region;
-			return null;
 		}
 
 
@@ -992,12 +491,12 @@ namespace River.OneMoreAddIn.Models
 				.Select(p => new Style(new QuickStyleDef(p)))
 				.FirstOrDefault();
 
-			if (style == null)
+			if (style is null)
 			{
 				var quick = key.GetDefaults();
 
 				var sibling = Root.Elements(Namespace + "QuickStyleDef").LastOrDefault();
-				if (sibling == null)
+				if (sibling is null)
 				{
 					quick.Index = 0;
 					Root.AddFirst(quick.ToElement(Namespace));
@@ -1128,7 +627,7 @@ namespace River.OneMoreAddIn.Models
 			var tag = Root.Elements(Namespace + "TagDef")
 				.FirstOrDefault(e => e.Attribute("symbol").Value == symbol);
 
-			if (tag != null)
+			if (tag is not null)
 			{
 				return tag.Attribute("index").Value;
 			}
@@ -1147,25 +646,12 @@ namespace River.OneMoreAddIn.Models
 			var tag = Root.Elements(Namespace + "TagDef")
 				.FirstOrDefault(e => e.Attribute("index").Value == index);
 
-			if (tag != null)
+			if (tag is not null)
 			{
 				return tag.Attribute("symbol").Value;
 			}
 
 			return null;
-		}
-
-
-		/// <summary>
-		/// Gets the TagDef mappings for the current page. Used to copy or merge
-		/// content on this page
-		/// </summary>
-		/// <returns></returns>
-		public List<TagDefMapping> GetTagDefMap()
-		{
-			return Root.Elements(Namespace + "TagDef")
-				.Select(e => new TagDefMapping(e))
-				.ToList();
 		}
 
 
@@ -1196,7 +682,7 @@ namespace River.OneMoreAddIn.Models
 					.Elements(Namespace + "MediaReference")
 					.FirstOrDefault(e => e.Attribute("mediaID").Value == mediaID);
 
-				if (file == null)
+				if (file is null)
 				{
 					// MediaFile element exists only after recording has stopped
 					return true;
@@ -1204,43 +690,6 @@ namespace River.OneMoreAddIn.Models
 			}
 
 			return false;
-		}
-
-
-		/// <summary>
-		/// Adds the given content immediately before or after the selected insertion point;
-		/// this will not replace selected regions.
-		/// </summary>
-		/// <param name="content">The content to insert</param>
-		/// <param name="before">
-		/// If true then insert before the insertion point; otherwise insert after the insertion point
-		/// </param>
-		public void InsertParagraph(XElement content, bool before = true)
-		{
-			var current = Root.Descendants(Namespace + "OE").LastOrDefault(e =>
-				e.Elements(Namespace + "T").Attributes("selected").Any(a => a.Value == "all"));
-
-			if (current != null)
-			{
-				if (content.Name.LocalName != "OE")
-				{
-					content = new XElement(Namespace + "OE", content);
-				}
-
-				if (before)
-					current.AddBeforeSelf(content);
-				else
-					current.AddAfterSelf(content);
-			}
-		}
-
-
-		public void InsertParagraph(params XElement[] content)
-		{
-			foreach (var e in content)
-			{
-				InsertParagraph(e, false);
-			}
 		}
 
 
@@ -1276,7 +725,7 @@ namespace River.OneMoreAddIn.Models
 			foreach (var source in sourcemap)
 			{
 				var quick = map.Find(q => q.Style.Equals(source.Style));
-				if (quick == null)
+				if (quick is null)
 				{
 					// no match so add it and set index to maxIndex+1
 					// O(n) is OK here; there should only be a few
@@ -1298,83 +747,6 @@ namespace River.OneMoreAddIn.Models
 
 
 		/// <summary>
-		/// Merges the TagDefs from a source page with the TagDefs on the current page,
-		/// adjusting index values to avoid collisions with pre-existing definitions
-		/// </summary>
-		/// <param name="sourcePage">
-		/// The page from which to copy TagDefs into this page. The value of the index
-		/// attribute of the TagDefs are updated for each definition
-		/// </param>
-		public List<TagDefMapping> MergeTagDefs(Page sourcePage)
-		{
-			var sourcemap = sourcePage.GetTagDefMap();
-			var map = GetTagDefMap();
-
-			var index = map.Any() ? map.Max(t => t.TagDef.IndexValue) + 1 : 0;
-
-			foreach (var source in sourcemap)
-			{
-				var tagdef = map.Find(t => t.TagDef.Equals(source.TagDef));
-				if (tagdef == null)
-				{
-					// no match so add it and set index to maxIndex+1
-					// O(n) is OK here; there should only be a few
-					source.TagDef.IndexValue = index++;
-
-					source.Element = new XElement(source.Element);
-					source.Element.Attribute("index").Value = source.TagDef.Index;
-
-					map.Add(source);
-					AddTagDef(source.TagDef);
-				}
-
-				// else if found then the index may differ but keep it so it can be mapped
-				// to content later...
-			}
-
-			return map;
-		}
-
-
-		/// <summary>
-		/// Replaces the selected range on the page with the given content, keeping
-		/// the cursor after the newly inserted content.
-		/// <para>
-		/// This attempts to replicate what Word might do when pasting content in a
-		/// document with a selection range.
-		/// </para>
-		/// </summary>
-		/// <param name="page">The page root node</param>
-		/// <param name="content">The content to insert</param>
-		public void ReplaceSelectedWithContent(XElement content)
-		{
-			var elements = Root.Descendants(Namespace + "T")
-				.Where(e => e.Attribute("selected")?.Value == "all");
-
-			if ((elements.Count() == 1) &&
-				(elements.First().GetCData().Value.Length == 0))
-			{
-				// zero-width selection so insert just before cursor
-				elements.First().AddBeforeSelf(content);
-			}
-			else
-			{
-				// replace one or more [one:T @select=all] with status, placing cursor after
-				var element = elements.Last();
-				element.AddAfterSelf(content);
-				elements.Remove();
-
-				content.AddAfterSelf(new XElement(Namespace + "T",
-					new XAttribute("selected", "all"),
-					new XCData(string.Empty)
-					));
-
-				SelectionScope = SelectionScope.Region;
-			}
-		}
-
-
-		/// <summary>
 		/// Adds a Meta element to the page (in the proper schema sequence) with the
 		/// specified name and value.
 		/// </summary>
@@ -1385,7 +757,7 @@ namespace River.OneMoreAddIn.Models
 			var meta = Root.Elements(Namespace + "Meta")
 				.FirstOrDefault(e => e.Attribute("name").Value == name);
 
-			if (meta == null)
+			if (meta is null)
 			{
 				meta = new XElement(Namespace + "Meta",
 					new XAttribute("name", name),
@@ -1394,13 +766,13 @@ namespace River.OneMoreAddIn.Models
 
 				// add into schema sequence...
 				var after = Root.Elements(Namespace + "XPSFile").LastOrDefault();
-				if (after == null)
+				if (after is null)
 				{
 					after = Root.Elements(Namespace + "QuickStyleDef").LastOrDefault();
 					after ??= Root.Elements(Namespace + "TagDef").LastOrDefault();
 				}
 
-				if (after == null)
+				if (after is null)
 				{
 					Root.AddFirst(meta);
 				}
@@ -1426,18 +798,23 @@ namespace River.OneMoreAddIn.Models
 			PageNamespace.Set(ns);
 
 			var block = Root.Elements(ns + "Title").FirstOrDefault();
-			if (block == null)
+			if (block is null)
 			{
 				var style = GetQuickStyle(StandardStyles.PageTitle);
 				block = new XElement(ns + "Title",
 					new Paragraph(title).SetQuickStyle(style.Index));
 
-				var outline = Root.Elements(ns + "Outline")
-					.FirstOrDefault(e => !e.Elements(ns + "Meta")
-						.Any(m => m.Attribute("name").Value.Equals(MetaNames.TaggingBank)));
-
-				outline ??= EnsureContentContainer();
-				outline.AddBeforeSelf(block);
+				var anchor = Root.Elements(ns + "PageSettings").FirstOrDefault();
+				if (anchor is not null)
+				{
+					anchor.AddAfterSelf(block);
+				}
+				else
+				{
+					anchor = Root.Elements(ns + "Outline").FirstOrDefault();
+					anchor ??= EnsureContentContainer();
+					anchor.AddBeforeSelf(block);
+				}
 			}
 			else
 			{

@@ -54,7 +54,7 @@ namespace OneMoreSetupActions
 				logger.WriteLine($"direct action: {args[0]} .. {DateTime.Now}");
 			}
 
-			ReportContext();
+			ReportContext(args.Any(a => a == "--install" || a == "--uninstall"));
 
 			int status;
 
@@ -66,18 +66,6 @@ namespace OneMoreSetupActions
 				{
 					Environment.Exit(status);
 				}
-			}
-
-			status = new CheckOneNoteAction(logger, stepper).Install();
-			if (status != CustomAction.SUCCESS)
-			{
-				MessageBox.Show($"The OneNote installation looks to be invalid. OneMore may not appear " +
-					"in the OneNote ribbon until OneNote is repaired. For more information, " +
-					$"check the logs at\n{logger.LogPath}",
-					"OneNote Configuration Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
-				// treat as warning for now...
-				//Environment.Exit(status);
 			}
 
 			switch (args[0])
@@ -101,7 +89,7 @@ namespace OneMoreSetupActions
 					break;
 
 				case "--install-checkonenote":
-					// no-op
+					status = new CheckOneNoteAction(logger, stepper).Install();
 					break;
 
 				case "--install-edge":
@@ -146,7 +134,7 @@ namespace OneMoreSetupActions
 		}
 
 
-		static void ReportContext()
+		static void ReportContext(bool requireElevated)
 		{
 			// current user...
 
@@ -169,6 +157,18 @@ namespace OneMoreSetupActions
 				: username.ToLower();
 
 			logger.WriteLine($"on behalf of {userdom}");
+
+			if (!elevated && requireElevated)
+			{
+				logger.WriteLine($"aborting without elevated privileges");
+
+				MessageBox.Show(
+					"This installer must be run as an administrator using elevated privileges",
+					"Not Elevated",
+					MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+				Environment.Exit(CustomAction.FAILURE);
+			}
 		}
 
 
@@ -179,6 +179,19 @@ namespace OneMoreSetupActions
 
 			logger.WriteLine();
 			logger.WriteLine($"Register... version {AssemblyInfo.Version}");
+
+			var status = new CheckOneNoteAction(logger, stepper).Install();
+			if (status != CustomAction.SUCCESS)
+			{
+				MessageBox.Show(
+					"The OneNote installation looks to be invalid. OneMore may not appear in the" +
+					"OneNote ribbon until OneNote is repaired. For more information, check the logs at\n" +
+					logger.LogPath,
+					"OneNote Configuration Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+				// treat as warning for now...
+				//return CustomAction.FAILURE;
+			}
 
 			try
 			{

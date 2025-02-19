@@ -39,10 +39,10 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out page, out ns);
+			await using var one = new OneNote(out page, out ns);
 			if (!page.ConfirmBodyContext())
 			{
-				UIHelper.ShowError(Resx.Error_BodyContext);
+				ShowError(Resx.Error_BodyContext);
 				return;
 			}
 
@@ -59,6 +59,8 @@ namespace River.OneMoreAddIn.Commands
 			var root = MakeCalendar(days, dialog.FirstDay, dialog.Large, dialog.HeaderShading);
 			var header = MakeHeader(dialog.Year, dialog.Month);
 
+			var editor = new PageEditor(page);
+
 			if (dialog.Indent)
 			{
 				header.Add(new XElement(ns + "OEChildren",
@@ -66,12 +68,12 @@ namespace River.OneMoreAddIn.Commands
 						root)
 					));
 
-				page.AddNextParagraph(header);
+				editor.AddNextParagraph(header);
 			}
 			else
 			{
-				page.AddNextParagraph(root);
-				page.AddNextParagraph(header);
+				editor.AddNextParagraph(root);
+				editor.AddNextParagraph(header);
 			}
 
 			await one.Update(page);

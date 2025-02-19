@@ -1,22 +1,20 @@
 ﻿//************************************************************************************************
-// Copyright © 2020 Steven M Cohn.  All rights reserved.
+// Copyright © 2020 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
 {
 	using River.OneMoreAddIn.Models;
+	using River.OneMoreAddIn.Settings;
 	using River.OneMoreAddIn.UI;
 	using System;
 	using System.Diagnostics;
-	using System.Drawing;
 	using System.IO;
 	using System.Linq;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
-	using System.Xml;
 	using System.Xml.Linq;
-	using System.Xml.Schema;
 	using Resx = Properties.Resources;
 
 
@@ -25,7 +23,9 @@ namespace River.OneMoreAddIn.Commands
 		private Plugin plugin;
 		private ProgressDialog progress = null;
 		private Page page;
+		private OneNote.HierarchyInfo hierarchyInfo;
 		private string workpath;
+		private bool trialRun;
 
 
 		public RunPluginCommand()
@@ -40,7 +40,10 @@ namespace River.OneMoreAddIn.Commands
 				return;
 			}
 
-			var content = plugin.TargetPage ? PreparePageCache() : await PrepareHierarchyCache();
+			var content = plugin.Target == PluginTarget.Page
+				? await PreparePageCache()
+				: await PrepareHierarchyCache();
+
 			if (content == null)
 			{
 				return;
@@ -53,19 +56,19 @@ namespace River.OneMoreAddIn.Commands
 					var root = LoadUpdates(content);
 					if (root != null)
 					{
-						if (plugin.TargetPage)
+						if (plugin.Target == PluginTarget.Page)
 						{
 							await SavePage(root);
 						}
 						else
 						{
-							SaveHierarchy(root);
+							await SaveHierarchy(root);
 						}
 					}
 				}
 				else
 				{
-					UIHelper.ShowError(Resx.Plugin_Unsuccessful);
+					ShowError(Resx.Plugin_Unsuccessful);
 				}
 			}
 			finally
@@ -80,7 +83,9 @@ namespace River.OneMoreAddIn.Commands
 			// check for replay
 			if (args != null && args.Length > 0)
 			{
-				var element = args.FirstOrDefault(a => a is XElement e && e.Name.LocalName == "path") as XElement;
+				var element = Array.Find(args,
+					a => a is XElement e && e.Name.LocalName == "path") as XElement;
+
 				if (!string.IsNullOrEmpty(element?.Value))
 				{
 					plugin = await new PluginsProvider().Load(element.Value);
@@ -108,7 +113,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			using var dialog = new PluginDialog
 			{
-				PageName = "$name (2)"
+				PageName = PluginDialog.DefaultCreatedPageName
 			};
 
 			if (dialog.ShowDialog(owner) == DialogResult.Cancel)
@@ -118,13 +123,14 @@ namespace River.OneMoreAddIn.Commands
 			}
 
 			plugin = dialog.Plugin;
+			trialRun = dialog.TrialRun;
 			return true;
 		}
 
 
-		private string PreparePageCache()
+		private async Task<string> PreparePageCache()
 		{
-			using var one = new OneNote(out page, out _, OneNote.PageDetail.All);
+			await using var one = new OneNote(out page, out _, OneNote.PageDetail.All);
 
 			// derive a temp file name from PageId which is of the form {sectionID}{}{pageId}
 			// so grab just the pageId part which should be a Guid spanning the last 32 digits
@@ -141,10 +147,13 @@ namespace River.OneMoreAddIn.Commands
 			}
 			catch (Exception exc)
 			{
-				UIHelper.ShowError(Resx.Plugin_WritingTemp);
+				ShowError(Resx.Plugin_WritingTemp);
 				logger.WriteLine("error writing to temp file", exc);
 				return null;
 			}
+
+			hierarchyInfo = await one.GetPageInfo(page.PageId);
+			hierarchyInfo.PageId = page.PageId;
 
 			return content;
 		}
@@ -152,17 +161,40 @@ namespace River.OneMoreAddIn.Commands
 
 		private async Task<string> PrepareHierarchyCache()
 		{
-			using var one = new OneNote();
-			var notebook = await one.GetNotebook(OneNote.Scope.Sections);
+			await using var one = new OneNote();
+
+			XElement notebook = null;
+			switch (plugin.Target)
+			{
+				case PluginTarget.Section:
+					notebook = await one.GetSection();
+					break;
+
+				case PluginTarget.Notebook:
+					notebook = await one.GetNotebook(OneNote.Scope.Sections);
+					break;
+
+				case PluginTarget.NotebookPages:
+					notebook = await one.GetNotebook(OneNote.Scope.Pages);
+					break;
+
+				default: // case PluginTarget.Notebooks:
+					notebook = await one.GetNotebooks(OneNote.Scope.Pages);
+					break;
+			}
+
+			//var notebook = await one.GetNotebook(OneNote.Scope.Sections);
 
 			// look for locked sections and warn user...
 			var ns = one.GetNamespace(notebook);
-			if (notebook.Descendants(ns + "Section").Any(e => e.Attribute("locked") != null))
+			if (notebook.Attribute("locked") != null /* section */ ||
+				notebook.Descendants(ns + "Section").Any(e => e.Attribute("locked") != null))
 			{
 				using var box = new MoreMessageBox();
 				box.SetIcon(MessageBoxIcon.Warning);
 				box.SetButtons(MessageBoxButtons.YesNo);
-				box.AppendMessage("This notebook contains locked sections.", Color.Firebrick);
+				box.AppendMessage("This notebook contains locked sections.",
+					ThemeManager.Instance.GetColor("ErrorText"));
 
 				box.AppendMessage(plugin.SkipLocked
 					? " These sections may be skipped by the plugin."
@@ -178,7 +210,13 @@ namespace River.OneMoreAddIn.Commands
 
 			// derive a temp file name from the notebook ID which is of the form {ID}{}{}
 			// so grab just the ID part which should be a hyphenated Guid value
-			var name = notebook.Attribute("ID").Value;
+			var name = notebook.Name.LocalName == "Notebooks"
+				? notebook.Elements(ns + "Notebook").FirstOrDefault()?.Attribute("ID").Value
+				: notebook.Attribute("ID").Value;
+
+			// shouldn't happen, but fall back to generic Guid
+			name ??= Guid.NewGuid().ToString("D");
+
 			name = name.Substring(1, name.IndexOf('}') - 1).Replace("-", string.Empty);
 			workpath = Path.Combine(Path.GetTempPath(), $"{name}.xml");
 
@@ -191,10 +229,13 @@ namespace River.OneMoreAddIn.Commands
 			}
 			catch (Exception exc)
 			{
-				UIHelper.ShowError(Resx.Plugin_WritingTemp);
+				ShowError(Resx.Plugin_WritingTemp);
 				logger.WriteLine("error writing to temp file", exc);
 				return null;
 			}
+
+			hierarchyInfo = await one.GetPageInfo();
+			hierarchyInfo.PageId = one.CurrentPageId;
 
 			return content;
 		}
@@ -231,13 +272,15 @@ namespace River.OneMoreAddIn.Commands
 			{
 				var abscmd = Environment.ExpandEnvironmentVariables(plugin.Command);
 				var absargs = Environment.ExpandEnvironmentVariables(plugin.Arguments);
+				var userargs = Environment.ExpandEnvironmentVariables(plugin.UserArguments);
 
-				logger.WriteLine($"running {abscmd} {absargs} \"{path}\"");
+				var op = trialRun ? "trialing" : "running";
+				logger.WriteLine($"{op} {abscmd} {absargs} \"{path}\" {userargs}");
 
 				var info = new ProcessStartInfo
 				{
 					FileName = abscmd,
-					Arguments = $"{absargs} \"{path}\"",
+					Arguments = $"{absargs} \"{path}\" {userargs}",
 					CreateNoWindow = true,
 					UseShellExecute = false,
 					RedirectStandardOutput = true,
@@ -248,6 +291,13 @@ namespace River.OneMoreAddIn.Commands
 				info.Environment["PLUGIN_CREATE"] = plugin.CreateNewPage.ToString();
 				info.Environment["PLUGIN_PAGENAME"] = plugin.PageName;
 				info.Environment["PLUGIN_ASCHILD"] = plugin.AsChildPage.ToString();
+
+				info.Environment["PLUGIN_SOURCE_PAGEID"] = hierarchyInfo.PageId;
+				info.Environment["PLUGIN_SOURCE_SECTIONID"] = hierarchyInfo.SectionId;
+				info.Environment["PLUGIN_SOURCE_NOTEBOOKID"] = hierarchyInfo.NotebookId;
+				info.Environment["PLUGIN_SOURCE_PAGENAME"] = hierarchyInfo.Name;
+				info.Environment["PLUGIN_SOURCE_PAGEPATH"] = hierarchyInfo.Path;
+				info.Environment["PLUGIN_SOURCE_PAGEURL"] = hierarchyInfo.Link;
 
 				process = new Process
 				{
@@ -308,18 +358,25 @@ namespace River.OneMoreAddIn.Commands
 			try
 			{
 				var root = XElement.Load(workpath);
-				var updated = root.ToString(SaveOptions.DisableFormatting);
 
+				var updated = root.ToString(SaveOptions.DisableFormatting);
 				if (updated == content && !plugin.CreateNewPage)
 				{
-					UIHelper.ShowInfo(Resx.Plugin_NoChanges);
+					InformNoChange();
 					return null;
 				}
 
-				if (plugin.TargetPage && !ValidPageSchema(root))
+				if (plugin.Target == PluginTarget.Page)
 				{
-					UIHelper.ShowInfo(Resx.Plugin_InvalidSchema);
-					return null;
+					var candidate = new Page(root);
+					// must optimize before we can validate schema...
+					candidate.OptimizeForSave(true);
+
+					if (!OneNote.ValidateSchema(root))
+					{
+						ShowInfo(Resx.Plugin_InvalidSchema);
+						return null;
+					}
 				}
 
 				return root;
@@ -327,36 +384,54 @@ namespace River.OneMoreAddIn.Commands
 			catch (Exception exc)
 			{
 				logger.WriteLine("error updating page", exc);
-				UIHelper.ShowError(Resx.Plugin_NoUpdate);
+				ShowError(Resx.Plugin_NoUpdate);
 				return null;
 			}
 		}
 
 
-		private bool ValidPageSchema(XElement root)
+		private void InformNoChange()
 		{
-			var schemas = new XmlSchemaSet();
-			var ns = root.GetNamespaceOfPrefix(OneNote.Prefix);
-			schemas.Add(ns.ToString(), XmlReader.Create(new StringReader(Resx._0336_OneNoteApplication_2013)));
-
-			var document = new XDocument(root);
-
-			bool valid = true;
-			document.Validate(schemas, (o, e) =>
+			var provider = new SettingsProvider();
+			var settings = provider.GetCollection("plugins");
+			if (settings.Get("hideNoChange", false))
 			{
-				logger.WriteLine($"schema validation {e.Severity}", e.Exception);
-				valid = false;
-			});
+				return;
+			}
 
-			return valid;
+			var box = new MoreMessageBox();
+			box.SetIcon(MessageBoxIcon.Information);
+			box.SetMessage(Resx.Plugin_NoChanges);
+			box.SetButtons(MessageBoxButtons.OK);
+			box.EnableSuppression();
+			var result = box.ShowDialog(owner);
+
+			if (result == DialogResult.OK && box.SuppressMessage)
+			{
+				settings.Add("hideNoChange", "true");
+				provider.SetCollection(settings);
+				provider.Save();
+			}
 		}
 
 
 		private async Task SavePage(XElement root)
 		{
+			if (!OneNote.ValidateSchema(root))
+			{
+				ShowError($"{Resx.Plugin_InvalidSchema}\n\nCache: {workpath}");
+				return;
+			}
+
+			if (trialRun)
+			{
+				ShowInfo(string.Format(Resx.Plugin_trialCompleted, workpath));
+				return;
+			}
+
 			try
 			{
-				using var one = new OneNote();
+				await using var one = new OneNote();
 
 				if (plugin.CreateNewPage)
 				{
@@ -364,20 +439,23 @@ namespace River.OneMoreAddIn.Commands
 				}
 				else
 				{
-					await one.Update(new Page(root));
+					var candidate = new Page(root);
+					candidate.OptimizeForSave(true);
+
+					await one.Update(candidate);
 				}
 			}
 			catch (Exception exc)
 			{
 				logger.WriteLine("error updating page", exc);
-				UIHelper.ShowError(Resx.Plugin_NoUpdate);
+				ShowError(Resx.Plugin_NoUpdate);
 			}
 		}
 
 
 		private async Task CreatePage(OneNote one, XElement childRoot)
 		{
-			var section = one.GetSection();
+			var section = await one.GetSection();
 			var sectionId = section.Attribute("ID").Value;
 
 			one.CreatePage(sectionId, out var pageId);
@@ -388,6 +466,9 @@ namespace River.OneMoreAddIn.Commands
 
 			var childTitle = child.Title.Trim();
 			var parentTitle = page.Title.Trim();
+
+			// every new page adds hashes so need to remove them
+			child.OptimizeForSave(true);
 
 			// if plugin has modified the page title then accept that
 			// otherwise apply the name template defined by this plugin...
@@ -416,27 +497,19 @@ namespace River.OneMoreAddIn.Commands
 
 			await one.Update(child);
 
+			section = await one.GetSection();
+			var editor = new SectionEditor(section);
+
 			if (plugin.AsChildPage)
 			{
 				// get current section again after new page is created
-				section = one.GetSection();
-
-				var parentElement = section.Elements(page.Namespace + "Page")
-					.First(e => e.Attribute("ID").Value == page.PageId);
-
-				var childElement = section.Elements(page.Namespace + "Page")
-					.First(e => e.Attribute("ID").Value == pageId);
-
-				if (childElement != parentElement.NextNode)
+				if (editor.MovePageToParent(pageId, page.PageId))
 				{
-					// move new page immediately after its original in the section
-					childElement.Remove();
-					parentElement.AddAfterSelf(childElement);
+					one.UpdateHierarchy(section);
 				}
-
-				var level = int.Parse(parentElement.Attribute("pageLevel").Value);
-				childElement.Attribute("pageLevel").Value = (level + 1).ToString();
-
+			}
+			else if (editor.MovePageAfterAnchor(pageId, page.PageId))
+			{
 				one.UpdateHierarchy(section);
 			}
 
@@ -444,28 +517,34 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private void SaveHierarchy(XElement root)
+		private async Task SaveHierarchy(XElement root)
 		{
+			if (trialRun)
+			{
+				ShowInfo(string.Format(Resx.Plugin_trialCompleted, workpath));
+				return;
+			}
+
 			try
 			{
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				one.UpdateHierarchy(root);
 			}
 			catch (Exception exc)
 			{
 				logger.WriteLine("error updating hierarchy", exc);
-				UIHelper.ShowError(Resx.Plugin_NoUpdate);
+				ShowError(Resx.Plugin_NoUpdate);
 			}
 		}
 
 
 		private void Cleanup(string workPath)
 		{
-			if (File.Exists(workPath))
+			if (File.Exists(workPath) && !trialRun)
 			{
 				try
 				{
-					//File.Delete(workPath);
+					File.Delete(workPath);
 				}
 				catch (Exception exc)
 				{

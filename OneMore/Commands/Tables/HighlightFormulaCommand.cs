@@ -25,7 +25,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			logger.StartClock();
 
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 
 			// deselect any selected content in the page
 			page.Root.Descendants().Attributes("selected").Remove();
@@ -39,7 +39,7 @@ namespace River.OneMoreAddIn.Commands
 				.Where(e => e.Attribute("name").Value == "omfx")
 				.Select(e => e.FirstAncestor(ns + "Table"));
 
-			if (tables?.Any() == true)
+			if (tables.Any())
 			{
 				foreach (var table in tables)
 				{
@@ -58,7 +58,7 @@ namespace River.OneMoreAddIn.Commands
 			}
 			else
 			{
-				UIHelper.ShowInfo(Resx.HighlightFormulaCommand_NoFormulas);
+				ShowInfo(Resx.HighlightFormulaCommand_NoFormulas);
 			}
 
 			logger.WriteTime("highlight");

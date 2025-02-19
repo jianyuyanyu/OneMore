@@ -41,7 +41,7 @@ namespace River.OneMoreAddIn.Commands
 
 			scope = dialog.Scope;
 
-			using var one = new OneNote(out var page, out _);
+			await using var one = new OneNote(out var page, out _);
 
 			// cleaned page title
 			title = Unstamp(page.Title);
@@ -61,15 +61,15 @@ namespace River.OneMoreAddIn.Commands
 			}
 
 			var progressDialog = new UI.ProgressDialog(Execute);
-			await progressDialog.RunModeless((s, a) =>
+			progressDialog.RunModeless((s, a) =>
 			{
 				if (updates > 0)
 				{
-					UIHelper.ShowInfo(string.Format(Resx.RefreshPageLinksCommand_updated, updates));
+					ShowInfo(string.Format(Resx.RefreshPageLinksCommand_updated, updates));
 				}
 				else
 				{
-					UIHelper.ShowInfo(Resx.RefreshPageLinksCommand_none);
+					ShowInfo(Resx.RefreshPageLinksCommand_none);
 				}
 			});
 		}
@@ -83,7 +83,7 @@ namespace River.OneMoreAddIn.Commands
 			logger.Start();
 			logger.StartClock();
 
-			using var one = new OneNote();
+			await using var one = new OneNote();
 
 			var hierarchy = await GetHierarchy(one);
 			var ns = one.GetNamespace(hierarchy);
@@ -144,7 +144,7 @@ namespace River.OneMoreAddIn.Commands
 			{
 				OneNote.Scope.Notebooks => await one.GetNotebooks(OneNote.Scope.Pages),
 				OneNote.Scope.Sections => await one.GetNotebook(OneNote.Scope.Pages),
-				_ => one.GetSection(),
+				_ => await one.GetSection(),
 			};
 		}
 

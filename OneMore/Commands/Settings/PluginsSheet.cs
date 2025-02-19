@@ -15,7 +15,7 @@ namespace River.OneMoreAddIn.Settings
 	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
 	internal partial class PluginsSheet : SheetBase
@@ -33,24 +33,25 @@ namespace River.OneMoreAddIn.Settings
 			InitializeComponent();
 
 			Name = "PluginsSheet";
-			Title = Resx.PluginsSheet_Title;
+			Title = Resx.word_Plugins;
 
 			if (NeedsLocalizing())
 			{
 				Localize(new string[]
 				{
-					"introLabel",
-					"deleteLabel=word_Delete"
+					"introBox",
+					"renameButton=word_Rename",
+					"deleteButton=word_Delete"
 				});
 
 				nameColumn.HeaderText = Resx.word_Name;
 				cmdColumn.HeaderText = Resx.word_Command;
 			}
 
-			toolStrip.Rescale();
-
 			gridView.AutoGenerateColumns = false;
 			gridView.Columns[0].DataPropertyName = "Name";
+			(_, float scaleY) = UI.Scaling.GetScalingFactors();
+			gridView.RowTemplate.Height = (int)(16 * scaleY);
 
 			this.ribbon = ribbon;
 			pinProvider = new PluginsProvider();
@@ -134,6 +135,7 @@ namespace River.OneMoreAddIn.Settings
 				plugin.CreateNewPage = edited.CreateNewPage;
 				plugin.AsChildPage = edited.AsChildPage;
 				plugin.PageName = edited.PageName;
+				plugin.Target = edited.Target;
 
 				plugins.ResetItem(rowIndex);
 			}
@@ -197,19 +199,16 @@ namespace River.OneMoreAddIn.Settings
 
 			var plugin = plugins[rowIndex];
 
-			var result = MessageBox.Show(
+			var result = UI.MoreMessageBox.Show(this,
 				string.Format(Resx.PluginsSheet_ConfirmDelete, plugin.Name),
-				"OneMore",
-				MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-				MessageBoxDefaultButton.Button2,
-				MessageBoxOptions.DefaultDesktopOnly);
+				MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
 			if (result != DialogResult.Yes)
 				return;
 
 			if (pinProvider.Delete(plugin.Path))
 			{
-				Logger.Current.WriteLine($"Deleted {plugin.Name} plugin");
+				logger.WriteLine($"Deleted {plugin.Name} plugin");
 
 				plugins.RemoveAt(rowIndex);
 				updated = true;
@@ -222,7 +221,7 @@ namespace River.OneMoreAddIn.Settings
 			}
 			else
 			{
-				Logger.Current.WriteLine($"Could not delete {plugin.Name} plugin");
+				logger.WriteLine($"Could not delete {plugin.Name} plugin");
 			}
 		}
 

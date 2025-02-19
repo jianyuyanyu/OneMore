@@ -41,8 +41,7 @@ namespace River.OneMoreAddIn.Settings
 					"sectionLink",
 					"optionsGroup=word_Options",
 					"titleBox",
-					"stampBox",
-					"langLabel"
+					"stampBox"
 				});
 			}
 
@@ -63,7 +62,7 @@ namespace River.OneMoreAddIn.Settings
 
 			if (!string.IsNullOrWhiteSpace(notebookID))
 			{
-				SetLinkName(notebookLink, notebookID);
+				Task.Run(async () => { await SetLinkName(notebookLink, notebookID); }).Wait();
 			}
 
 			groupingBox.SelectedIndex = settings.Get("grouping", 0);
@@ -72,7 +71,7 @@ namespace River.OneMoreAddIn.Settings
 
 			if (!string.IsNullOrWhiteSpace(sectionID))
 			{
-				SetLinkName(sectionLink, sectionID);
+				Task.Run(async () => { await SetLinkName(sectionLink, sectionID); }).Wait();
 			}
 
 			titleBox.Checked = settings.Get("titled", false);
@@ -83,9 +82,9 @@ namespace River.OneMoreAddIn.Settings
 		}
 
 
-		private void SetLinkName(LinkLabel link, string nodeID)
+		private async Task SetLinkName(LinkLabel link, string nodeID)
 		{
-			using var one = new OneNote();
+			await using var one = new OneNote();
 
 			try
 			{
@@ -99,7 +98,7 @@ namespace River.OneMoreAddIn.Settings
 				}
 				else
 				{
-					var info = one.GetSectionInfo(nodeID);
+					var info = await one.GetSectionInfo(nodeID);
 					if (info != null)
 					{
 						link.Text = info.Path.Substring(1).Replace("/", $" {RightArrow} ");
@@ -108,7 +107,7 @@ namespace River.OneMoreAddIn.Settings
 			}
 			catch (COMException exc) when ((uint)exc.ErrorCode == ErrorCodes.hrObjectMissing)
 			{
-				Logger.Current.WriteLine("could not find expected quicknotes target");
+				logger.WriteLine("could not find expected quicknotes target");
 			}
 		}
 
@@ -139,9 +138,9 @@ namespace River.OneMoreAddIn.Settings
 
 		private async void SelectNotebook(object sender, System.EventArgs e)
 		{
-			await SingleThreaded.Invoke(() =>
+			await SingleThreaded.Invoke(async () =>
 			{
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				one.SelectLocation(
 					Resx.QuickNotesSheet_SelectNotebookTitle,
 					Resx.QuickNotesSheet_SelectNotebookIntro,
@@ -151,7 +150,7 @@ namespace River.OneMoreAddIn.Settings
 						if (!string.IsNullOrEmpty(sourceID))
 						{
 							notebookID = sourceID;
-							SetLinkName(notebookLink, notebookID);
+							await SetLinkName(notebookLink, notebookID);
 							await Task.Yield();
 						}
 					});
@@ -161,9 +160,9 @@ namespace River.OneMoreAddIn.Settings
 
 		private async void SelectSection(object sender, System.EventArgs e)
 		{
-			await SingleThreaded.Invoke(() =>
+			await SingleThreaded.Invoke(async () =>
 			{
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				one.SelectLocation(
 					Resx.QuickNotesSheet_SelectSectionTitle,
 					Resx.QuickNotesSheet_SelectSectionIntro,
@@ -173,7 +172,7 @@ namespace River.OneMoreAddIn.Settings
 						if (!string.IsNullOrEmpty(sourceID))
 						{
 							sectionID = sourceID;
-							SetLinkName(sectionLink, sectionID);
+							await SetLinkName(sectionLink, sectionID);
 							await Task.Yield();
 						}
 					});

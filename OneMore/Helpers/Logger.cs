@@ -4,6 +4,7 @@
 
 namespace River.OneMoreAddIn
 {
+	using Newtonsoft.Json;
 	using System;
 	using System.Diagnostics;
 	using System.IO;
@@ -19,14 +20,18 @@ namespace River.OneMoreAddIn
 
 	internal class Logger : ILogger
 	{
+		private const string DebugFlag = "!";
+		private const string VerboseFlag = "+";
+
 		private static ILogger instance;
 		private static bool designMode;
 		private static string appname = "OneMore";
 
 		private readonly bool stdio;
-		private readonly bool longHeader;
-		private readonly bool verbose;
+		private bool debug;
+		private bool verbose;
 		private string preamble;
+		private string timeBar;
 		private bool isNewline;
 		private bool isDisposed;
 		private bool writeHeader;
@@ -44,6 +49,7 @@ namespace River.OneMoreAddIn
 				designMode ? $"{appname}-design.log" : $"{appname}.log");
 
 			preamble = string.Empty;
+			timeBar = "|";
 			writer = null;
 			isNewline = true;
 			isDisposed = false;
@@ -58,15 +64,29 @@ namespace River.OneMoreAddIn
 			{
 				try
 				{
+					// keep Logger independent of SettingsProvider
 					var root = XElement.Load(path);
 					var settings = root
 						.Elements(nameof(Settings.GeneralSheet))
 						.FirstOrDefault();
 
-					if (settings != null)
+					if (settings is not null)
 					{
-						longHeader = "true".EqualsICIC(settings.Element("longHeader")?.Value);
-						verbose = "true".EqualsICIC(settings.Element("verbose")?.Value);
+						if (settings.Element("logging") is XElement loption)
+						{
+							if (loption.Value.EqualsICIC("debug"))
+							{
+								verbose = debug = true;
+							}
+							else if (loption.Value.EqualsICIC("verbose"))
+							{
+								verbose = true;
+							}
+						}
+						else if (settings.Element("verbose") is XElement voption)
+						{
+							verbose = "true".EqualsICIC(voption.Value);
+						}
 					}
 				}
 				catch (Exception exc)
@@ -94,7 +114,7 @@ namespace River.OneMoreAddIn
 					clock?.Stop();
 					clock = null;
 
-					if (writer != null)
+					if (writer is not null)
 					{
 						writer.Flush();
 						writer.Dispose();
@@ -118,39 +138,18 @@ namespace River.OneMoreAddIn
 		}
 
 
+		public bool IsDebug => debug;
+
+
+		public bool IsVerbose => verbose;
+
+
 		public string LogPath { get; private set; }
-
-
-		private bool EnsureWriter()
-		{
-			if (stdio)
-				return true;
-
-			if (writer == null)
-			{
-				try
-				{
-					// allow the UTF8 output stream to handle Unicode characters
-					// by falling back to default replacement characters like '?'
-					var encodingWithFallback = (Encoding)(new UTF8Encoding(false)).Clone();
-					encodingWithFallback.EncoderFallback = EncoderFallback.ReplacementFallback;
-					encodingWithFallback.DecoderFallback = DecoderFallback.ReplacementFallback;
-
-					writer = new StreamWriter(LogPath, true, encodingWithFallback);
-				}
-				catch
-				{
-					writer = null;
-				}
-			}
-
-			return (writer != null);
-		}
 
 
 		public void Clear()
 		{
-			if (writer != null)
+			if (writer is not null)
 			{
 				writer.Flush();
 				writer.Dispose();
@@ -169,6 +168,61 @@ namespace River.OneMoreAddIn
 		}
 
 
+		public void Debug()
+		{
+			if (debug)
+			{
+				timeBar = DebugFlag;
+				WriteLine();
+				timeBar = "|";
+			}
+		}
+
+
+		public void Debug(string message)
+		{
+			if (debug)
+			{
+				timeBar = DebugFlag;
+				WriteLine(message);
+				timeBar = "|";
+			}
+		}
+
+
+		public void Debug(XElement element)
+		{
+			if (debug)
+			{
+				timeBar = DebugFlag;
+				WriteLine(element);
+				timeBar = "|";
+			}
+		}
+
+
+		public void DebugTime(string message, bool keepRunning = false)
+		{
+			if (debug)
+			{
+				timeBar = DebugFlag;
+				WriteTime(message, keepRunning);
+				timeBar = "|";
+			}
+		}
+
+
+		public void Dump(object obj)
+		{
+			var frame = new StackTrace(true).GetFrame(1);
+			WriteLine($"DUMP {obj.GetType().FullName} " +
+				$"from ({Path.GetFileName(frame.GetFileName())} " +
+				$"@line {frame.GetFileLineNumber()})");
+
+			WriteLine(JsonConvert.SerializeObject(obj, Formatting.Indented));
+		}
+
+
 		public void End()
 		{
 			preamble = string.Empty;
@@ -176,23 +230,43 @@ namespace River.OneMoreAddIn
 		}
 
 
+		/// <summary>
+		/// Call this immediately after starting the application and before any logging.
+		/// The application name implies the name of the log file on disk.
+		/// </summary>
+		/// <param name="name">The simple name of the application</param>
 		public static void SetApplication(string name)
 		{
 			appname = name;
 		}
 
 
-		// For VS Forms designer
+		/// <summary>
+		/// For VS Forms designer
+		/// </summary>
+		/// <param name="mode">Pass in the Forms.DesignMode property!</param>
 		public static void SetDesignMode(bool mode)
 		{
 			designMode = mode;
 		}
 
 
+		/// <summary>
+		/// Directly set verbose/debug logging flags, for use by GeneralSettings.
+		/// Consumer needs explict cast to Logger class
+		/// </summary>
+		/// <param name="verbose"></param>
+		/// <param name="debug"></param>
+		public void SetLoggingLevel(bool verbose, bool debug)
+		{
+			this.verbose = verbose || debug;
+			this.debug = debug;
+		}
+
 
 		public void Start(string message = null)
 		{
-			if (message != null)
+			if (message is not null)
 			{
 				WriteLine(message);
 			}
@@ -203,7 +277,7 @@ namespace River.OneMoreAddIn
 
 		public void StartClock()
 		{
-			if (clock == null)
+			if (clock is null)
 			{
 				clock = new Stopwatch();
 			}
@@ -225,6 +299,50 @@ namespace River.OneMoreAddIn
 		public void StopClock()
 		{
 			clock?.Stop();
+		}
+
+
+		public void Verbose()
+		{
+			if (verbose)
+			{
+				timeBar = VerboseFlag;
+				WriteLine();
+				timeBar = "|";
+			}
+		}
+
+
+		public void Verbose(string message)
+		{
+			if (verbose)
+			{
+				timeBar = VerboseFlag;
+				WriteLine(message);
+				timeBar = "|";
+			}
+		}
+
+
+		public void Verbose(XElement element)
+		{
+			if (verbose)
+			{
+				timeBar = VerboseFlag;
+				WriteLine(element);
+				timeBar = "|";
+			}
+		}
+
+
+		public void VerboseTime(string message, bool keepRunning = false)
+		{
+			if (verbose)
+			{
+				timeBar = "+";
+				WriteTime(message, keepRunning);
+				timeBar = "|";
+			}
 		}
 
 
@@ -314,58 +432,45 @@ namespace River.OneMoreAddIn
 		public void WriteLine(string message, Exception exc)
 		{
 			WriteLine(message);
+
+			var wh = writeHeader;
+			writeHeader = false;
+
 			WriteLine(exc);
+
+			writeHeader = wh;
+		}
+
+
+		public void WriteLine(string message, XElement element)
+		{
+			WriteLine(message);
+
+			var wh = writeHeader;
+			writeHeader = false;
+
+			WriteLine(element);
+
+			writeHeader = wh;
 		}
 
 
 		public void WriteLine(XElement element)
 		{
+			var wh = writeHeader;
+			writeHeader = false;
+
 			WriteLine(element.ToString());
+
+			writeHeader = wh;
 		}
-
-
-		public void WriteVerbose(string message)
-		{
-			if (verbose)
-			{
-				Write(message);
-			}
-		}
-
-
-		public void Verbose()
-		{
-			if (verbose)
-			{
-				WriteLine();
-			}
-		}
-
-
-		public void Verbose(string message)
-		{
-			if (verbose)
-			{
-				WriteLine(message);
-			}
-		}
-
-
-		public void Verbose(XElement element)
-		{
-			if (verbose)
-			{
-				WriteLine(element);
-			}
-		}
-
 
 
 		public void WriteTime(string message, bool keepRunning = false)
 		{
-			if (clock == null)
+			if (clock is null)
 			{
-				WriteLine($"{message} @ <no time to report>");
+				WriteLine($"--:--.-- {message} @ <no time to report>");
 				return;
 			}
 
@@ -374,7 +479,36 @@ namespace River.OneMoreAddIn
 				clock.Stop();
 			}
 
-			WriteLine($"{message} @ {clock.Elapsed:mm\\:ss\\.ff}");
+			WriteLine($"{clock.Elapsed:mm\\:ss\\.ff} {message}");
+		}
+
+
+		// helpers...
+
+		private bool EnsureWriter()
+		{
+			if (stdio)
+				return true;
+
+			if (writer is null)
+			{
+				try
+				{
+					// allow the UTF8 output stream to handle Unicode characters
+					// by falling back to default replacement characters like '?'
+					var encodingWithFallback = (Encoding)(new UTF8Encoding(false)).Clone();
+					encodingWithFallback.EncoderFallback = EncoderFallback.ReplacementFallback;
+					encodingWithFallback.DecoderFallback = DecoderFallback.ReplacementFallback;
+
+					writer = new StreamWriter(LogPath, true, encodingWithFallback);
+				}
+				catch
+				{
+					writer = null;
+				}
+			}
+
+			return (writer is not null);
 		}
 
 
@@ -382,13 +516,9 @@ namespace River.OneMoreAddIn
 		{
 			if (!stdio)
 			{
-				if (longHeader)
-				{
-					return
-						$"{Thread.CurrentThread.ManagedThreadId:00}|{DateTime.Now:hh:mm:ss.fff}| {preamble}";
-				}
-
-				return $"{Thread.CurrentThread.ManagedThreadId:00}| {preamble}";
+				return
+					$"{Thread.CurrentThread.ManagedThreadId:00}|" +
+					$"{DateTime.Now:hh:mm:ss.fff}{timeBar} {preamble}";
 			}
 
 			return string.Empty;

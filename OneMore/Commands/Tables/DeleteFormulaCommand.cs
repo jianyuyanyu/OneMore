@@ -23,7 +23,7 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 
 			// only delete formula from selected cell(s)
 
@@ -38,7 +38,7 @@ namespace River.OneMoreAddIn.Commands
 				.Where(e => e.Element(ns + "Meta") != null && e.Element(ns + "Meta").Attribute("name").Value == "omfx")
 				.Select(e => e.Element(ns + "Meta"));
 
-			if (metas?.Any() == true)
+			if (metas.Any())
 			{
 				var tagIndex = page.GetTagDefIndex(AddFormulaCommand.BoltSymbol);
 
@@ -60,12 +60,11 @@ namespace River.OneMoreAddIn.Commands
 
 				await one.Update(page);
 
-				UIHelper.ShowMessage(
-					string.Format(Resx.DeleteFormulaCommand_Deleted, count));
+				ShowMessage(string.Format(Resx.DeleteFormulaCommand_Deleted, count));
 			}
 			else
 			{
-				UIHelper.ShowInfo(Resx.DeleteFormulaCommand_NoFormulas);
+				ShowInfo(Resx.DeleteFormulaCommand_NoFormulas);
 			}
 		}
 	}

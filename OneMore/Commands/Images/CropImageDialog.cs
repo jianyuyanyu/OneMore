@@ -21,7 +21,7 @@ namespace River.OneMoreAddIn.Commands
 	/// and crops the image to that region
 	/// </summary>
 	/// <seealso cref="https://www.codeproject.com/articles/27748/marching-ants"/>
-	internal partial class CropImageDialog : UI.LocalizableForm
+	internal partial class CropImageDialog : UI.MoreForm
 	{
 
 		#region Supporting classes
@@ -68,7 +68,7 @@ namespace River.OneMoreAddIn.Commands
 		private readonly Image original;
 		private readonly Region selectionRegion;
 		private readonly GraphicsPath selectionPath;
-		private readonly MagicScaling scaling;
+		private readonly UI.Scaling scaling;
 
 		// the original image
 		private Rectangle imageBounds;
@@ -104,7 +104,7 @@ namespace River.OneMoreAddIn.Commands
 				Localize(new string[]
 				{
 					"introText",
-					"selectButton",
+					"selectButton=phrase_SelectAll",
 					"cropButton=word_OK",
 					"cancelButton=word_Cancel"
 				});
@@ -121,7 +121,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			Image = original = image;
 
-			scaling = new MagicScaling(image.HorizontalResolution, image.VerticalResolution);
+			scaling = new UI.Scaling(image.HorizontalResolution, image.VerticalResolution);
 
 			SizeWindow();
 
@@ -136,7 +136,7 @@ namespace River.OneMoreAddIn.Commands
 			var hasRealDpi = (image.Flags & (int)ImageFlags.HasRealDpi) > 0;
 			var hasRealPixelSize = (image.Flags & (int)ImageFlags.HasRealPixelSize) > 0;
 
-			Logger.Current.WriteLine(
+			logger.WriteLine(
 				$"IMAG hasRealDpi:{hasRealDpi} hasRealPixelSize:{hasRealPixelSize} | " +
 				$"hRes:{image.HorizontalResolution} vRes:{image.VerticalResolution} | " +
 				$"size:{image.Width}x{image.Height} " +
@@ -798,10 +798,10 @@ namespace River.OneMoreAddIn.Commands
 			// return the larger ratio, horizontal or vertical of the image
 			var points = new PointF[]
 			{
-				new PointF(0, 0),
-				new PointF(bitmap.Width, 0),
-				new PointF(bitmap.Width, bitmap.Height),
-				new PointF(0, bitmap.Height),
+				new(0, 0),
+				new(bitmap.Width, 0),
+				new(bitmap.Width, bitmap.Height),
+				new(0, bitmap.Height),
 			};
 
 			using (var matrix = new Matrix())
@@ -872,7 +872,7 @@ namespace River.OneMoreAddIn.Commands
 				(int)Math.Round(selectionBounds.Width * ratio),
 				(int)Math.Round(selectionBounds.Height * ratio));
 #if Logging
-			Logger.Current.WriteLine(
+			logger.WriteLine(
 				$"CROP selectionBounds xy:{selectionBounds.X}x{selectionBounds.Y} " +
 				$"siz:{selectionBounds.Width}x{selectionBounds.Height} | " +
 				$"bounds xy:{bounds.X}x{bounds.Y} siz:{bounds.Width}x{bounds.Height}");

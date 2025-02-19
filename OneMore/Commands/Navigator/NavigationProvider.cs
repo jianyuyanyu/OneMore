@@ -5,12 +5,14 @@
 namespace River.OneMoreAddIn.Commands
 {
 	using Newtonsoft.Json;
+	using River.OneMoreAddIn.Settings;
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using HistoryRecord = OneNote.HierarchyInfo;
+	using Resx = Properties.Resources;
 
 
 	/// <summary>
@@ -23,8 +25,9 @@ namespace River.OneMoreAddIn.Commands
 		private static readonly SemaphoreSlim semapub = new(1);
 
 		private readonly string path;
+		private readonly bool quickNotes;
 		private FileSystemWatcher watcher;
-		private EventHandler<List<HistoryRecord>> navigated;
+		private EventHandler<HistoryLog> navigated;
 		private DateTime lastWrite;
 		private bool disposedValue;
 
@@ -33,6 +36,10 @@ namespace River.OneMoreAddIn.Commands
 		{
 			path = Path.Combine(PathHelper.GetAppDataPath(), "Navigator.json");
 			lastWrite = DateTime.MinValue;
+
+			var settings = new SettingsProvider();
+			var collection = settings.GetCollection("NavigatorSheet");
+			quickNotes = collection.Get("quickNotes", false);
 		}
 
 
@@ -69,7 +76,7 @@ namespace River.OneMoreAddIn.Commands
 		/// Adds or removes an event handler to signal that the user has navigated to a page
 		/// and stayed long enough to be recorded as "read"
 		/// </summary>
-		public event EventHandler<List<HistoryRecord>> Navigated
+		public event EventHandler<HistoryLog> Navigated
 		{
 			add
 			{
@@ -109,7 +116,7 @@ namespace River.OneMoreAddIn.Commands
 				var time = File.GetLastWriteTime(e.FullPath);
 				if (time.Subtract(lastWrite).TotalMilliseconds > NavigationService.SafeWatchWindow)
 				{
-					navigated?.Invoke(this, await ReadHistory());
+					navigated?.Invoke(this, await ReadHistoryLog());
 					lastWrite = time;
 				}
 			}
@@ -124,17 +131,54 @@ namespace River.OneMoreAddIn.Commands
 		// History...
 
 		/// <summary>
+		/// Deletes the given records from the history log.
+		/// </summary>
+		/// <param name="records">Records to delete</param>
+		/// <returns></returns>
+		public async Task DeleteHistory(List<HistoryRecord> records)
+		{
+			await semalock.WaitAsync();
+
+			try
+			{
+				var log = await Read();
+
+				var updated = false;
+
+				foreach (var record in records)
+				{
+					var index = log.History.FindIndex(r => r.PageId == record.PageId);
+					if (index >= 0)
+					{
+						log.History.RemoveAt(index);
+						updated = true;
+					}
+				}
+
+				if (updated)
+				{
+					await Save(log);
+				}
+			}
+			finally
+			{
+				semalock.Release();
+			}
+		}
+
+
+		/// <summary>
 		/// Returns the list of history items tracking visited pages.
 		/// </summary>
 		/// <returns></returns>
-		public async Task<List<HistoryRecord>> ReadHistory()
+		public async Task<HistoryLog> ReadHistoryLog()
 		{
 			try
 			{
 				await semalock.WaitAsync();
 
 				var log = await Read();
-				return log.History;
+				return log;
 			}
 			finally
 			{
@@ -169,17 +213,30 @@ namespace River.OneMoreAddIn.Commands
 				var index = log.History.FindIndex(r => r.PageId == pageID);
 				if (index < 0)
 				{
-					record = Resolve(pageID);
+					record = await Resolve(pageID);
 					if (record != null)
 					{
-						log.History.Insert(0, record);
-						updated = true;
+						// tracking Quick Notes?
+						if (record.TitleId == null)
+						{
+							if (quickNotes)
+							{
+								record.Name = Resx.phrase_QuickNote;
+								log.History.Insert(0, record);
+								updated = true;
+							}
+						}
+						else
+						{
+							log.History.Insert(0, record);
+							updated = true;
+						}
 					}
 				}
 				else
 				{
 					record = log.History[index];
-					if (UpdateTitle(record))
+					if (await UpdateTitle(record))
 					{
 						log.History.RemoveAt(index);
 						log.History.Insert(0, record);
@@ -211,13 +268,13 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private HistoryRecord Resolve(string pageID)
+		private async Task<HistoryRecord> Resolve(string pageID)
 		{
 			try
 			{
 				// might be null if the page no longer exits; exception raised in GetPageInfo
-				using var one = new OneNote { FallThrough = true };
-				return one.GetPageInfo(pageID);
+				await using var one = new OneNote { FallThrough = true };
+				return await one.GetPageInfo(pageID);
 			}
 			catch (System.Runtime.InteropServices.COMException exc)
 			{
@@ -232,13 +289,18 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private bool UpdateTitle(HistoryRecord record)
+		private async Task<bool> UpdateTitle(HistoryRecord record)
 		{
 			try
 			{
-				using var one = new OneNote { FallThrough = true };
-				var page = one.GetPage(record.PageId, OneNote.PageDetail.Basic);
-				record.Name = page.Title;
+				await using var one = new OneNote { FallThrough = true };
+				var page = await one.GetPage(record.PageId, OneNote.PageDetail.Basic);
+
+				if (page.TitleID != null)
+				{
+					record.Name = page.Title;
+				}
+
 				return true;
 			}
 			catch (System.Runtime.InteropServices.COMException exc)
@@ -282,6 +344,9 @@ namespace River.OneMoreAddIn.Commands
 		/// </summary>
 		/// <param name="records">A list of page IDs</param>
 		/// <returns>True if the pinned list is updated; false if no changes needed</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Major Bug",
+			"S2583:Conditionally executed code should be reachable",
+			Justification = "Sonar can't see into predicate")]
 		public async Task<bool> AddPinned(List<HistoryRecord> records)
 		{
 			await semalock.WaitAsync();
@@ -344,6 +409,9 @@ namespace River.OneMoreAddIn.Commands
 		/// </summary>
 		/// <param name="records"></param>
 		/// <returns></returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Major Bug",
+			"S2583:Conditionally executed code should be reachable",
+			Justification = "Sonar can't see into predicate")]
 		public async Task<bool> UnpinPages(List<HistoryRecord> records)
 		{
 			await semalock.WaitAsync();
@@ -416,6 +484,9 @@ namespace River.OneMoreAddIn.Commands
 			try
 			{
 				var json = JsonConvert.SerializeObject(log, Formatting.Indented);
+
+				var dir = Path.GetDirectoryName(path);
+				PathHelper.EnsurePathExists(dir);
 
 				// ensure we have ReadWrite sharing enabled so we don't block access
 				// between NavigationService and NavigationDialog

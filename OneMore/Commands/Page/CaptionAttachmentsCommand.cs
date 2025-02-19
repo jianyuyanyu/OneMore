@@ -34,7 +34,7 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out ns, OneNote.PageDetail.Selection);
+			await using var one = new OneNote(out var page, out ns, OneNote.PageDetail.Selection);
 
 			var files = page.Root.Descendants(ns + "InsertedFile")
 				.Where(e => e.Attribute("selected")?.Value == "all");
@@ -46,7 +46,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (!files.Any())
 			{
-				UIHelper.ShowError(Resx.Error_NoAttachments);
+				ShowError(Resx.Error_NoAttachments);
 				return;
 			}
 
@@ -109,7 +109,7 @@ namespace River.OneMoreAddIn.Commands
 			var styles = new ThemeProvider().Theme.GetStyles();
 			if (styles?.Count > 0)
 			{
-				style = styles.FirstOrDefault(s => s.Name.Equals("Caption"));
+				style = styles.Find(s => s.Name.Equals("Caption"));
 			}
 
 			// otherwise use default style

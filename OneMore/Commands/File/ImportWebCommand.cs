@@ -62,14 +62,14 @@ namespace River.OneMoreAddIn.Commands
 		{
 			if (!HttpClientFactory.IsNetworkAvailable())
 			{
-				UIHelper.ShowInfo(Resx.NetwordConnectionUnavailable);
+				ShowInfo(Resx.NetwordConnectionUnavailable);
 				return;
 			}
 
 			var key = Registry.LocalMachine.OpenSubKey($"{ClientKey}\\{RuntimeId}");
 			if (key == null)
 			{
-				UIHelper.ShowError("Unable to use this command; Edge WebView2 is not installed");
+				ShowError("Unable to use this command; Edge WebView2 is not installed");
 				return;
 			}
 
@@ -87,12 +87,14 @@ namespace River.OneMoreAddIn.Commands
 
 			if (importImages)
 			{
-				await ImportAsImages();
+				ImportAsImages();
 			}
 			else
 			{
 				ImportAsContent();
 			}
+
+			await Task.Yield();
 		}
 
 
@@ -100,10 +102,10 @@ namespace River.OneMoreAddIn.Commands
 
 		#region ImportAsImages
 
-		private async Task ImportAsImages()
+		private void ImportAsImages()
 		{
 			progress = new ProgressDialog(ImportImages);
-			await progress.RunModeless();
+			progress.RunModeless();
 		}
 
 
@@ -125,7 +127,7 @@ namespace River.OneMoreAddIn.Commands
 			await SingleThreaded.Invoke(() =>
 			{
 				// WebView2 needs a message pump so host in its own invisible worker dialog
-				using var form = new WebViewWorkerDialog(
+				using var form = new WebViewDialog(
 					new WebViewWorker(async (webview) =>
 					{
 						webview.Source = new Uri(address);
@@ -162,12 +164,12 @@ namespace River.OneMoreAddIn.Commands
 			try
 			{
 				Page page = null;
-				using (var one = new OneNote())
+				await using (var one = new OneNote())
 				{
 					page = target == ImportWebTarget.Append
-						? one.GetPage()
+						? await one.GetPage()
 						: await CreatePage(one,
-							target == ImportWebTarget.ChildPage ? one.GetPage() : null, address);
+							target == ImportWebTarget.ChildPage ? await one.GetPage() : null, address);
 				}
 
 				var ns = page.Namespace;
@@ -211,7 +213,7 @@ namespace River.OneMoreAddIn.Commands
 
 				progress.SetMessage($"Updating page");
 
-				using (var one = new OneNote())
+				await using (var one = new OneNote())
 				{
 					await one.Update(page);
 				}
@@ -227,16 +229,16 @@ namespace River.OneMoreAddIn.Commands
 
 		private async Task<Page> CreatePage(OneNote one, Page parent, string title)
 		{
-			var section = one.GetSection();
+			var section = await one.GetSection();
 			var sectionId = section.Attribute("ID").Value;
 
 			one.CreatePage(sectionId, out var pageId);
-			var page = one.GetPage(pageId);
+			var page = await one.GetPage(pageId);
 
 			if (parent != null)
 			{
 				// get current section again after new page is created
-				section = one.GetSection();
+				section = await one.GetSection();
 
 				var parentElement = section.Elements(parent.Namespace + "Page")
 					.First(e => e.Attribute("ID").Value == parent.PageId);
@@ -336,13 +338,13 @@ namespace River.OneMoreAddIn.Commands
 			//content = PreMailer.MoveCssInline(baseUri, doc.DocumentNode.OuterHtml,
 			//	stripIdAndClassAttributes: true, removeComments: true).Html;
 
-			using (var one = new OneNote())
+			await using (var one = new OneNote())
 			{
 				Page page;
 
 				if (target == ImportWebTarget.Append)
 				{
-					page = one.GetPage();
+					page = await one.GetPage();
 
 					if (token.IsCancellationRequested)
 					{
@@ -370,7 +372,7 @@ namespace River.OneMoreAddIn.Commands
 					}
 
 					page = await CreatePage(one,
-						target == ImportWebTarget.ChildPage ? one.GetPage() : null,
+						target == ImportWebTarget.ChildPage ? await one.GetPage() : null,
 						title
 						);
 				}
@@ -394,7 +396,7 @@ namespace River.OneMoreAddIn.Commands
 
 		private void Giveup(string msg)
 		{
-			UIHelper.ShowInfo($"Cannot load web page.\n\n{msg}");
+			ShowInfo($"Cannot load web page.\n\n{msg}");
 		}
 
 
@@ -484,6 +486,8 @@ namespace River.OneMoreAddIn.Commands
 
 		// = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Major Bug",
+			"S2583:Conditionally executed code should be reachable", Justification = "<Pending>")]
 		private async Task<WebPageInfo> DownloadWebContent(Uri uri)
 		{
 			const string GetTitleJS = "document.getElementsByTagName('title')[0].innerText;";
@@ -496,7 +500,7 @@ namespace River.OneMoreAddIn.Commands
 			await SingleThreaded.Invoke(() =>
 			{
 				// WebView2 needs a message pump so host in its own invisible worker dialog
-				using var form = new WebViewWorkerDialog(
+				using var form = new WebViewDialog(
 					startup:
 					new WebViewWorker(async (webview) =>
 					{
@@ -667,7 +671,7 @@ namespace River.OneMoreAddIn.Commands
 				logger.WriteLine("pass 2 patching images and anchors");
 
 				// fetch page again with temp links
-				page = one.GetPage(page.PageId, OneNote.PageDetail.All);
+				page = await one.GetPage(page.PageId, OneNote.PageDetail.All);
 
 				var updated = false;
 				if (hasImages)

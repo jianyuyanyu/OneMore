@@ -29,7 +29,7 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns, OneNote.PageDetail.Selection);
+			await using var one = new OneNote(out var page, out var ns, OneNote.PageDetail.Selection);
 			var selections = page.Root
 				.Descendants(page.Namespace + "OE")
 				.Elements(page.Namespace + "T")
@@ -39,7 +39,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (selections.Count == 0 || (selections.Count == 1 && selections[0].Value == string.Empty))
 			{
-				UIHelper.ShowInfo(one.Window, Resx.TextToTable_NoText);
+				ShowInfo(Resx.TextToTable_NoText);
 				return;
 			}
 

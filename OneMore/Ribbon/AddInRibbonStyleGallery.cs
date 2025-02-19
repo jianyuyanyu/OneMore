@@ -12,12 +12,12 @@ namespace River.OneMoreAddIn
 	using River.OneMoreAddIn.Styles;
 	using System.Drawing;
 	using System.Runtime.InteropServices.ComTypes;
-
+	using System.Threading.Tasks;
 
 	public partial class AddIn
 	{
-		private static Theme galleryTheme;	// theme of styles that might force back color
-		private static Color galleryBack;	// background color
+		private static Theme galleryTheme;  // theme of styles that might force back color
+		private static Color galleryBack;   // background color
 
 
 		/*
@@ -48,22 +48,30 @@ namespace River.OneMoreAddIn
 			}
 			else
 			{
-				using var one = new OneNote();
-				var section = one.GetSection();
-				if (section.Attribute("locked") == null)
+				galleryBack = Task.Run(async () =>
 				{
-					var page = one.GetPage(OneNote.PageDetail.Basic);
-					galleryBack = page.GetPageColor(out _, out var black);
-					if (black)
+					await using var one = new OneNote();
+
+					// ribbon handlers apparently cannot be async so we need to do this
+					var section = await one.GetSection();
+					if (section.Attribute("locked") == null)
 					{
-						// translate Black into a custom black smoke
-						galleryBack = ColorTranslator.FromHtml("#201F1E");
+						// ribbon handlers apparently cannot be async so we need to do this
+						var page = Task.Run(async () =>
+						{
+							return await one.GetPage(OneNote.PageDetail.Basic);
+						}).Result;
+
+						var color = page.GetPageColor(out _, out var black);
+
+						return black
+							? ColorTranslator.FromHtml("#201F1E")
+							: color;
 					}
-				}
-				else
-				{
-					galleryBack = Color.White;
-				}
+
+					return Color.White;
+
+				}).Result;
 			}
 
 			var count = galleryTheme.GetCount();

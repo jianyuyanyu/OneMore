@@ -1,15 +1,15 @@
 ﻿//************************************************************************************************
-// Copyright © 2022 Steven M Cohn.  Yada yada...
+// Copyright © 2022 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.UI
 {
 	using System.Drawing;
 	using System.Windows.Forms;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
-	internal partial class MoreMessageBox : LocalizableForm
+	internal partial class MoreMessageBox : MoreForm
 	{
 
 		public MoreMessageBox()
@@ -18,11 +18,19 @@ namespace River.OneMoreAddIn.UI
 
 			if (NeedsLocalizing())
 			{
+				Localize(new string[]
+				{
+					"hideBox"
+				});
+
 				Text = Resx.ProgramName;
 			}
 
 			messageBox.Clear();
 		}
+
+
+		public bool SuppressMessage { get; private set; }
 
 
 		public void ShowLogLink()
@@ -43,23 +51,44 @@ namespace River.OneMoreAddIn.UI
 		}
 
 
+		public void EnableSuppression()
+		{
+			hideBox.Visible = true;
+		}
+
+
 		public void SetMessage(string message)
 		{
+			var size = TextRenderer.MeasureText(
+				message, messageBox.Font, messageBox.Size, TextFormatFlags.NoClipping);
+
+			// leave a little room (is this good?)
+			var preferred = size.Height + messageBox.Font.Height;
+			if (preferred > messageBox.Height)
+			{
+				Height += preferred - messageBox.Height;
+			}
+
 			messageBox.Text = message;
 		}
 
 
 		public void SetButtons(MessageBoxButtons buttons)
 		{
+			// OK | No | Cancel ...
+
 			if (buttons == MessageBoxButtons.OK)
 			{
+				cancelButton.Visible = false;
+				noButton.Visible = false;
+				okButton.Left = cancelButton.Left;
 				okButton.Text = Resx.word_OK;
 				okButton.DialogResult = DialogResult.OK;
-				cancelButton.Visible = false;
 			}
 			else if (buttons == MessageBoxButtons.OKCancel)
 			{
-				(cancelButton.Left, okButton.Left) = (okButton.Left, cancelButton.Left);
+				noButton.Visible = false;
+				okButton.Left = noButton.Left;
 				okButton.Text = Resx.word_OK;
 				okButton.DialogResult = DialogResult.OK;
 				cancelButton.Text = Resx.word_Cancel;
@@ -67,11 +96,22 @@ namespace River.OneMoreAddIn.UI
 			}
 			else if (buttons == MessageBoxButtons.YesNo)
 			{
-				(cancelButton.Left, okButton.Left) = (okButton.Left, cancelButton.Left);
+				cancelButton.Visible = false;
+				okButton.Left = noButton.Left;
 				okButton.Text = Resx.word_Yes;
 				okButton.DialogResult = DialogResult.Yes;
-				cancelButton.Text = Resx.word_No;
-				cancelButton.DialogResult = DialogResult.No;
+				noButton.Left = cancelButton.Left;
+				noButton.Text = Resx.word_No;
+				noButton.DialogResult = DialogResult.No;
+			}
+			else if (buttons == MessageBoxButtons.YesNoCancel)
+			{
+				okButton.Text = Resx.word_Yes;
+				okButton.DialogResult = DialogResult.Yes;
+				noButton.Text = Resx.word_No;
+				noButton.DialogResult = DialogResult.No;
+				cancelButton.Text = Resx.word_Cancel;
+				cancelButton.DialogResult = DialogResult.Cancel;
 			}
 		}
 
@@ -81,8 +121,8 @@ namespace River.OneMoreAddIn.UI
 			Icon icon = mbicon switch
 			{
 				MessageBoxIcon.Error => SystemIcons.Error,
-				MessageBoxIcon.Exclamation => SystemIcons.Exclamation,
 				MessageBoxIcon.Question => SystemIcons.Question,
+				MessageBoxIcon.Warning => SystemIcons.Warning, // same as Exclamation
 				_ => SystemIcons.Information,
 			};
 
@@ -104,17 +144,19 @@ namespace River.OneMoreAddIn.UI
 			box.SetMessage(text);
 			box.SetIcon(icon);
 			box.SetButtons(buttons);
+			if (owner is null)
+			{
+				box.StartPosition = FormStartPosition.CenterScreen;
+				return box.ShowDialog();
+			}
+
 			return box.ShowDialog(owner);
 		}
 
 
 		public static DialogResult ShowError(IWin32Window owner, string text)
 		{
-			using var box = new MoreMessageBox();
-			box.SetMessage(text);
-			box.SetIcon(MessageBoxIcon.Error);
-			box.SetButtons(MessageBoxButtons.OK);
-			return box.ShowDialog(owner);
+			return Show(owner, text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 		}
 
 
@@ -125,7 +167,37 @@ namespace River.OneMoreAddIn.UI
 			box.ShowLogLink();
 			box.SetIcon(MessageBoxIcon.Error);
 			box.SetButtons(MessageBoxButtons.OK);
+
+			if (owner is null)
+			{
+				box.StartPosition = FormStartPosition.CenterScreen;
+				return box.ShowDialog();
+			}
+
 			return box.ShowDialog(owner);
+		}
+
+
+		public static DialogResult ShowQuestion(
+			IWin32Window owner, string text, bool cancel = false)
+		{
+			var buttons = cancel
+				? MessageBoxButtons.YesNoCancel
+				: MessageBoxButtons.YesNo;
+
+			return Show(owner, text, buttons, MessageBoxIcon.Question);
+		}
+
+
+		public static DialogResult ShowWarning(IWin32Window owner, string text)
+		{
+			return Show(owner, text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+		}
+
+
+		private void ChangeSuppression(object sender, System.EventArgs e)
+		{
+			SuppressMessage = hideBox.Visible && hideBox.Checked;
 		}
 
 

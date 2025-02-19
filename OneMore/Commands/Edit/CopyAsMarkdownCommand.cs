@@ -1,12 +1,13 @@
 ﻿//************************************************************************************************
-// Copyright © 2022 Steven M Cohn.  All rights reserved.
+// Copyright © 2022 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
 {
-	using River.OneMoreAddIn.UI;
-	using System.Threading.Tasks; 
-	using Resx = Properties.Resources;
+	using River.OneMoreAddIn.Models;
+	using System;
+	using System.Threading.Tasks;
+	using System.Xml.Linq;
 
 
 	/// <summary>
@@ -21,26 +22,60 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var _);
-			var cursor = page.GetTextCursor();
+			#region WriteMarkdown(PageEditor editor, MarkdownWriter writer, XElement start)
+			async void WriteMarkdown(PageEditor editor, MarkdownWriter writer, XElement start)
+			{
+				var content = editor.ExtractSelectedContent(start);
+
+				logger.Debug("markdown content");
+				logger.Debug(content);
+				logger.Debug("- - -");
+
+				await writer.Copy(content);
+			}
+			#endregion WriteMarkdown
+
+			await using var one = new OneNote(out var page, out var _);
 
 			var writer = new MarkdownWriter(page, false);
 
-			if (// cursor is not null if selection range is empty
-				cursor != null &&
-				// selection range is a single line containing a hyperlink
-				!(page.SelectionSpecial && page.SelectionScope == SelectionScope.Empty))
+			// discover selection scope
+			var range = new SelectionRange(page);
+			range.GetSelection();
+
+			if (range.Scope == SelectionScope.None)
 			{
-				await writer.Copy(page.Root);
-			}
-			else
-			{
-				// selection range found so move it into snippet
-				var content = page.ExtractSelectedContent(out var firstParent);
-				await writer.Copy(content);
+				return;
 			}
 
-			MoreBubbleWindow.Show(Resx.CopyAsMarkdownCommand_copied);
+			try
+			{
+				var editor = new PageEditor(page);
+
+				if (range.Scope == SelectionScope.TextCursor ||
+					range.Scope == SelectionScope.SpecialCursor)
+				{
+					editor.AllContent = true;
+					range.Deselect();
+
+					logger.Debug(page.Root);
+
+					foreach (var outline in page.BodyOutlines)
+					{
+						WriteMarkdown(editor, writer, outline);
+					}
+				}
+				else
+				{
+					WriteMarkdown(editor, writer, null);
+				}
+			}
+			catch (Exception exc)
+			{
+				logger.WriteLine(exc);
+			}
+
+			//MoreBubbleWindow.Show(Resx.CopyAsMarkdownCommand_copied);
 		}
 	}
 }

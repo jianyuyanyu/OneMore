@@ -44,7 +44,7 @@ namespace River.OneMoreAddIn.Commands
 		/// <returns></returns>
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out page, out ns);
+			await using var one = new OneNote(out page, out ns);
 
 			AddDepth(page.Root);
 
@@ -75,7 +75,11 @@ namespace River.OneMoreAddIn.Commands
 		public bool Colorize(string key, IEnumerable<XElement> runs)
 		{
 			var pageColor = page.GetPageColor(out var automatic, out var black);
-			var dark = black || pageColor.GetBrightness() < 0.5;
+
+			var dark =
+				(black || pageColor.GetBrightness() < 0.5) &&
+				!(black && pageColor.GetBrightness() >= 0.5);
+
 			var theme = dark ? "dark" : "light";
 			//logger.WriteLine($"theme: {theme} (color:{pageColor} automatic:{automatic} black:{black})");
 
@@ -93,7 +97,7 @@ namespace River.OneMoreAddIn.Commands
 
 			foreach (var run in runs.ToList())
 			{
-                run.SetAttributeValue("lang", "yo");
+				run.SetAttributeValue("lang", "yo");
 				run.Parent.Attributes("spaceAfter").Remove();
 				run.Parent.Attributes("spaceBefore").Remove();
 				var runoffs = new List<XElement>();

@@ -6,7 +6,6 @@ namespace River.OneMoreAddIn.Commands
 {
 	using River.OneMoreAddIn.Commands.Tables.FillCellModels;
 	using River.OneMoreAddIn.Models;
-	using System.Collections.Generic;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Xml.Linq;
@@ -77,7 +76,7 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 			// Find first selected cell as anchor point to locate table; by filtering on
 			// selected=all, we avoid including the parent table of a selected nested table.
 
@@ -93,7 +92,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (anchor == null)
 			{
-				UIHelper.ShowInfo(one.Window, Resx.InsertCellsCommand_NoSelection);
+				ShowInfo(Resx.InsertCellsCommand_NoSelection);
 				return;
 			}
 
@@ -113,8 +112,8 @@ namespace River.OneMoreAddIn.Commands
 			{
 				case FillCells.CopyAcross: updated = CopyAcross(table); break;
 				case FillCells.CopyDown: updated = CopyDown(table); break;
-				case FillCells.FillAcross: updated = FillAcross(table, cells); break;
-				case FillCells.FillDown: updated = FillDown(table, cells); break;
+				case FillCells.FillAcross: updated = FillAcross(table); break;
+				case FillCells.FillDown: updated = FillDown(table); break;
 			}
 
 			if (updated)
@@ -168,7 +167,7 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private bool FillAcross(Table table, List<TableCell> cells)
+		private bool FillAcross(Table table)
 		{
 			if (maxCol == minCol)
 			{
@@ -213,7 +212,7 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private bool FillDown(Table table, List<TableCell> cells)
+		private bool FillDown(Table table)
 		{
 			if (maxRow == minRow)
 			{

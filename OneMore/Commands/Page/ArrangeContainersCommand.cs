@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2021 Steven M Cohn.  All rights reserved.
+// Copyright © 2021 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -11,6 +11,7 @@ namespace River.OneMoreAddIn.Commands
 	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Xml.Linq;
+	using Resx = Properties.Resources;
 
 
 	/// <summary>
@@ -26,6 +27,7 @@ namespace River.OneMoreAddIn.Commands
 		private Page page;
 		private XNamespace ns;
 		private double topMargin;
+		private double indent;
 
 
 		public ArrangeContainersCommand()
@@ -35,26 +37,36 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
+			await using var one = new OneNote(out page, out ns);
+
+			if (!page.Root.Elements(ns + "Outline").Any())
+			{
+				ShowInfo(Resx.ArrangeContainersCommand_noContainers);
+				return;
+			}
+
 			using var dialog = new ArrangeContainersDialog();
 			if (dialog.ShowDialog(owner) != System.Windows.Forms.DialogResult.OK)
 			{
 				return;
 			}
 
-			using var one = new OneNote(out page, out ns);
-
 			FindTopMargin();
 
-			if (dialog.Vertical)
+			indent = LeftMargin + dialog.Indent;
+
+			var updated = dialog.Vertical
+				? ArrangeVertical(dialog.PageWidth)
+				: ArrangeFlow(dialog.Columns, dialog.PageWidth);
+
+			if (updated)
 			{
-				ArrangeVertical(dialog.PageWidth);
+				await one.Update(page);
 			}
 			else
 			{
-				ArrangeFlow(dialog.Columns, dialog.PageWidth);
+				ShowInfo(Resx.ArrangeContainersCommand_noContainers);
 			}
-
-			await one.Update(page);
 		}
 
 
@@ -66,7 +78,7 @@ namespace River.OneMoreAddIn.Commands
 				.Select(e => e.Parent)
 				.FirstOrDefault();
 
-			if (bank == null)
+			if (bank is null)
 			{
 				topMargin = TopMargin;
 			}
@@ -79,9 +91,14 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private void ArrangeVertical(int pageWidth)
+		private bool ArrangeVertical(int pageWidth)
 		{
 			var containers = CollectContainers(page, ns);
+
+			if (!containers.Any())
+			{
+				return false;
+			}
 
 			// find the topmost container position
 			var yoffset = Math.Min(
@@ -92,7 +109,7 @@ namespace River.OneMoreAddIn.Commands
 			foreach (var container in containers)
 			{
 				var position = container.Element(ns + "Position");
-				position.SetAttributeValue("x", LeftMargin.ToString(CultureInfo.InvariantCulture));
+				position.SetAttributeValue("x", indent.ToString(CultureInfo.InvariantCulture));
 				position.SetAttributeValue("y", yoffset.ToString(CultureInfo.InvariantCulture));
 
 				var size = container.Element(ns + "Size");
@@ -106,14 +123,21 @@ namespace River.OneMoreAddIn.Commands
 				var height = size.GetAttributeDouble("height");
 				yoffset += height + BottomMargin;
 			}
+
+			return true;
 		}
 
 
-		private void ArrangeFlow(int columns, int pageWidth)
+		private bool ArrangeFlow(int columns, int pageWidth)
 		{
 			var containers = CollectContainers(page, ns);
 
-			var xoffset = LeftMargin;
+			if (!containers.Any())
+			{
+				return false;
+			}
+
+			var xoffset = indent;
 
 			// find the topmost container position
 			var yoffset = Math.Min(
@@ -124,7 +148,7 @@ namespace River.OneMoreAddIn.Commands
 			int col = 1;
 			double maxHeight = 0;
 			double colwidth = (pageWidth / columns);
-			double maxPageWidth = LeftMargin + pageWidth + (RightMargin * (columns - 1));
+			double maxPageWidth = indent + pageWidth + (RightMargin * (columns - 1));
 
 			foreach (var container in containers)
 			{
@@ -141,7 +165,7 @@ namespace River.OneMoreAddIn.Commands
 				if ((col > columns) ||
 					(col > 1 && (xoffset + width > maxPageWidth)))
 				{
-					xoffset = LeftMargin;
+					xoffset = indent;
 					yoffset += maxHeight + BottomMargin;
 					maxHeight = height;
 					col = 1;
@@ -151,48 +175,77 @@ namespace River.OneMoreAddIn.Commands
 				position.SetAttributeValue("x", xoffset.ToString(CultureInfo.InvariantCulture));
 				position.SetAttributeValue("y", yoffset.ToString(CultureInfo.InvariantCulture));
 
-				size.SetAttributeValue("width", colwidth.ToString("N3", CultureInfo.InvariantCulture));
+				size.SetAttributeValue("width", colwidth.ToInvariantString());
 				// must set both width and height for changes to take effect
-				size.SetAttributeValue("height", (height + 0.001).ToString("N3", CultureInfo.InvariantCulture));
+				size.SetAttributeValue("height", (height + 0.001).ToInvariantString());
 				size.SetAttributeValue("isSetByUser", "true");
 
-				logger.WriteLine($"moved container to {LeftMargin} x {yoffset:N3}, size {width:N3} x {height:N3}");
+				logger.WriteLine($"moved container to {indent} x {yoffset:N3}, size {width:N3} x {height:N3}");
 
 				xoffset += Math.Max(width, colwidth) + RightMargin;
 				col++;
 			}
+
+			return true;
 		}
 
 
-		// Collects a list of containers that have content, filtering out those with
-		// empty text runs. OneNote tends to append an empty container after Update regardless
+		// Collects a list of Outlines that have content, removing the last Outline if it
+		// only has a single line of whitespace. OneNote sometimes appends an empty container
+		// after Update for some reason.
 		private IEnumerable<XElement> CollectContainers(Page page, XNamespace ns)
 		{
-			var containers = page.Root.Elements(ns + "Outline")
-				.Where(e => !e.Elements(ns + "Meta")
-					.Any(m => m.Attribute("name").Value == MetaNames.TaggingBank))
-				.ToList();
-
-			foreach (var container in containers)
+			var outlines = page.BodyOutlines.ToList();
+			if (outlines.Count < 2)
 			{
-				var runs = container.Descendants(ns + "T");
-				if (runs.Any())
-				{
-					var text = runs.Nodes().OfType<XCData>()
-						.Select(c => c.Value.Trim())
-						.Aggregate((a, b) => $"{a}{b}");
+				// zero or one Outline; don't leave the page entirely empty
+				return outlines;
+			}
 
-					if (text.Length > 0)
-					{
-						yield return container;
-					}
-				}
-				else
+			// we only care about the last Outline...
+
+			var index = outlines.Count - 1;
+			var last = outlines[index];
+			var blocks = last.Descendants(ns + "HTMLBlock");
+			if (blocks.Any())
+			{
+				// HTMLBlock is content
+				return outlines;
+			}
+
+			var paragraphs = last.Descendants(ns + "OE");
+			if (!paragraphs.Any())
+			{
+				// remove empty Outline
+				outlines.RemoveAt(index);
+				return outlines;
+			}
+
+			// if Outline contains exactly one paragraph
+			if (paragraphs.Count() == 1 &&
+				paragraphs.First() is XElement paragraph)
+			{
+				var descendants = paragraph.Descendants();
+
+				// contains Meta, Image, Table, or other non-text elements
+				if (descendants.Any(e => e.Name.LocalName != "T"))
 				{
-					// likely contains an InsertedFile or image without text runs
-					yield return container;
+					return outlines;
+				}
+
+				var text = descendants
+					.Where(e => e.Name.LocalName == "T")
+					.Nodes().OfType<XCData>()
+					.Select(c => c.Value.Trim())
+					.Aggregate((a, b) => $"{a}{b}");
+
+				if (text?.Length == 0)
+				{
+					outlines.RemoveAt(index);
 				}
 			}
+
+			return outlines;
 		}
 	}
 }

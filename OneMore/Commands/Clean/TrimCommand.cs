@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2019 Steven M Cohn.  All rights reserved.
+// Copyright © 2019 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -30,12 +30,14 @@ namespace River.OneMoreAddIn.Commands
 				? new Regex(@"^([\s]|&#160;|&nbsp;)+", RegexOptions.Multiline)
 				: new Regex(@"([\s]|&#160;|&nbsp;)+$", RegexOptions.Multiline);
 
-			using var one = new OneNote(out var page, out _);
+			await using var one = new OneNote(out var page, out _);
 
-			var selections = page.GetSelectedElements();
-			if (selections != null)
+			var range = new Models.SelectionRange(page);
+			var runs = range.GetSelections(defaulToAnytIfNoRange: true);
+
+			if (runs.Any())
 			{
-				foreach (var selection in selections)
+				foreach (var selection in runs)
 				{
 					// only include last T in an OE
 					// only include Ts that have a CDATA

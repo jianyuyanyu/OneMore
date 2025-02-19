@@ -21,10 +21,10 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 			if (!page.ConfirmBodyContext())
 			{
-				UIHelper.ShowError(Resx.Error_BodyContext);
+				ShowError(Resx.Error_BodyContext);
 				return;
 			}
 
@@ -64,7 +64,9 @@ namespace River.OneMoreAddIn.Commands
 				}
 			}
 
-			page.AddNextParagraph(expand);
+			var editor = new PageEditor(page);
+			editor.AddNextParagraph(expand);
+
 			await one.Update(page);
 		}
 	}

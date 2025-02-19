@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2021 Steven M Cohn.  All rights reserved.
+// Copyright © 2021 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -10,11 +10,14 @@ namespace River.OneMoreAddIn.Commands
 	using System.Drawing;
 	using System.Globalization;
 	using System.Windows.Forms;
-	using Resx = River.OneMoreAddIn.Properties.Resources;
+	using Resx = Properties.Resources;
 
 
-	internal partial class TimerWindow : LocalizableForm
+	internal partial class TimerWindow : MoreForm
 	{
+		public const int CopyCmd = 1;
+		public const int RestartCmd = 2;
+		public const int ShutdownCmd = 3;
 
 		private readonly float scalingX;
 		private readonly float scalingY;
@@ -45,7 +48,7 @@ namespace River.OneMoreAddIn.Commands
 			TopMost = true;
 			TopLevel = true;
 
-			(scalingX, scalingY) = UIHelper.GetScalingFactors();
+			(scalingX, scalingY) = UI.Scaling.GetScalingFactors();
 			toolstrip.ImageScalingSize = new Size((int)(16 * scalingX), (int)(16 * scalingY));
 		}
 
@@ -53,26 +56,35 @@ namespace River.OneMoreAddIn.Commands
 		public int Seconds { get; private set; }
 
 
-		private void TimerWindow_Load(object sender, EventArgs e)
+		protected override void OnLoad(EventArgs e)
 		{
-			// deal with primary/secondary displays in either duplicate or extended mode...
-			Rectangle area;
-			using var one = new OneNote();
-			//for (int i = 0; i < Screen.AllScreens.Length; i++)
-			//{
-			//	var s = Screen.AllScreens[i];
-			//	logger.WriteLine($"Screen[{i}] ({s.DeviceName}), primary={s.Primary}, size={s.Bounds}");
-			//}
+			// tell ThemeManager to ignore this window
+			ThemeEnabled = false;
+			base.OnLoad(e);
+		}
 
-			var screen = Screen.FromHandle(one.WindowHandle);
+
+		protected override async void OnShown(EventArgs e)
+		{
+			base.OnShown(e);
+
+			// deal with primary/secondary displays in either duplicate or extended mode...
+			Screen screen = null;
+			await using (var one = new OneNote())
+			{
+				screen = Screen.FromHandle(one.WindowHandle);
+			}
+
+			screen ??= Screen.PrimaryScreen;
+
 			//logger.WriteLine($"using screen ({screen.DeviceName}), primary={screen.Primary}, size={screen.Bounds}");
 			Location = screen.WorkingArea.Location;
-			area = screen.WorkingArea;
+			var area = screen.WorkingArea;
 
 			// must add to area.X here to handle extended mode in which the coord of the secondary
 			// display is an extension of the first, so X would be greater than zero
-			Left = (int)(area.X + (area.Width - Width - (10 * scalingX)));
-			Top = (int)((SystemInformation.CaptionHeight + 5) * scalingY);
+			Left = (int)(area.X + (area.Width - Width - (40 * scalingX)));
+			Top = (int)((SystemInformation.CaptionHeight + 60) * scalingY);
 
 			maxLeft = Left;
 			maxTop = area.Height - Height - 50;
@@ -122,7 +134,17 @@ namespace River.OneMoreAddIn.Commands
 		private async void CopyTime(object sender, EventArgs e)
 		{
 			var stamp = TimeSpan.FromSeconds(++Seconds).ToString("c");
-			await new ClipboardProvider().SetText(stamp);
+			var success = await new ClipboardProvider().SetText(stamp);
+			if (!success)
+			{
+				MoreMessageBox.ShowError(null, Resx.Clipboard_locked);
+			}
+		}
+
+
+		public void Restart()
+		{
+			RestartTimer(this, EventArgs.Empty);
 		}
 
 
@@ -130,6 +152,12 @@ namespace River.OneMoreAddIn.Commands
 		{
 			// start at -1 so the user will see Time Zero
 			Seconds = -1;
+		}
+
+
+		public void Shutdown()
+		{
+			CloseWindow(this, EventArgs.Empty);
 		}
 
 

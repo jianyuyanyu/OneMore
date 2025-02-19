@@ -57,7 +57,9 @@ namespace River.OneMoreAddIn.Commands
 			fullCatalog = dialog.FullCatalog;
 
 			var progressDialog = new UI.ProgressDialog(Execute);
-			await progressDialog.RunModeless();
+			progressDialog.RunModeless();
+
+			await Task.Yield();
 		}
 
 
@@ -69,7 +71,7 @@ namespace River.OneMoreAddIn.Commands
 			logger.Start();
 			logger.StartClock();
 
-			using (one = new OneNote())
+			await using (one = new OneNote())
 			{
 				var hierarchy = await GetHierarchy();
 
@@ -146,7 +148,7 @@ namespace River.OneMoreAddIn.Commands
 								}
 								else
 								{
-									var p = one.GetPage(hyperlink.PageID, OneNote.PageDetail.Basic);
+									var p = await one.GetPage(hyperlink.PageID, OneNote.PageDetail.Basic);
 									title = p.Title;
 									titles.Add(hyperlink.PageID, title);
 								}
@@ -165,7 +167,7 @@ namespace River.OneMoreAddIn.Commands
 
 					if (titles.Count == 0)
 					{
-						UIHelper.ShowMessage("No linked pages were found");
+						ShowError("No linked pages were found");
 						return;
 					}
 
@@ -195,7 +197,7 @@ namespace River.OneMoreAddIn.Commands
 				// all sectios in current notebook
 				OneNote.Scope.Sections => await one.GetNotebook(OneNote.Scope.Pages),
 				// current section
-				_ => one.GetSection(),
+				_ => await one.GetSection(),
 			};
 
 			ns = one.GetNamespace(hierarchy);
@@ -224,7 +226,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var catalog = fullCatalog ? OneNote.Scope.Notebooks : scope;
 
-			return await one.BuildHyperlinkMap(catalog, token,
+			return await new HyperlinkProvider(one).BuildHyperlinkMap(catalog, token,
 				async (count) =>
 				{
 					progress.SetMaximum(count);
@@ -271,12 +273,12 @@ namespace River.OneMoreAddIn.Commands
 
 		private async Task BuildMapPage(XElement hierarchy)
 		{
-			var section = one.GetSection();
+			var section = await one.GetSection();
 			var sectionId = section.Attribute("ID").Value;
 
 			one.CreatePage(sectionId, out var pageId);
 
-			var page = one.GetPage(pageId);
+			var page = await one.GetPage(pageId);
 			page.SetMeta(MetaNames.PageMap, "true");
 
 			page.Title = scope switch
@@ -385,7 +387,7 @@ namespace River.OneMoreAddIn.Commands
 			var quick = standard.GetDefaults();
 
 			var styles = page.GetQuickStyles();
-			var style = styles.FirstOrDefault(s => s.Name == quick.Name);
+			var style = styles.Find(s => s.Name == quick.Name);
 
 			if (style != null)
 			{

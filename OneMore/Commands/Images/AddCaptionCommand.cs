@@ -6,9 +6,11 @@ namespace River.OneMoreAddIn.Commands
 {
 	using River.OneMoreAddIn.Models;
 	using River.OneMoreAddIn.Styles;
+	using River.OneMoreAddIn.UI;
 	using System;
 	using System.Linq;
 	using System.Threading.Tasks;
+	using System.Windows.Forms;
 	using System.Xml.Linq;
 	using Resx = Properties.Resources;
 
@@ -34,13 +36,19 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out ns, OneNote.PageDetail.All);
+			await using var one = new OneNote(out var page, out ns, OneNote.PageDetail.All);
 			var element = page.Root.Descendants(ns + "Image")?
 				.FirstOrDefault(e => e.Attribute("selected")?.Value == "all");
 
 			if (element == null)
 			{
-				UIHelper.ShowError(Resx.Error_SelectImage);
+				ShowError(Resx.Error_SelectImage);
+				return;
+			}
+
+			if (element.Parent.Name.LocalName == "Page")
+			{
+				ShowError(Resx.AddCaptionCommand_cannotCaptionBg);
 				return;
 			}
 
@@ -51,19 +59,26 @@ namespace River.OneMoreAddIn.Commands
 
 			element.Attribute("selected").Remove();
 
-			// try to detect PlantuML title...
+			// try to detect diagram title...
 
 			string caption = Resx.word_Caption;
 
 			string plantID = null;
-			var uml = PlantUmlHelper.ExtractUmlFromImageData(element.Element(ns + "Data").Value);
+
+			var editor = new ImageMetaTextEditor(element.Element(ns + "Data").Value);
+			var uml = editor.ReadImageMetaTextEntry();
 			if (uml != null)
 			{
-				logger.WriteLine(uml);
-				var title = PlantUmlHelper.ReadTitle(uml);
-				if (!string.IsNullOrWhiteSpace(title))
+				logger.Verbose(uml);
+
+				if (editor.Keyword == DiagramKeys.PlantUmlKey ||
+					editor.Keyword == DiagramKeys.MermaidKey)
 				{
-					caption = MakeExtractCaption(ns, element, title, out plantID);
+					var title = DiagramProviderFactory.MakeProvider(editor.Keyword).ReadTitle(uml);
+					if (!string.IsNullOrWhiteSpace(title))
+					{
+						caption = MakeCaption(ns, element, title, out plantID);
+					}
 				}
 			}
 
@@ -89,7 +104,7 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		public string MakeExtractCaption(
+		public static string MakeCaption(
 			XNamespace ns, XElement image, string title, out string plantID)
 		{
 			var meta = image.Parent.Elements(ns + "Meta")
@@ -169,7 +184,7 @@ namespace River.OneMoreAddIn.Commands
 			var styles = new ThemeProvider().Theme.GetStyles();
 			if (styles?.Count > 0)
 			{
-				style = styles.FirstOrDefault(s => s.Name.Equals(Resx.word_Caption));
+				style = styles.Find(s => s.Name.Equals(Resx.word_Caption));
 			}
 
 			// otherwise use default style
@@ -192,7 +207,8 @@ namespace River.OneMoreAddIn.Commands
 				.Any(e => e.Attribute("name").Value.Equals("om") &&
 					 e.Attribute("content").Value.Equals(Resx.word_Caption)) == true)
 			{
-				UIHelper.ShowInfo(Resx.AddCaptionCommand_Captioned);
+				MoreMessageBox.Show(owner, Resx.AddCaptionCommand_Captioned,
+					MessageBoxButtons.OK, MessageBoxIcon.Information);
 				return true;
 			}
 

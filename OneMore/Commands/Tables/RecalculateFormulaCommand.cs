@@ -27,7 +27,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			logger.StartClock();
 
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 
 			var element = page.Root.Descendants(ns + "Cell")
 				// first dive down to find the selected T
@@ -64,7 +64,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (!updated)
 			{
-				UIHelper.ShowInfo(Resx.RecalculateFormulaCommand_NoFormula);
+				ShowInfo(Resx.RecalculateFormulaCommand_NoFormula);
 			}
 
 			logger.WriteTime("recalcution");

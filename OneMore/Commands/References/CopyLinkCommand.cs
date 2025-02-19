@@ -4,8 +4,6 @@
 
 namespace River.OneMoreAddIn
 {
-	using River.OneMoreAddIn.Models;
-	using River.OneMoreAddIn.UI;
 	using System.Linq;
 	using System.Text;
 	using System.Threading.Tasks;
@@ -53,13 +51,11 @@ namespace River.OneMoreAddIn
 			string hyperlink = null;
 			string text = null;
 
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 
 			if (specific)
 			{
-				var selected = page.Root.Elements(ns + "Outline")
-					.Where(e => !e.Elements(ns + "Meta")
-						.Any(m => m.Attribute("name").Value.Equals(MetaNames.TaggingBank)))
+				var selected = page.BodyOutlines
 					.Descendants(ns + "OE")
 					.LastOrDefault(e => e.Attributes().Any(a => a.Name == "selected"));
 
@@ -85,12 +81,12 @@ namespace River.OneMoreAddIn
 				}
 				else
 				{
-					UIHelper.ShowError(Resx.Error_BodyContext);
+					ShowError(Resx.Error_BodyContext);
 				}
 			}
 			else
 			{
-				hyperlink = one.GetHyperlink(page.PageId, null);
+				hyperlink = one.GetHyperlink(page.PageId, page.TitleID);
 			}
 
 			if (string.IsNullOrEmpty(hyperlink))
@@ -125,10 +121,6 @@ namespace River.OneMoreAddIn
 			board.Stash(Win.TextDataFormat.Html, html);
 			board.Stash(Win.TextDataFormat.Text, hyperlink);
 			await board.RestoreState();
-
-			MoreBubbleWindow.Show(specific
-				? Resx.CopyLinkCommand_LinkToParagraph
-				: Resx.CopyLinkCommand_LinkToPage);
 
 			await Task.Yield();
 		}

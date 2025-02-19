@@ -35,6 +35,7 @@ namespace River.OneMoreAddIn.Commands
 		/// <summary>
 		/// The OneNote ID of the page title paragraph.
 		/// Let's us scroll the page to the top.
+		/// This might be null if the page is a Quick Note and doesn't have a one:Title
 		/// </summary>
 		public string TitleID { get; set; }
 
@@ -73,6 +74,12 @@ namespace River.OneMoreAddIn.Commands
 		/// The contextual snippet of text surrounding the hashtag
 		/// </summary>
 		public string Snippet { get; set; }
+
+
+		/// <summary>
+		/// Gets the document-order index value of the snippet on the page
+		/// </summary>
+		public int DocumentOrder { get; set; }
 
 
 		/// <summary>

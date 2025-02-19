@@ -43,9 +43,9 @@ namespace River.OneMoreAddIn.Commands
 				return;
 			}
 
-			using (one = new OneNote())
+			await using (one = new OneNote())
 			{
-				var section = one.GetSection();
+				var section = await one.GetSection();
 				ns = one.GetNamespace(section);
 
 				var pages = section.Elements(ns + "Page")
@@ -94,7 +94,7 @@ namespace River.OneMoreAddIn.Commands
 
 			while (index < pages.Count && pages[index].Level == level)
 			{
-				var page = one.GetPage(pages[index].ID, OneNote.PageDetail.Basic);
+				var page = await one.GetPage(pages[index].ID, OneNote.PageDetail.Basic);
 
 				var cdata = page.Root.Element(ns + "Title")
 					.Element(ns + "OE")
@@ -135,10 +135,11 @@ namespace River.OneMoreAddIn.Commands
 						return $"({counter})";
 
 					case 1:
-						return $"({counter.ToAlphabetic().ToLower()})";
+						return $"({counter.ToAlphabetic().ToLowerInvariant()})";
 
 					case 2:
-						return $"({counter.ToRoman().ToLower()})";
+						// use Invariant so langs like tr-TR convert "I" to "i" instead of "ı"
+						return $"({counter.ToRoman().ToLowerInvariant()})";
 				}
 			}
 

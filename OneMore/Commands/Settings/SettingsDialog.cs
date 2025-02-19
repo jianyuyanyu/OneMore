@@ -13,13 +13,14 @@ namespace River.OneMoreAddIn.Settings
 	using Resx = Properties.Resources;
 
 
-	internal partial class SettingsDialog : UI.LocalizableForm
+	internal partial class SettingsDialog : UI.MoreForm
 	{
 		public enum Sheets
 		{
 			General,
 			Aliases,
 			Colorizer,
+			Colors,
 			Context,
 			Favorites,
 			FileImport,
@@ -28,7 +29,6 @@ namespace River.OneMoreAddIn.Settings
 			Images,
 			Keyboard,
 			Navigator,
-			Lines,
 			Plugins,
 			QuickNotes,
 			Ribbon,
@@ -56,23 +56,23 @@ namespace River.OneMoreAddIn.Settings
 					"cancelButton=word_Cancel"
 				});
 
-				navTree.Nodes["generalNode"].Text = Resx.SettingsDialog_generalNode_Text;
-				navTree.Nodes["colorizerNode"].Text = Resx.ColorizeSheet_Title;
-				navTree.Nodes["aliasNode"].Text = Resx.SettingsDialog_aliasNode_Text;
-				navTree.Nodes["contextNode"].Text = Resx.SettingsDialog_contextNode_Text;
+				navTree.Nodes["generalNode"].Text = Resx.GeneralSheet_Title;
+				navTree.Nodes["colorizerNode"].Text = Resx.ColorizerSheet_Title;
+				navTree.Nodes["colorsNode"].Text = Resx.ColorsSheet_Title;
+				navTree.Nodes["aliasNode"].Text = Resx.AliasSheet_Title;
+				navTree.Nodes["contextNode"].Text = Resx.ContextMenuSheet_Title;
 				navTree.Nodes["favoritesNode"].Text = Resx.word_Favorites;
 				navTree.Nodes["fileImportNode"].Text = Resx.FileImportSheet_Title;
-				navTree.Nodes["hashtagsNode"].Text = Resx.SettingsDialog_hashtagsNode_Text;
-				navTree.Nodes["highlightNode"].Text = Resx.SettingsDialog_highlightNode_Text;
-				navTree.Nodes["linesNode"].Text = Resx.SettingsDialog_linesNode_Text;
-				navTree.Nodes["imagesNode"].Text = Resx.SettingsDialog_imagesNode_Text;
+				navTree.Nodes["hashtagsNode"].Text = Resx.word_Hashtags;
+				navTree.Nodes["highlightNode"].Text = Resx.HighlightsSheet_Title;
+				navTree.Nodes["imagesNode"].Text = Resx.word_Images;
 				navTree.Nodes["keyboardNode"].Text = Resx.SettingsDialog_keyboardNode_Text;
-				navTree.Nodes["navigatorNode"].Text = Resx.SettingsDialog_navigatorNode_Text;
-				navTree.Nodes["pluginsNode"].Text = Resx.SettingsDialog_pluginsNode_Text;
-				navTree.Nodes["quickNotesNode"].Text = Resx.SettingsDialog_quickNotesNode_Text;
-				navTree.Nodes["ribbonNode"].Text = Resx.SettingsDialog_ribbonNode_Text;
-				navTree.Nodes["searchNode"].Text = Resx.SettingsDialog_searchNode_Text;
-				navTree.Nodes["snippetsNode"].Text = Resx.SettingsDialog_snippetshNode_Text;
+				navTree.Nodes["navigatorNode"].Text = Resx.word_Navigator;
+				navTree.Nodes["pluginsNode"].Text = Resx.word_Plugins;
+				navTree.Nodes["quickNotesNode"].Text = Resx.QuickNotesSheet_Title;
+				navTree.Nodes["ribbonNode"].Text = Resx.RibbonBarSheet_Title;
+				navTree.Nodes["searchNode"].Text = Resx.SearchEngineDialog_Text;
+				navTree.Nodes["snippetsNode"].Text = Resx.word_Snippets;
 			}
 
 			this.ribbon = ribbon;
@@ -122,13 +122,13 @@ namespace River.OneMoreAddIn.Settings
 				{
 					0 => new GeneralSheet(provider),
 					1 => new ColorizerSheet(provider),
-					2 => new AliasSheet(provider),
-					3 => new ContextMenuSheet(provider),
-					4 => new FavoritesSheet(provider, ribbon),
-					5 => new FileImportSheet(provider),
-					6 => new HashtagSheet(provider),
-					7 => new HighlightsSheet(provider),
-					8 => new LinesSheet(provider),
+					2 => new ColorsSheet(provider),
+					3 => new AliasSheet(provider),
+					4 => new ContextMenuSheet(provider),
+					5 => new FavoritesSheet(provider, ribbon),
+					6 => new FileImportSheet(provider),
+					7 => new HashtagSheet(provider),
+					8 => new HighlightsSheet(provider),
 					9 => new ImagesSheet(provider),
 					10 => new KeyboardSheet(provider, ribbon),
 					11 => new NavigatorSheet(provider),
@@ -138,13 +138,16 @@ namespace River.OneMoreAddIn.Settings
 					15 => new SearchEngineSheet(provider),
 					_ => new SnippetsSheet(provider, ribbon),
 				};
+
 				sheets.Add(e.Node.Index, sheet);
 			}
 
 			headerLabel.Text = sheet.Title;
 
+			contentPanel.SuspendLayout();
 			contentPanel.Controls.Clear();
 			contentPanel.Controls.Add(sheet);
+			contentPanel.ResumeLayout();
 		}
 
 
@@ -160,7 +163,7 @@ namespace River.OneMoreAddIn.Settings
 
 			provider.Save();
 
-			Logger.Current.WriteLine($"user settings saved, restart:{restart}");
+			logger.WriteLine($"user settings saved, restart:{restart}");
 		}
 	}
 }
