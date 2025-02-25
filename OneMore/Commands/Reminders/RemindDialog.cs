@@ -9,7 +9,7 @@ namespace River.OneMoreAddIn.Commands
 	using Resx = River.OneMoreAddIn.Properties.Resources;
 
 
-	internal partial class RemindDialog : UI.LocalizableForm
+	internal partial class RemindDialog : UI.MoreForm
 	{
 		private readonly Reminder reminder;
 		private string symbol;
@@ -34,7 +34,7 @@ namespace River.OneMoreAddIn.Commands
 					"statusBox",
 					"priorityLabel",
 					"priorityBox",
-					"percentLabel",
+					"percentLabel=phrase_PctComplete",
 					"optionsBox=word_Options",
 					"silentBox",
 					"snoozeLabel",

@@ -36,7 +36,7 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using (one = new OneNote(out var page, out var ns))
+			await using (one = new OneNote(out var page, out var ns))
 			{
 				// make sure cursor is positioned in a target table...
 
@@ -55,7 +55,7 @@ namespace River.OneMoreAddIn.Commands
 				if (anchor == null)
 				{
 					logger.WriteLine("could not find anchor cell");
-					UIHelper.ShowInfo(one.Window, "could not find anchor cell; this shouldn't happen!");
+					ShowInfo("could not find anchor cell; this shouldn't happen!");
 					IsCancelled = true;
 					return;
 				}
@@ -65,7 +65,7 @@ namespace River.OneMoreAddIn.Commands
 				var spage = await GetSourcePage();
 				if (spage == null)
 				{
-					UIHelper.ShowInfo(one.Window, Resx.PasteCellsCommand_NoContent);
+					ShowInfo(Resx.PasteCellsCommand_NoContent);
 					IsCancelled = true;
 					return;
 				}
@@ -73,7 +73,7 @@ namespace River.OneMoreAddIn.Commands
 				var source = GetSourceTable(spage);
 				if (source == null)
 				{
-					UIHelper.ShowInfo(one.Window, Resx.PasteCellsCommand_NoContent);
+					ShowInfo(Resx.PasteCellsCommand_NoContent);
 					IsCancelled = true;
 					return;
 				}
@@ -120,7 +120,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (cell == null)
 			{
-				UIHelper.ShowInfo(one.Window, Resx.PasteCellsCommand_SelectCell);
+				ShowInfo(Resx.PasteCellsCommand_SelectCell);
 				return null;
 			}
 
@@ -128,7 +128,7 @@ namespace River.OneMoreAddIn.Commands
 			if (root == null)
 			{
 				logger.WriteLine("error finding <one:Table>");
-				UIHelper.ShowInfo(one.Window, "error finding <one:Table>; this shouldn't happen!");
+				ShowInfo("error finding <one:Table>; this shouldn't happen!");
 				return null;
 			}
 
@@ -213,7 +213,7 @@ namespace River.OneMoreAddIn.Commands
 
 			await new ClipboardProvider().Paste();
 
-			var page = one.GetPage(pageId);
+			var page = await one.GetPage(pageId);
 			one.DeleteHierarchy(pageId);
 
 			await one.NavigateTo(currentPageId);

@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2021 Steven M Cohn.  All rights reserved.
+// Copyright © 2021 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Models
@@ -29,17 +29,23 @@ namespace River.OneMoreAddIn.Models
 			: base(original.GetNamespaceOfPrefix(OneNote.Prefix) + "TagDef",
 				  original.Attributes())
 		{
-			Index = Attribute("index").Value;
+			ElementRef = original;
 			IndexValue = int.Parse(original.Attribute("index").Value);
 			Type = int.Parse(Attribute("type").Value);
 			hashcode = original.GetHashCode();
 		}
 
 
-		public string Index { get; private set; }
+		/// <summary>
+		/// Dynamic, indicates the order in which the tagdefs were added to the page
+		/// </summary>
+		public string Index => Attribute("index").Value;
 
 
-		public int Type { get; private set; }
+		/// <summary>
+		/// Gets the original XElement reference.
+		/// </summary>
+		public XElement ElementRef { get; private set; }
 
 
 		public int IndexValue
@@ -54,15 +60,46 @@ namespace River.OneMoreAddIn.Models
 		}
 
 
+		/// <summary>
+		/// Gets the unique font color of this symbol tag
+		/// </summary>
+		public string FontColor => Attribute("fontColor").Value;
+
+
+		/// <summary>
+		/// Gets the unique highlight color of this symbol tag
+		/// </summary>
+		public string HighlightColor => Attribute("highlightColor").Value;
+
+
+		/// <summary>
+		/// Gets the specific glyph used for the tag
+		/// </summary>
 		public string Symbol => Attribute("symbol").Value;
 
 
+		/// <summary>
+		/// Dynamic, can differ page to page, seems meaningless??
+		/// </summary>
+		public int Type { get; private set; }
+
+
+		/// <summary>
+		/// Compares by Symbol
+		/// </summary>
+		/// <param name="obj">other instance</param>
+		/// <returns>True if the Symbols are equal</returns>
 		public override bool Equals(object obj)
 		{
-			if (obj is XElement other)
+			if (obj is XElement other && other.Name.LocalName == "TagDef")
 			{
-				// this is all we care about; OneNote allows exactly one of each symbol, no more
-				return Attribute("symbol").Value.Equals(other.Attribute("symbol").Value);
+				// OneNote typically allows one of each symbol, however, you can have multiple
+				// instances of each symbol as long as the font/highlight colors are unique
+
+				return
+					Symbol.Equals(other.Attribute("symbol").Value) &&
+					FontColor.Equals(other.Attribute("fontColor").Value) &&
+					HighlightColor.Equals(other.Attribute("highlightColor").Value);
 			}
 
 			return false;
@@ -93,28 +130,28 @@ namespace River.OneMoreAddIn.Models
 /*
 idx	typ	sym	default	Tag
 --- --- --- ------- ------------
-0	0	33			Num three
-1	1	51			Num Two
-2	2	70			Num One
-3	3	39			Num Zero
-4	4	3	false	To Do
-5	5	13			Important
-6	6	15			Question
+0	0	33			Num three --> :three:
+1	1	51			Num Two --> :two:
+2	2	70			Num One --> :one:
+3	3	39			Num Zero --> :zero:
+4	4	3	false	To Do --> [x]
+5	5	13			Important --> :star:
+6	6	15			Question --> :question:
 7	7	0			Remember for later
 8	8	0			Definition
 9	9	136			Highlight
-10	10	118			Contact
-11	11	23			Address
-12	12	18			Phone number
+10	10	118			Contact --> :mailbox:
+11	11	23			Address --> :house:
+12	12	18			Phone number --> :phone:
 13	13	125			Web site to visit
-14	14	21			Idea
-15	15	131			Password
-16	16	17			Critical
+14	14	21			Idea --> :bulb:
+15	15	131			Password --> :secret:
+16	16	17			Critical --> :exclamation:
 17	17	100			Project A
 18	18	101			Project B
-19	19	122			Movie to see
-20	20	132			Book to read
-21	21	121			Music to listen to
+19	19	122			Movie to see --> :movie_camera:
+20	20	132			Book to read --> :book:
+21	21	121			Music to listen to --> :musical_note:
 22	22	125			Source for article
 23	23	24			Remember for blog
 24	24	94	false	Discuss with <Person A>
@@ -126,4 +163,5 @@ idx	typ	sym	default	Tag
 30	30	28	false	To Do priority 1
 31	31	71	false	To Do priority 2
 32	32	8	false	Client request
+        140         lightning bolt --> :zap:
 */

@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2020 Steven M Cohn.  All rights reserved.
+// Copyright © 2020 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
@@ -9,7 +9,6 @@ namespace River.OneMoreAddIn.Commands
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Linq;
-	using System.Text.RegularExpressions;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
 	using System.Xml.Linq;
@@ -24,7 +23,7 @@ namespace River.OneMoreAddIn.Commands
 	{
 		private Page page;
 		private XNamespace ns;
-		private IEnumerable<XElement> range;
+		private IEnumerable<XElement> runs;
 		private bool all;
 
 
@@ -35,7 +34,9 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			var result = UIHelper.ShowQuestion(Resx.RemoveEmptyCommand_option, false, true);
+			var result = UI.MoreMessageBox.ShowQuestion(owner,
+				Resx.RemoveEmptyCommand_option, cancel: true);
+
 			if (result == DialogResult.Cancel)
 			{
 				return;
@@ -45,12 +46,13 @@ namespace River.OneMoreAddIn.Commands
 
 			logger.StartClock();
 
-			using var one = new OneNote();
-			page = one.GetPage(OneNote.PageDetail.Selection);
+			await using var one = new OneNote();
+			page = await one.GetPage(OneNote.PageDetail.Selection);
 			ns = page.Namespace;
 
-			range = page.GetSelectedElements();
-			logger.WriteLine($"found {range.Count()} runs, scope={page.SelectionScope}");
+			var range = new Models.SelectionRange(page);
+			runs = range.GetSelections(defaulToAnytIfNoRange: true);
+			logger.WriteLine($"found {runs.Count()} runs, scope={range.Scope}");
 
 			var modified = OutdentEmptyLines();
 			modified = CollapseEmptyLines() || modified;
@@ -76,10 +78,10 @@ namespace River.OneMoreAddIn.Commands
 			 *     <OEChildren> indented OE...
 			 */
 
-			var children = range.Descendants(ns + "OEChildren").ToList();
+			var children = runs.Descendants(ns + "OEChildren").ToList();
 			if (children.Any())
 			{
-				return OutdentEmptyLines(children.First().Parent, children);
+				return OutdentEmptyLines(children[0].Parent, children);
 			}
 
 			return false;
@@ -120,13 +122,13 @@ namespace River.OneMoreAddIn.Commands
 		{
 			// find consecutive empty paragraphs that need to be collapsed...
 
-			var elements = range
+			var elements = runs
 				.Select(e => e.Parent)
 				.Distinct()
 				.Where(e => e.TextValue().Trim().Length == 0 && !e.IsMathML())
 				.ToList();
 
-			if (elements?.Any() != true)
+			if (!elements.Any())
 			{
 				//logger.WriteLine("no blank lines found");
 				return false;
@@ -161,7 +163,7 @@ namespace River.OneMoreAddIn.Commands
 
 				// is this a custom Heading style?
 				var style = new Style(element.CollectStyleProperties(true));
-				if (customStyles.Any(s => s.Equals(style)))
+				if (customStyles.Exists(s => s.Equals(style)))
 				{
 					// remove empty custom heading
 					element.Remove();
@@ -224,11 +226,11 @@ namespace River.OneMoreAddIn.Commands
 			 * </OE>
 			 */
 
-			var elements = range
+			var elements = runs
 				.Where(e => e.PreviousNode == null && e.TextValue().Trim().Length == 0)
 				.ToList();
 
-			if (elements?.Any() != true)
+			if (!elements.Any())
 			{
 				return false;
 			}
@@ -237,10 +239,9 @@ namespace River.OneMoreAddIn.Commands
 
 			foreach (var element in elements)
 			{
-				var next = element.NextNode as XElement;
-				if (next?.Name.LocalName == "OEChildren")
+				if (element.NextNode is XElement next && next.Name.LocalName == "OEChildren")
 				{
-					var prev = element?.Parent.PreviousNode as XElement;
+					var prev = element.Parent.PreviousNode as XElement;
 					if (prev?.Name.LocalName == "OE")
 					{
 						// move empty line to its own paragraph

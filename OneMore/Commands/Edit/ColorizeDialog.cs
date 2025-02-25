@@ -1,19 +1,22 @@
 ﻿//************************************************************************************************
-// Copyright © 2023 Steven M. Cohn. All Rights Reserved.
+// Copyright © 2023 Steven M Cohn. All Rights Reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands
 {
+	using River.OneMoreAddIn.Settings;
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
 	using System.IO;
+	using System.Linq;
 	using System.Windows.Forms;
+	using System.Xml.Linq;
 	using Colorizer = Colorizer.Colorizer;
 	using Resx = Properties.Resources;
 
 
-	internal partial class ColorizeDialog : UI.LocalizableForm
+	internal partial class ColorizeDialog : UI.MoreForm
 	{
 		public ColorizeDialog()
 		{
@@ -29,7 +32,7 @@ namespace River.OneMoreAddIn.Commands
 				});
 			}
 
-			var languages = Colorizer.LoadLanguageNames();
+			var languages = LoadFilteredLanguages();
 			var imageList = MakeImageList(languages);
 
 			view.SmallImageList = imageList;
@@ -47,6 +50,26 @@ namespace River.OneMoreAddIn.Commands
 			{
 				view.Items[0].Selected = true;
 			}
+		}
+
+
+		public static IDictionary<string, string> LoadFilteredLanguages()
+		{
+			var languages = Colorizer.LoadLanguageNames();
+
+			// load hidden languages from Settings
+			var hidden = new SettingsProvider()
+				.GetCollection(nameof(ColorizerSheet))
+				.Get(ColorizerSheet.HiddenKey, new XElement(ColorizerSheet.HiddenKey));
+
+			// remove hidden languages
+			var keys = languages.Keys.ToList();
+			foreach (var key in keys.Where(key => hidden.Element(languages[key]) is not null))
+			{
+				languages.Remove(key);
+			}
+
+			return languages;
 		}
 
 
@@ -78,6 +101,13 @@ namespace River.OneMoreAddIn.Commands
 			}
 
 			return list;
+		}
+
+
+		protected override void OnLoad(EventArgs e)
+		{
+			base.OnLoad(e);
+			nameColumn.Width = view.ClientSize.Width;
 		}
 
 

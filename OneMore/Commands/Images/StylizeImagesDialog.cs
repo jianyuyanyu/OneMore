@@ -8,16 +8,8 @@ namespace River.OneMoreAddIn.Commands
 	using Resx = Properties.Resources;
 
 
-	internal partial class StylizeImagesDialog : UI.LocalizableForm
+	internal partial class StylizeImagesDialog : UI.MoreForm
 	{
-		public enum ImageStyle
-		{
-			GrayScale,
-			Sepia,
-			Polaroid,
-			Invert
-		}
-
 
 		public StylizeImagesDialog()
 		{
@@ -47,16 +39,20 @@ namespace River.OneMoreAddIn.Commands
 			foreBox.Enabled = foreCount > 0 || foreSelected > 0;
 			backBox.Enabled = backCount > 0 || backSelected > 0;
 
-			foreImagesLabel.Text = string.Format(
-				Resx.StylizeImagesDialog_foreImagesLabel_Text,
+			foreBox.Text = string.Format(
+				Resx.StylizeImagesDialog_foreBox_Text,
 				foreCount, foreSelected);
 
-			backImagesLabel.Text = string.Format(
-				Resx.StylizeImagesDialog_backImagesLabel_Text,
+			backBox.Text = string.Format(
+				Resx.StylizeImagesDialog_backBox_Text,
 				backCount, backSelected);
 
 			foreBox.Enabled = foreCount > 0;
 			backBox.Enabled = backCount > 0;
+
+			foreBox.Checked = foreCount > 0 && backCount == 0;
+			backBox.Checked = backCount > 0 && foreCount == 0;
+
 			styleBox.SelectedIndex = 0;
 		}
 
@@ -67,12 +63,12 @@ namespace River.OneMoreAddIn.Commands
 		public bool ApplyBackground => backBox.Checked;
 
 
-		public ImageStyle Style => styleBox.SelectedIndex switch
+		public ImageEditor.Stylization Style => styleBox.SelectedIndex switch
 		{
-			0 => ImageStyle.GrayScale,
-			1 => ImageStyle.Sepia,
-			2 => ImageStyle.Polaroid,
-			_ => ImageStyle.Invert
+			0 => ImageEditor.Stylization.GrayScale,
+			1 => ImageEditor.Stylization.Sepia,
+			2 => ImageEditor.Stylization.Polaroid,
+			_ => ImageEditor.Stylization.Invert
 		};
 
 

@@ -6,6 +6,7 @@ namespace River.OneMoreAddIn.Commands
 {
 	using River.OneMoreAddIn.Styles;
 	using System.IO;
+	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
 	using Resx = Properties.Resources;
@@ -40,8 +41,13 @@ namespace River.OneMoreAddIn.Commands
 
 		public Theme LoadTheme()
 		{
-			var path = Path.Combine(PathHelper.GetAppDataPath(), Resx.ThemesFolder);
-			PathHelper.EnsurePathExists(path);
+			var path = ThemeProvider.GetCustomThemeDirectory();
+			if (!Directory.Exists(path) ||
+				!Directory.EnumerateFiles(path, "*.xml").Any())
+			{
+				path = ThemeProvider.GetThemeDirectory();
+				PathHelper.EnsurePathExists(path);
+			}
 
 			using var dialog = new OpenFileDialog
 			{
@@ -49,8 +55,8 @@ namespace River.OneMoreAddIn.Commands
 				Filter = Resx.LoadStyleTheme_filter,
 				Multiselect = false,
 				Title = Resx.LoadStyleTheme_Title,
-				ShowHelp = true,			// stupid, but this is needed to avoid hang
-				AutoUpgradeEnabled = true,	// simpler UI, faster
+				ShowHelp = true,            // stupid, but this is needed to avoid hang
+				AutoUpgradeEnabled = true,  // simpler UI, faster
 				InitialDirectory = path
 			};
 
@@ -59,17 +65,19 @@ namespace River.OneMoreAddIn.Commands
 				return null;
 			}
 
-			var theme = new ThemeProvider(dialog.FileName).Theme;
-			if (theme != null)
+			var provider = new ThemeProvider(dialog.FileName);
+			var theme = provider.Theme;
+			if (theme is not null)
 			{
 				var styles = theme.GetStyles();
 				if (styles.Count > 0)
 				{
+					ThemeProvider.RecordTheme(theme.Key);
 					return theme;
 				}
 			}
 
-			UIHelper.ShowError(Resx.LoadStyleTheme_errorLoading);
+			ShowError(Resx.LoadStyleTheme_errorLoading);
 			return null;
 		}
 	}

@@ -1,200 +1,204 @@
 [
   {
     "glyph": "📐",
-    "resID": "Architecture"
+    "resID": "e_Architecture"
   },
   {
     "glyph": "🚗",
-    "resID": "Automobile"
+    "resID": "e_Automobile"
   },
   {
     "glyph": "☐",
-    "resID": "BallotBox",
+    "resID": "e_BallotBox",
     "color": "#5B9BD5"
   },
   {
     "glyph": "🔔",
-    "resID": "Bell"
+    "resID": "e_Bell"
   },
   {
     "glyph": "●",
-    "resID": "Bullet",
+    "resID": "e_Bullet",
     "color": "#0070C0"
   },
   {
     "glyph": "📆",
-    "resID": "Calendar"
+    "resID": "e_Calendar"
   },
   {
     "glyph": "📷",
-    "resID": "Camera"
+    "resID": "e_Camera"
   },
   {
     "glyph": "✓",
-    "resID": "CheckMark",
+    "resID": "e_CheckMark",
     "color": "#00B050"
   },
   {
     "glyph": "⭕",
-    "resID": "Circle"
+    "resID": "e_Circle"
   },
   {
     "glyph": "📋",
-    "resID": "Clipboard"
+    "resID": "e_Clipboard"
   },
   {
     "glyph": "☁",
-    "resID": "Cloud"
+    "resID": "e_Cloud"
   },
   {
     "glyph": "©",
-    "resID": "Copyright"
+    "resID": "e_Copyright"
   },
   {
     "glyph": "❌",
-    "resID": "Cross"
+    "resID": "e_Cross"
   },
   {
     "glyph": "🚴",
-    "resID": "Cycling"
+    "resID": "e_Cycling"
+  },
+  {
+    "glyph": "Δ",
+    "resID": "e_Delta"
   },
   {
     "glyph": "✉",
-    "resID": "Envelope"
+    "resID": "e_Envelope"
   },
   {
     "glyph": "👀",
-    "resID": "Eyes"
+    "resID": "e_Eyes"
   },
   {
     "glyph": "👪",
-    "resID": "Family"
+    "resID": "e_Family"
   },
   {
     "glyph": "💲",
-    "resID": "Financial"
+    "resID": "e_Financial"
   },
   {
     "glyph": "🚩",
-    "resID": "Flag"
+    "resID": "e_Flag"
   },
   {
     "glyph": "📁",
-    "resID": "Folder"
+    "resID": "e_Folder"
   },
   {
     "glyph": "🌐",
-    "resID": "Globe"
+    "resID": "e_Globe"
   },
   {
     "glyph": "🔨",
-    "resID": "Hammer"
+    "resID": "e_Hammer"
   },
   {
     "glyph": "♥",
-    "resID": "Heart"
+    "resID": "e_Heart"
   },
   {
     "glyph": "⁉",
-    "resID": "Interrobang"
+    "resID": "e_Interrobang"
   },
   {
     "glyph": "📓",
-    "resID": "Journal"
+    "resID": "e_Journal"
   },
   {
     "glyph": "←",
-    "resID": "LeftwardsArrow",
+    "resID": "e_LeftwardsArrow",
     "color": "#0070C0"
   },
   {
     "glyph": "🔒",
-    "resID": "Lock"
+    "resID": "e_Lock"
   },
   {
     "glyph": "📝",
-    "resID": "Memo"
+    "resID": "e_Memo"
   },
   {
     "glyph": "🔑",
-    "resID": "Passwords"
+    "resID": "e_Passwords"
   },
   {
     "glyph": "✏",
-    "resID": "Pencil"
+    "resID": "e_Pencil"
   },
   {
     "glyph": "📌",
-    "resID": "Pushpin"
+    "resID": "e_Pushpin"
   },
   {
     "glyph": "♻",
-    "resID": "Recycle"
+    "resID": "e_Recycle"
   },
   {
     "glyph": "→",
-    "resID": "RightwardsArrow",
+    "resID": "e_RightwardsArrow",
     "color": "#0070C0"
   },
   {
     "glyph": "§",
-    "resID": "Section"
+    "resID": "e_Section"
   },
   {
     "glyph": "⚡",
-    "resID": "Shazam"
+    "resID": "e_Shazam"
   },
   {
     "glyph": "🙂",
-    "resID": "Smiley"
+    "resID": "e_Smiley"
   },
   {
     "glyph": "💾",
-    "resID": "Software"
+    "resID": "e_Software"
   },
   {
     "glyph": "⚾",
-    "resID": "Sports"
+    "resID": "e_Sports"
   },
   {
     "glyph": "⚽",
-    "resID": "SportsEU"
+    "resID": "e_SportsEU"
   },
   {
     "glyph": "⭐",
-    "resID": "Star"
+    "resID": "e_Star"
   },
   {
     "glyph": "∑",
-    "resID": "Summary"
+    "resID": "e_Summary"
   },
   {
     "glyph": "☑",
-    "resID": "Tasks"
+    "resID": "e_Tasks"
   },
   {
     "glyph": "⚒",
-    "resID": "Tools"
+    "resID": "e_Tools"
   },
   {
     "glyph": "🛩",
-    "resID": "Travel"
+    "resID": "e_Travel"
   },
   {
     "glyph": "🎥",
-    "resID": "Video"
+    "resID": "e_Video"
   },
   {
     "glyph": "⚠",
-    "resID": "Warning"
+    "resID": "e_Warning"
   },
   {
     "glyph": "⌚",
-    "resID": "Watch"
+    "resID": "e_Watch"
   },
   {
     "glyph": "✗",
-    "resID": "XMark",
+    "resID": "e_XMark",
     "color": "#C00000"
   }
 ]

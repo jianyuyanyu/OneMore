@@ -42,7 +42,7 @@ namespace River.OneMoreAddIn.Commands
 				return;
 			}
 
-			using var one = new OneNote(out page, out ns);
+			await using var one = new OneNote(out page, out ns);
 			PageNamespace.Set(ns);
 
 			var paragraph = page.Root.Descendants(ns + "T")
@@ -52,7 +52,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (paragraph == null)
 			{
-				UIHelper.ShowInfo(one.Window, Resx.RemindCommand_noContext);
+				ShowError(Resx.RemindCommand_noContext);
 				return;
 			}
 
@@ -75,11 +75,11 @@ namespace River.OneMoreAddIn.Commands
 			var pageId = parts[0];
 			var objectId = parts[1];
 
-			using var one = new OneNote();
+			await using var one = new OneNote();
 			Native.SetForegroundWindow(one.WindowHandle);
 			await one.NavigateTo(pageId, objectId);
 
-			page = one.GetPage(pageId);
+			page = await one.GetPage(pageId);
 			ns = page.Namespace;
 
 			var paragraph = page.Root.Descendants(ns + "OE")
@@ -127,7 +127,7 @@ namespace River.OneMoreAddIn.Commands
 			var reminders = new ReminderSerializer().LoadReminders(page);
 			if (reminders.Any())
 			{
-				reminder = reminders.FirstOrDefault(r => r.ObjectId == objectID);
+				reminder = reminders.Find(r => r.ObjectId == objectID);
 
 				if (reminder == null)
 				{
@@ -136,7 +136,7 @@ namespace River.OneMoreAddIn.Commands
 					// object IDs are mutable per client but differ across clients so lookup URI
 
 					var uri = one.GetHyperlink(page.PageId, objectID);
-					reminder = reminders.FirstOrDefault(r => r.ObjectUri == uri);
+					reminder = reminders.Find(r => r.ObjectUri == uri);
 				}
 
 				if (reminder != null &&
@@ -157,7 +157,8 @@ namespace River.OneMoreAddIn.Commands
 							{
 								reminder.Status = ReminderStatus.Completed;
 								reminder.Percent = 100;
-								reminder.Completed = DateTime.Parse(tag.Attribute("completionDate").Value);
+								reminder.Completed = DateTime
+									.Parse(tag.Attribute("completionDate").Value, AddIn.Culture);
 							}
 
 							if (string.IsNullOrEmpty(reminder.ObjectUri))
@@ -203,12 +204,12 @@ namespace River.OneMoreAddIn.Commands
 				reminder.TagIndex = tag.Attribute("index").Value;
 				reminder.Symbol = page.GetTagDefSymbol(reminder.TagIndex);
 
-				reminder.Created = DateTime.Parse(tag.Attribute("creationDate").Value);
+				reminder.Created = DateTime.Parse(tag.Attribute("creationDate").Value, AddIn.Culture);
 
 				var completionDate = tag.Attribute("creationDate");
 				if (completionDate != null)
 				{
-					reminder.Completed = DateTime.Parse(completionDate.Value);
+					reminder.Completed = DateTime.Parse(completionDate.Value, AddIn.Culture);
 				}
 			}
 			else
@@ -276,9 +277,9 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		internal static void ReportDiagnostics(ILogger logger)
+		internal static async Task ReportDiagnostics(ILogger logger)
 		{
-			using var one = new OneNote(out var spage, out var sns);
+			await using var one = new OneNote(out var spage, out var sns);
 
 			logger.WriteLine();
 			logger.WriteLine($"Reminders on current page ({spage.Title})");
@@ -303,7 +304,7 @@ namespace River.OneMoreAddIn.Commands
 				var due = reminder.Due.ToLocalTime().ToString();
 
 				var status = string.Empty;
-				if (!spage.Root.Descendants(sns + "OE").Any(e => 
+				if (!spage.Root.Descendants(sns + "OE").Any(e =>
 					e.Attribute("objectID").Value == reminder.ObjectId))
 				{
 					if (string.IsNullOrEmpty(reminder.ObjectUri) ||

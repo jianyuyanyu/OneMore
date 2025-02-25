@@ -22,9 +22,9 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote();
+			await using var one = new OneNote();
 
-			var section = one.GetSection();
+			var section = await one.GetSection();
 			var ns = one.GetNamespace(section);
 
 			// find all level 1 pages not collapsed and immediately followed by level 2 page

@@ -94,7 +94,10 @@ namespace River.OneMoreAddIn.UI
 				// special case for our MoreListView and hosted controls
 				if (item is IMoreHostItem child)
 				{
-					Register(control, child.Control, eventName);
+					if (!trash.Exists(t => t.Control == child.Control && t.EventName == eventName))
+					{
+						Register(control, child.Control, eventName);
+					}
 				}
 			}
 		}

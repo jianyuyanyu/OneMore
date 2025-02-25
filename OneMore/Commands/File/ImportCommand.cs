@@ -125,7 +125,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			if (!Office.IsInstalled("Word"))
 			{
-				UIHelper.ShowMessage("Word is not installed");
+				ShowError("Word is not installed");
 			}
 
 			string[] files;
@@ -173,8 +173,12 @@ namespace River.OneMoreAddIn.Commands
 		{
 			progress.SetMessage($"Importing {filepath}...");
 
-			using var word = new Word();
-			var html = word.ConvertFileToHtml(filepath);
+			string html;
+			// do not use single-line using here!!
+			using (var word = new Word())
+			{
+				html = word.ConvertFileToHtml(filepath);
+			}
 
 			if (token.IsCancellationRequested)
 			{
@@ -184,15 +188,15 @@ namespace River.OneMoreAddIn.Commands
 
 			if (append)
 			{
-				using var one = new OneNote(out var page, out _);
+				await using var one = new OneNote(out var page, out _);
 				page.AddHtmlContent(html);
 				await one.Update(page);
 			}
 			else
 			{
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				one.CreatePage(one.CurrentSectionId, out var pageId);
-				var page = one.GetPage(pageId);
+				var page = await one.GetPage(pageId);
 
 				page.Title = Path.GetFileName(filepath);
 				page.AddHtmlContent(html);
@@ -209,7 +213,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			if (!Office.IsInstalled("Powerpoint"))
 			{
-				UIHelper.ShowMessage("PowerPoint is not installed");
+				ShowError("PowerPoint is not installed");
 			}
 
 			string[] files;
@@ -275,7 +279,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (split)
 			{
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				var section = await one.CreateSection(Path.GetFileNameWithoutExtension(filepath));
 				var sectionId = section.Attribute("ID").Value;
 				var ns = one.GetNamespace(section);
@@ -286,7 +290,7 @@ namespace River.OneMoreAddIn.Commands
 				foreach (var file in Directory.GetFiles(outpath, "*.jpg"))
 				{
 					one.CreatePage(sectionId, out var pageId);
-					var page = one.GetPage(pageId);
+					var page = await one.GetPage(pageId);
 					page.Title = $"Slide {i}";
 					var container = page.EnsureContentContainer();
 
@@ -301,16 +305,16 @@ namespace River.OneMoreAddIn.Commands
 			}
 			else
 			{
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				Page page;
 				if (append)
 				{
-					page = one.GetPage();
+					page = await one.GetPage();
 				}
 				else
 				{
 					one.CreatePage(one.CurrentSectionId, out var pageId);
-					page = one.GetPage(pageId);
+					page = await one.GetPage(pageId);
 					page.Title = Path.GetFileName(filepath);
 				}
 
@@ -418,16 +422,16 @@ namespace River.OneMoreAddIn.Commands
 			Page page;
 
 			// keep this using block or the StorageFile/PdfDocument context will corrupt it
-			using (var one = new OneNote())
+			await using (var one = new OneNote())
 			{
 				if (append)
 				{
-					page = one.GetPage();
+					page = await one.GetPage();
 				}
 				else
 				{
 					one.CreatePage(one.CurrentSectionId, out var pageId);
-					page = one.GetPage(pageId);
+					page = await one.GetPage(pageId);
 					page.Title = Path.GetFileName(filepath);
 				}
 			}
@@ -454,7 +458,7 @@ namespace River.OneMoreAddIn.Commands
 					.GetCollection(nameof(FileImportSheet))
 					.Get("width", DefaultWidth)
 					*
-					UIHelper.GetScalingFactors().Item1)
+					Scaling.GetScalingFactors().Item1)
 			};
 
 			for (int i = 0; i < doc.PageCount; i++)
@@ -487,7 +491,7 @@ namespace River.OneMoreAddIn.Commands
 			}
 
 			// keep this using block or the StorageFile/PdfDocument context will corrupt it
-			using (var one = new OneNote())
+			await using (var one = new OneNote())
 			{
 				await one.Update(page);
 
@@ -561,51 +565,48 @@ namespace River.OneMoreAddIn.Commands
 
 				var body = OneMoreDig.ConvertMarkdownToHtml(filepath, text);
 
-				// copy/paste HTML...
+				// create new page...
 
 				if (!string.IsNullOrEmpty(body))
 				{
-					var html = ClipboardProvider.WrapWithHtmlPreamble(body);
+					await using var one = new OneNote();
+					one.CreatePage(one.CurrentSectionId, out var pageId);
 
-					if (token != default && token.IsCancellationRequested)
-					{
-						logger.WriteLine("import markdown cancelled");
-						return;
-					}
+					var page = await one.GetPage(pageId, OneNote.PageDetail.Basic);
+					var ns = page.Namespace;
 
-					var clippy = new ClipboardProvider();
-					await clippy.StashState();
-					await clippy.SetHtml(html);
+					page.Title = Path.GetFileNameWithoutExtension(filepath);
 
-					Page page;
-					string pageId;
+					var container = page.EnsureContentContainer();
 
-					IntPtr handle;
-					using (var one = new OneNote())
-					{
-						handle = one.WindowHandle;
-						one.CreatePage(one.CurrentSectionId, out pageId);
+					container.Add(new XElement(ns + "HTMLBlock",
+						new XElement(ns + "Data",
+							new XCData($"<html><body>{body}</body></html>")
+							)
+						));
 
-						page = one.GetPage(pageId, OneNote.PageDetail.Basic);
-						page.Title = Path.GetFileNameWithoutExtension(filepath);
+					var converter = new MarkdownConverter(page);
+					converter.RewriteHeadings();
 
-						await one.Update(page);
-						await one.NavigateTo(pageId);
-					}
+					logger.WriteLine($"saving...");
+					logger.WriteLine(page.Root);
 
-					// need to set focus from Progress window to OneNote window to give
-					// the paste operation the correct target
-					Native.SwitchToThisWindow(handle, false);
+					await one.Update(page);
 
-					await clippy.Paste(true);
-					await clippy.RestoreState();
+					// Pass 2, cleanup...
 
-					using (var one = new OneNote())
-					{
-						page = one.GetPage(pageId, OneNote.PageDetail.Basic);
-						MarkdownConverter.RewriteHeadings(page);
-						await one.Update(page);
-					}
+					// find and convert headers based on styles
+					page = await one.GetPage(pageId, OneNote.PageDetail.Basic);
+
+					converter = new MarkdownConverter(page);
+					converter.RewriteHeadings();
+
+					logger.WriteLine($"updating...");
+					logger.WriteLine(page.Root);
+
+					await one.Update(page);
+
+					await one.NavigateTo(pageId);
 				}
 			}
 			catch (Exception exc)
@@ -627,7 +628,7 @@ namespace River.OneMoreAddIn.Commands
 				// load page-from-file
 				var template = new Page(XElement.Load(filepath));
 
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				one.CreatePage(one.CurrentSectionId, out var pageId);
 
 				// remove any objectID values and let OneNote generate new IDs
@@ -660,7 +661,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			try
 			{
-				using var one = new OneNote();
+				await using var one = new OneNote();
 				var pageId = await one.Import(filepath);
 
 				if (!string.IsNullOrEmpty(pageId))

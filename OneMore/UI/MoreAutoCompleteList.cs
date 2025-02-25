@@ -4,13 +4,18 @@
 
 #pragma warning disable IDE0060 // Remove unused parameter
 
+//#define DEBUGLOG // set to DEBUGLOG to enable the DebugLog() conditional method
+
 namespace River.OneMoreAddIn.UI
 {
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Diagnostics;
 	using System.Drawing;
+	using System.Globalization;
 	using System.Linq;
+	using System.Text.RegularExpressions;
 	using System.Windows.Forms;
 	using Resx = Properties.Resources;
 
@@ -35,18 +40,226 @@ namespace River.OneMoreAddIn.UI
 		// The 'commands' field maintains the original list of available Cmds
 		// The 'matches' field maintains the current matched Cmds based on Owner input
 
-		private ToolStripDropDown popup;        // invisible host control of this ListtView	
-		private readonly Font highFont;         // font of matched substring
+		private ToolStripDropDown popup;        // invisible host control of this ListtView
 		private readonly List<Cmd> commands;    // original list of commands
 		private readonly List<Cmd> matches;     // dynamic list of matched commands
+		private readonly ThemeManager manager;  // color manager
+		private HighlightedItemPainter painter; // single painter for performance
 		private string boxtext;                 // the current/previous text in the Owner TextBox
+
 
 		// each command name is described by a Cmd entry
 		private sealed class Cmd
 		{
-			public string Name;                 // provided "name|keys" for this command
+			// incoming descriptor is of the form [category:]name[|keys]
+
+			public string Category;             // category part
+			public string Name;                 // name part
+			public string Keys;                 // key sequence part
 			public bool Recent;                 // true if in "recently used" category
 		}
+
+		#region HighlightedItemPainter
+		private sealed class HighlightedItemPainter : IDisposable
+		{
+			private const char Space = ' ';
+
+			private readonly ThemeManager manager;
+			private readonly Brush normalBack;
+			private readonly Brush normalFore;
+			private readonly Brush normalHigh;
+			private readonly Brush selectedBack;
+			private readonly Brush selectedFore;
+			private readonly Brush selectedHigh;
+
+			private ListViewItem item;
+			private Rectangle bounds;
+			private Graphics graphics;
+			private Brush back;
+			private Brush fore;
+			private Brush high;
+			private Font highFont;
+			private float rindent;
+			private bool disposed;
+
+
+			public HighlightedItemPainter(ThemeManager manager)
+			{
+				this.manager = manager;
+
+				normalBack = new SolidBrush(manager.GetColor("ListView"));
+				normalFore = new SolidBrush(manager.GetColor("ControlText"));
+				normalHigh = new SolidBrush(manager.GetColor("Highlight"));
+
+				selectedBack = new SolidBrush(manager.GetColor("Highlight"));
+				selectedFore = new SolidBrush(manager.GetColor("HighlightText"));
+				selectedHigh = new SolidBrush(manager.GetColor("GradientInactiveCaption"));
+			}
+
+
+			public void Dispose()
+			{
+				if (!disposed)
+				{
+					back = null;
+					fore = null;
+					high = null;
+
+					normalBack?.Dispose();
+					normalFore?.Dispose();
+					normalHigh?.Dispose();
+
+					selectedBack?.Dispose();
+					selectedFore?.Dispose();
+					selectedHigh?.Dispose();
+
+					highFont?.Dispose();
+
+					disposed = true;
+				}
+			}
+
+
+			public bool NonsequentialMatching { get; set; }
+
+
+			public void SetContext(DrawListViewSubItemEventArgs e)
+			{
+				item = e.Item;
+				bounds = e.Bounds;
+				graphics = e.Graphics;
+
+				highFont ??= new Font(item.Font, item.Font.Style | FontStyle.Bold);
+
+				if (item.Selected)
+				{
+					back = selectedBack;
+					fore = selectedFore;
+					high = selectedHigh;
+				}
+				else
+				{
+					back = normalBack;
+					fore = normalFore;
+					high = normalHigh;
+				}
+			}
+
+
+			public void PaintBackground()
+			{
+				graphics.FillRectangle(back,
+					bounds.X, bounds.Y + 1,
+					bounds.Width, bounds.Height - 2);
+
+				// presume PaintBackground is the start of a new item so reset rindex
+				rindent = 0;
+			}
+
+
+			public void PaintCategory(string text)
+			{
+				// this was used for recent and other annotations; difference?
+				//var size = e.Graphics.MeasureString(annotation, Font);
+
+				var size = TextRenderer.MeasureText(text, item.Font);
+				var x = bounds.Width - size.Width - 5 - rindent;
+				graphics.DrawString(text, item.Font, high, x, bounds.Y);
+
+				rindent -= size.Width;
+			}
+
+
+			public void PaintDivider()
+			{
+				graphics.DrawLine(Pens.Silver, // yes, this pen is hard-coded
+					bounds.X, bounds.Y, bounds.Width, bounds.Y);
+			}
+
+
+			public void PaintItem(string input, string commandName)
+			{
+				var inputIndex = 0;
+				float x = bounds.X;
+				SizeF size;
+
+				(int, int) range;
+				if (NonsequentialMatching)
+				{
+					range = (int.MaxValue, int.MinValue);
+				}
+				else
+				{
+					var index = commandName.IndexOf(input, StringComparison.InvariantCultureIgnoreCase);
+					range = (index, index + input.Length - 1);
+				}
+
+				bool InRange(int v) => v >= range.Item1 && v <= range.Item2;
+
+				for (int i = 0; i < commandName.Length; i++)
+				{
+					var ch = commandName[i];
+					var text = $"{ch}";
+
+					if (ch == Space)
+					{
+						size = graphics.MeasureString(text, item.Font, new PointF(x, bounds.Y),
+							// GenericDefault will measure space but GenericTypographic will not
+							StringFormat.GenericDefault);
+
+						x += size.Width;
+					}
+					else
+					{
+						Font font;
+						Brush brush;
+
+						if (InRange(i) ||
+							NonsequentialMatching &&
+							(inputIndex < input.Length &&
+							char.ToLower(ch, CultureInfo.InvariantCulture) ==
+							char.ToLower(input[inputIndex], CultureInfo.InvariantCulture)))
+						{
+							font = highFont;
+							brush = high;
+							inputIndex++;
+						}
+						else
+						{
+							font = item.Font;
+							brush = fore;
+						}
+
+						var format = StringFormat.GenericTypographic;
+						graphics.DrawString(text, font, brush, x, bounds.Y, format);
+						size = graphics.MeasureString(text, font, new PointF(x, bounds.Y), format);
+						x += size.Width;
+					}
+				}
+			}
+
+
+			public void PaintKeys(string keys)
+			{
+				using var cap = item.Selected
+					? new SolidBrush(manager.GetColor("GradientInactiveCaption"))
+					: new SolidBrush(manager.GetColor("ActiveCaption"));
+
+				var size = graphics.MeasureString(keys, item.Font);
+				var x = bounds.Width - size.Width - 5 - rindent;
+
+				graphics.DrawString(keys, item.Font, cap, x, bounds.Y);
+
+				rindent -= size.Width;
+			}
+
+
+			public void PaintPlainText(string text)
+			{
+				graphics.DrawString(text, item.Font, fore, bounds);
+			}
+		}
+		#endregion
 
 
 		/// <summary>
@@ -56,6 +269,10 @@ namespace River.OneMoreAddIn.UI
 		public MoreAutoCompleteList()
 		{
 			OwnerDraw = true;
+			manager = ThemeManager.Instance;
+
+			BackColor = manager.GetColor("ListView");
+			ForeColor = manager.GetColor("ControlText");
 
 			// detail view with default headless column so all drawing is done by DrawSubItem
 			View = View.Details;
@@ -68,12 +285,21 @@ namespace River.OneMoreAddIn.UI
 			SetStyle(ControlStyles.DoubleBuffer | ControlStyles.OptimizedDoubleBuffer, true);
 
 			Font = new Font("Segoe UI", 9);
-			highFont = new Font(Font, Font.Style | FontStyle.Bold);
 			commands = new List<Cmd>();
 			matches = new List<Cmd>();
 
 			RecentKicker = Resx.AutoComplete_recentlyUsed;
 			OtherKicker = Resx.AutoComplete_otherCommands;
+		}
+
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+			if (disposing)
+			{
+				painter?.Dispose();
+			}
 		}
 
 
@@ -86,8 +312,20 @@ namespace River.OneMoreAddIn.UI
 
 
 		/// <summary>
+		/// Gets or sets a character used to delimit a command's category string from its name.
+		/// </summary>
+		/// <remarks>
+		/// command.Name format is [category:]name[|keys]
+		/// </remarks>
+		public char CategoryDivider { get; set; } = ':';
+
+
+		/// <summary>
 		/// Gets or sets a character used to delimit a command's name from its key sequence.
 		/// </summary>
+		/// <remarks>
+		/// command.Name format is [category:]name[|keys]
+		/// </remarks>
 		public char KeyDivider { get; set; } = '|';
 
 
@@ -104,6 +342,14 @@ namespace River.OneMoreAddIn.UI
 		/// Gets a value indicating whether the hosted popup is visible
 		/// </summary>
 		public bool IsPopupVisible => popup?.Visible == true;
+
+
+		/// <summary>
+		/// Gets or sets whether characters in input text is allowed to match nonsequential
+		/// characters in item text value, e.g. "olf" could match "Open Log File". Otherwise,
+		/// input text must match an explicit substring.
+		/// </summary>
+		public bool NonsequentialMatching { get; set; }
 
 
 		/// <summary>
@@ -171,6 +417,8 @@ namespace River.OneMoreAddIn.UI
 			// currently, only allow TextBox as the owner control
 			if (control is TextBox box)
 			{
+				DebugLog("ACL SetAutoCompleteList...");
+
 				Owner = box;
 				Width = Math.Max(box.Width, 300);
 				box.KeyDown += DoKeydown;
@@ -193,6 +441,8 @@ namespace River.OneMoreAddIn.UI
 					// TODO: do we want to disconnect this handler once initialized?
 					box.GotFocus += ShowPopup;
 				}
+
+				DebugLog("ACL SetAutoCompleteList done");
 			}
 			else
 			{
@@ -209,14 +459,35 @@ namespace River.OneMoreAddIn.UI
 		/// <param name="recentNames">Optional list of recently used command names</param>
 		public void LoadCommands(IEnumerable<string> names, IEnumerable<string> recentNames = null)
 		{
+			SuspendLayout();
 			Items.Clear();
 			commands.Clear();
 			matches.Clear();
+
+			// descriptors are of the form [category:]name[|keyseq]
+			var pattern = new Regex(
+				@$"(?:(?<cat>[^{CategoryDivider}]+){CategoryDivider})?" +
+				@$"(?:(?<nam>[^\{KeyDivider}]+))" +
+				$@"(?:\{KeyDivider}(?<seq>.*))?",
+				RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
 			foreach (var name in names)
 			{
-				var cmd = new Cmd { Name = name };
-				Items.Add(name);
-				commands.Add(cmd);
+				var match = pattern.Match(name);
+				if (match.Success)
+				{
+					var groups = match.Groups;
+
+					var cmd = new Cmd
+					{
+						Category = groups["cat"].Success ? groups["cat"].Value : null,
+						Name = groups["nam"].Value,
+						Keys = groups["seq"].Success ? groups["seq"].Value : null
+					};
+
+					Items.Add(name);
+					commands.Add(cmd);
+				}
 			}
 
 			if (recentNames?.Any() == true)
@@ -224,12 +495,22 @@ namespace River.OneMoreAddIn.UI
 				// inject recent names at top of list
 				foreach (var name in recentNames.Reverse())
 				{
-					Items.Insert(0, name);
-					commands.Insert(0, new Cmd
+					var match = pattern.Match(name);
+					if (match.Success)
 					{
-						Name = name,
-						Recent = true
-					});
+						var groups = match.Groups;
+
+						var cmd = new Cmd
+						{
+							Category = groups["cat"].Success ? groups["cat"].Value : null,
+							Name = groups["nam"].Value,
+							Keys = groups["seq"].Success ? groups["seq"].Value : null,
+							Recent = true
+						};
+
+						Items.Insert(0, name);
+						commands.Insert(0, cmd);
+					}
 				}
 			}
 
@@ -238,12 +519,15 @@ namespace River.OneMoreAddIn.UI
 			{
 				Items[0].Selected = true;
 			}
+
+			Invalidate();
+			ResumeLayout();
 		}
 		#endregion public SetAutoCompleteList and LoadCommands
 
 
-		#region private HidePopup and ShowPopUp
-		private void HidePopup(object sender, EventArgs e)
+		#region HidePopup and ShowPopUp
+		public void HidePopup(object sender, EventArgs e)
 		{
 			if (popup?.Visible == true) // && !popup.Focused)
 			{
@@ -254,13 +538,17 @@ namespace River.OneMoreAddIn.UI
 
 		private void ShowPopup(object sender, EventArgs e)
 		{
+			DebugLog("ACL ShowPopup...");
+
 			if (Items.Count == 0 || popup?.Visible == true)
 			{
+				DebugLog("ACL SetAutoCompleteList !count");
 				return;
 			}
 
 			if (sender is TextBox box && !box.Visible)
 			{
+				DebugLog("ACL SetAutoCompleteList !visible");
 				popup?.Close();
 				return;
 			}
@@ -280,6 +568,8 @@ namespace River.OneMoreAddIn.UI
 				});
 
 				Owner.FindForm().Move += HidePopup;
+
+				manager.InitializeTheme(popup);
 			}
 
 			if (!popup.Visible)
@@ -289,6 +579,8 @@ namespace River.OneMoreAddIn.UI
 
 				popup.Show(Owner, new Point(0, Owner.Height));
 			}
+
+			DebugLog("ACL SetAutoCompleteList done");
 		}
 		#endregion private HidePopup and ShowPopUp
 
@@ -296,10 +588,11 @@ namespace River.OneMoreAddIn.UI
 		#region Overrides including OnDrawSubItem
 		protected override void OnMouseClick(MouseEventArgs e)
 		{
+			DebugLog("ACL mouseclick");
+
 			base.OnMouseClick(e);
 			var info = HitTest(e.Location);
 
-			Logger.Current.WriteLine("mouseclick");
 			if (info?.Item is ListViewItem item)
 			{
 				item.Selected = true;
@@ -311,6 +604,8 @@ namespace River.OneMoreAddIn.UI
 
 		protected override void OnClientSizeChanged(EventArgs e)
 		{
+			DebugLog("ACL onclientsize changed");
+
 			base.OnClientSizeChanged(e);
 			if (Columns.Count > 0)
 			{
@@ -321,107 +616,34 @@ namespace River.OneMoreAddIn.UI
 
 		protected override void OnDrawSubItem(DrawListViewSubItemEventArgs e)
 		{
-			var back = SystemBrushes.Window;
-			var fore = SystemBrushes.WindowText;
-			var high = SystemBrushes.Highlight;
-
-			if (e.Item.Selected)
+			painter ??= new HighlightedItemPainter(manager)
 			{
-				back = SystemBrushes.Highlight;
-				fore = SystemBrushes.HighlightText;
-				high = SystemBrushes.GradientInactiveCaption;
-			}
+				NonsequentialMatching = this.NonsequentialMatching
+			};
 
-			e.Graphics.FillRectangle(back,
-				e.Bounds.X, e.Bounds.Y + 1,
-				e.Bounds.Width, e.Bounds.Height - 2);
-
-			string keys = null;
+			painter.SetContext(e);
+			painter.PaintBackground();
 
 			var source = matches.Any() ? matches : commands;
 			var command = source[e.Item.Index];
-			var text = command.Name;
 
-			// parse out key sequence if any
-			var bar = text.IndexOf(KeyDivider);
-			if (bar > 0)
+			if (!string.IsNullOrWhiteSpace(Owner.Text) && IsMatch(Owner.Text, command.Name))
 			{
-				keys = text.Substring(bar + 1);
-				text = text.Substring(0, bar);
+				// paint item text with matching
+				painter.PaintItem(Owner.Text, command.Name);
 			}
-
-			var drawn = false;
-			float x;
-
-			if (!string.IsNullOrWhiteSpace(Owner.Text))
+			else
 			{
-				var index = text.IndexOf(Owner.Text, StringComparison.InvariantCultureIgnoreCase);
-				if (index >= 0)
-				{
-					string phrase;
-					SizeF size;
-
-					// track x-offset of each phrase
-					x = e.Bounds.X;
-
-					// phrase is in middle so draw prior phrase
-					if (index > 0)
-					{
-						phrase = text.Substring(0, index);
-
-						// when phrase is substring of word, GenericTypographic doesn't measure
-						// trailing space and when it is prefaced by a space, GenericDefault
-						// removes that space. So choose appropriate format carefully here
-						var format = index < text.Length - 1 && text[index - 1] == ' '
-							? StringFormat.GenericDefault
-							: StringFormat.GenericTypographic;
-
-						e.Graphics.DrawString(phrase, Font, fore, x, e.Bounds.Y, format);
-						size = e.Graphics.MeasureString(phrase, Font, new PointF(x, e.Bounds.Y), format);
-						x += size.Width;
-					}
-
-					// draw matched phrase
-					phrase = text.Substring(index, Owner.Text.Length);
-					e.Graphics.DrawString(phrase, highFont, high,
-						x, e.Bounds.Y, StringFormat.GenericTypographic);
-
-					size = e.Graphics.MeasureString(
-						phrase, highFont, new PointF(x, e.Bounds.Y), StringFormat.GenericTypographic);
-
-					x += size.Width;
-
-					// draw remaining phrase
-					index += Owner.Text.Length;
-					if (index < text.Length)
-					{
-						phrase = text.Substring(index);
-						e.Graphics.DrawString(phrase, Font, fore,
-							x, e.Bounds.Y, StringFormat.GenericTypographic);
-					}
-
-					drawn = true;
-				}
+				// paint item text without matching
+				painter.PaintPlainText(command.Name);
 			}
-
-			if (!drawn)
-			{
-				e.Graphics.DrawString(text, e.Item.Font, fore, e.Bounds);
-			}
-
-			// track where to draw key sequence for command
-			x = e.Bounds.Width - 5;
 
 			// did we match any Recent items at all?
 			if (source[0].Recent)
 			{
 				if (e.ItemIndex == 0)
 				{
-					var annotation = RecentKicker;
-					var size = e.Graphics.MeasureString(annotation, Font);
-					// push key sequence positioning over to the left
-					x -= size.Width;
-					e.Graphics.DrawString(annotation, e.Item.Font, high, x, e.Bounds.Y);
+					painter.PaintCategory(RecentKicker);
 				}
 
 				// index of first common command found after all recent commands
@@ -431,29 +653,35 @@ namespace River.OneMoreAddIn.UI
 					common++;
 				}
 
-				// divider line
-				if (common < source.Count && e.ItemIndex == common - 1)
+				if (common < source.Count && e.ItemIndex == common)
 				{
-					e.Graphics.DrawLine(Pens.Silver,
-						e.Bounds.X, e.Bounds.Y + e.Bounds.Height - 1,
-						e.Bounds.Width, e.Bounds.Y + e.Bounds.Height - 1);
+					painter.PaintDivider();
 				}
-				else if (common == e.ItemIndex)
+
+				if (common == e.ItemIndex)
 				{
-					var annotation = OtherKicker;
-					var size = e.Graphics.MeasureString(annotation, Font);
-					// push key sequence positioning over to the left
-					x -= size.Width;
-					e.Graphics.DrawString(annotation, e.Item.Font, high, x, e.Bounds.Y);
+					painter.PaintCategory(OtherKicker);
 				}
 			}
 
-			// key sequence
-			if (!string.IsNullOrWhiteSpace(keys))
+			// prefer category
+			if (!string.IsNullOrWhiteSpace(command.Category))
 			{
-				var size = e.Graphics.MeasureString(keys, Font);
-				x -= size.Width + 5;
-				e.Graphics.DrawString(keys, e.Item.Font, SystemBrushes.ActiveCaption, x, e.Bounds.Y);
+				if (e.Item.Index == 0 ||
+					(e.Item.Index > 0 && command.Category != source[e.Item.Index - 1].Category))
+				{
+					if (e.Item.Index > 0)
+					{
+						painter.PaintDivider();
+					}
+
+					painter.PaintCategory(command.Category);
+				}
+			}
+			// settle for key sequence
+			else if (!string.IsNullOrWhiteSpace(command.Keys))
+			{
+				painter.PaintKeys(command.Keys);
 			}
 		}
 
@@ -471,6 +699,8 @@ namespace River.OneMoreAddIn.UI
 
 		private void DoTextChanged(object sender, EventArgs e)
 		{
+			DebugLog("ACL textchange");
+
 			// as the TextBox.Text changes, this finds matches in the command list and
 			// highlights the first one; the TextBox value is not modified here...
 
@@ -492,7 +722,8 @@ namespace River.OneMoreAddIn.UI
 
 			commands.ForEach(cmd =>
 			{
-				if (cmd.Name.ContainsICIC(text))
+				//if (cmd.Name.ContainsICIC(text))
+				if (IsMatch(text, cmd.Name))
 				{
 					matches.Add(cmd);
 				}
@@ -555,6 +786,29 @@ namespace River.OneMoreAddIn.UI
 
 			var word = Owner.Text.Substring(start, end - start + 1);
 			return word;
+		}
+
+
+		// suggusted by nhwCoder here: https://github.com/stevencohn/OneMore/issues/1680
+		// allows sequential character searching such as "olf" = "Open Log File"
+		private bool IsMatch(string input, string command)
+		{
+			if (!NonsequentialMatching)
+			{
+				return command.ContainsICIC(input);
+			}
+
+			int inputIndex = 0;
+			foreach (var ch in command)
+			{
+				if (inputIndex < input.Length &&
+					char.ToLower(ch, CultureInfo.InvariantCulture) ==
+					char.ToLower(input[inputIndex], CultureInfo.InvariantCulture))
+				{
+					inputIndex++;
+				}
+			}
+			return inputIndex == input.Length;
 		}
 
 
@@ -709,6 +963,14 @@ namespace River.OneMoreAddIn.UI
 					EnsureVisible(SelectedIndices.Count > 0 ? SelectedIndices[0] : 0);
 				}
 			}
+		}
+
+
+		// #define DEBUGLOG to enable this method; otherwise compiler will remove it entirely
+		[Conditional("DEBUGLOG")]
+		private void DebugLog(string message)
+		{
+			Logger.Current.WriteLine(message);
 		}
 	}
 }

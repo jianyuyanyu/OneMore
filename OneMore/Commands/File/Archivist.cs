@@ -42,7 +42,7 @@ namespace River.OneMoreAddIn.Commands
 		{
 			logger.WriteLine("building hyperlink map");
 
-			map = await one.BuildHyperlinkMap(
+			map = await new HyperlinkProvider(one).BuildHyperlinkMap(
 				scope,
 				token,
 				async (count) =>
@@ -70,7 +70,7 @@ namespace River.OneMoreAddIn.Commands
 		/// <param name="withAttachments">True if copy and relink attachments</param>
 		/// <param name="embedded">True if attachment should be embedded; false to link</param>
 		/// <returns>True if the export was successful</returns>
-		public bool Export(string pageId, string filename,
+		public async Task<bool> Export(string pageId, string filename,
 			OneNote.ExportFormat format,
 			bool withAttachments = false,
 			bool embedded = false)
@@ -91,7 +91,7 @@ namespace River.OneMoreAddIn.Commands
 					if (withAttachments && format == OneNote.ExportFormat.Word)
 					{
 						using var word = new Helpers.Office.Word();
-						var page = one.GetPage(pageId);
+						var page = await one.GetPage(pageId);
 						word.ResolveAttachmentRefs(filename, page.Root, embedded);
 					}
 
@@ -104,7 +104,10 @@ namespace River.OneMoreAddIn.Commands
 			{
 				var fmt = format.ToString();
 				logger.WriteLine($"error publishig page as {fmt}", exc);
-				UIHelper.ShowError(string.Format(Resx.SaveAs_Error, fmt) + "\n\n" + exc.Message);
+
+				UI.MoreMessageBox.ShowError(null,
+					string.Format(Resx.SaveAs_Error, fmt) + "\n\n" + exc.Message);
+
 				return false;
 			}
 		}
@@ -116,27 +119,21 @@ namespace River.OneMoreAddIn.Commands
 		/// 
 		/// </summary>
 		/// <param name="page"></param>
-		/// <param name="filename"></param>
+		/// <param name="filename">Unique qualified name</param>
 		/// <param name="hpath"></param>
 		/// <param name="bookScope"></param>
-		public void ExportHTML(
-			Page page, ref string filename, string hpath = null, bool bookScope = false)
+		public async Task<string> ExportHTML(
+			Page page, string filename, string hpath = null, bool bookScope = false)
 		{
 			// expand C:\folder\name.htm --> C:\folder\name\name.htm
-			var name = Path.GetFileNameWithoutExtension(filename);				// "name"
-			var fame = PathHelper.CleanFileName(Path.GetFileName(filename));	// "name.htm"
-			var path = Path.Combine(Path.GetDirectoryName(filename), name);		// "c:\folder\name"
-			filename = Path.Combine(path, fame);								// "c:\folder\name\name.htm"
-
-			if (filename.Length > PathHelper.MAX_PATH)
-			{
-				filename = PathHelper.FitMaxPath(filename);
-				path = Path.GetDirectoryName(filename);
-			}
+			var name = Path.GetFileNameWithoutExtension(filename);              // "name"
+			var fame = PathHelper.CleanFileName(Path.GetFileName(filename));    // "name.htm"
+			var path = Path.Combine(Path.GetDirectoryName(filename), name);     // "c:\folder\name"
+			filename = Path.Combine(path, fame);                                // "c:\folder\name\name.htm"
 
 			if (PathHelper.EnsurePathExists(path))
 			{
-				if (Export(page.PageId, filename, OneNote.ExportFormat.HTML))
+				if (await Export(page.PageId, filename, OneNote.ExportFormat.HTML))
 				{
 					if (map != null)
 					{
@@ -146,6 +143,8 @@ namespace River.OneMoreAddIn.Commands
 					ArchiveAttachments(page, filename, path);
 				}
 			}
+
+			return filename;
 		}
 
 
@@ -385,7 +384,8 @@ namespace River.OneMoreAddIn.Commands
 			catch (Exception exc)
 			{
 				logger.WriteLine("error publishig page as Markdown", exc);
-				UIHelper.ShowError(string.Format(Resx.SaveAs_Error, "Markdown") + "\n\n" + exc.Message);
+				UI.MoreMessageBox.ShowError(null,
+					string.Format(Resx.SaveAs_Error, "Markdown") + "\n\n" + exc.Message);
 			}
 		}
 
@@ -402,7 +402,7 @@ namespace River.OneMoreAddIn.Commands
 			try
 			{
 				var path = Path.GetDirectoryName(filename);
-					
+
 				if (withAttachments)
 				{
 					CopyXmlAttachments(root, path);
@@ -420,7 +420,8 @@ namespace River.OneMoreAddIn.Commands
 			catch (Exception exc)
 			{
 				logger.WriteLine("error publishig page as XML", exc);
-				UIHelper.ShowError(string.Format(Resx.SaveAs_Error, "XML") + "\n\n" + exc.Message);
+				UI.MoreMessageBox.ShowError(null,
+					string.Format(Resx.SaveAs_Error, "XML") + "\n\n" + exc.Message);
 			}
 		}
 

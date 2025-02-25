@@ -8,46 +8,37 @@ namespace River.OneMoreAddIn.Commands
 	using System;
 	using System.Drawing;
 	using System.Windows.Forms;
-	using Resx = Properties.Resources;
 	using HierarchyInfo = OneNote.HierarchyInfo;
+	using Resx = Properties.Resources;
 
 
 	/// <summary>
 	/// Hosted control to be used in the pinned and history MoreListViews
 	/// </summary>
-	internal class HistoryControl : UserControl, IChameleon
+	internal class HistoryControl : UserControl, IChameleon, IThemedControl
 	{
+		private readonly PictureBox picture;
 		private readonly MoreLinkLabel link;
 
 
 		public HistoryControl(HierarchyInfo info)
 		{
-			var picture = new PictureBox
+			picture = new PictureBox
 			{
-				Image = new Bitmap(24, 24),
+				Image = Resx.SectionMask.MapColor(Color.Black, ColorHelper.FromHtml(info.Color)),
 				Dock = DockStyle.Left,
-				Width = 34
+				Padding = new(5, 0, 0, 0),
+				Width = 30
 			};
-
-			using var g = Graphics.FromImage(picture.Image);
-			g.Clear(SystemColors.Window);
-
-			using var image = Resx.SectionMask;
-			image.MapColor(Color.Black, ColorHelper.FromHtml(info.Color));
-			g.DrawImage(image, 0, 0, 24, 24);
 
 			link = new MoreLinkLabel
 			{
 				Dock = DockStyle.Fill,
-				BackColor = Color.Transparent,
-				ForeColor = SystemColors.WindowText,
-				LinkColor = SystemColors.WindowText,
-				VisitedLinkColor = SystemColors.WindowText,
 				Text = info.Name,
 				Tag = info,
-				Font = new Font("Segoe UI", 8.5f, FontStyle.Regular, GraphicsUnit.Point),
-				Padding = new Padding(0),
-				Margin = new Padding(4, 0, 0, 0)
+				Font = new("Segoe UI", 8.5f, FontStyle.Regular, GraphicsUnit.Point),
+				Padding = new(0),
+				Margin = new(4, 0, 0, 0)
 			};
 
 			link.LinkClicked += new LinkLabelLinkClickedEventHandler(async (s, e) =>
@@ -56,10 +47,11 @@ namespace River.OneMoreAddIn.Commands
 				{
 					var info = (HierarchyInfo)label.Tag;
 
-					// TODO: this breaks the space-time continuum
+					// Update the view immediately; this breaks the space-time continuum,
+					// not having to wait for the next update, but provides a better UX
 					NavigatorWindow.SetVisited(info.PageId);
 
-					using var one = new OneNote();
+					await using var one = new OneNote();
 					await one.NavigateTo(info.Link);
 				}
 			});
@@ -79,6 +71,7 @@ namespace River.OneMoreAddIn.Commands
 
 			BackColorChanged += new EventHandler((s, e) =>
 			{
+				picture.BackColor = ((Control)s).BackColor;
 				link.BackColor = ((Control)s).BackColor;
 			});
 
@@ -87,10 +80,33 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
+		public override string Text { get => link.Text; set => link.Text = value; }
+
+
+		public string ThemedBack { get; set; }
+
+
+		public string ThemedFore { get; set; }
+
+
 		public void ApplyBackground(Color color)
 		{
 			BackColor = color;
 			link.BackColor = color;
+		}
+
+
+		public void ApplyTheme(ThemeManager manager)
+		{
+			picture.BackColor = BackColor;
+			link.BackColor = BackColor;
+
+			var color = manager.GetColor("LinkColor");
+			link.ForeColor = color;
+			link.LinkColor = color;
+			link.VisitedLinkColor = color;
+
+			link.HoverColor = manager.GetColor("HoverColor");
 		}
 
 

@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2022 Steven M. Cohn. All Rights Reserved.
+// Copyright © 2022 Steven M Cohn. All Rights Reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.Commands.Favorites
@@ -14,7 +14,7 @@ namespace River.OneMoreAddIn.Commands.Favorites
 	using Resx = Properties.Resources;
 
 
-	internal partial class FavoritesDialog : UI.LocalizableForm
+	internal partial class FavoritesDialog : UI.MoreForm
 	{
 
 		public FavoritesDialog()
@@ -38,12 +38,16 @@ namespace River.OneMoreAddIn.Commands.Favorites
 				nameColumn.HeaderText = Resx.word_Name;
 				locationColumn.HeaderText = Resx.FavoritesSheet_locationColumn_HeaderText;
 			}
+
+			DefaultControl = searchBox;
 		}
 
 
-		private void BindOnLoad(object sender, EventArgs e)
+		private async void BindOnLoad(object sender, EventArgs e)
 		{
-			using var provider = new FavoritesProvider(null);
+			//Native.SwitchToThisWindow(Handle, false);
+
+			await using var provider = new FavoritesProvider(null);
 			var favorites = provider.LoadFavorites();
 
 			gridView.AutoGenerateColumns = false;
@@ -74,7 +78,7 @@ namespace River.OneMoreAddIn.Commands.Favorites
 					gridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText =
 						Resx.Favorites_unknown;
 
-					e.CellStyle.BackColor = Color.Pink;
+					e.CellStyle.ForeColor = manager.GetColor("ErrorText");
 					e.FormattingApplied = true;
 				}
 				else if (favorite.Status == FavoriteStatus.Suspect)
@@ -82,7 +86,8 @@ namespace River.OneMoreAddIn.Commands.Favorites
 					gridView.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText =
 						Resx.Favorites_suspect;
 
-					e.CellStyle.BackColor = Color.LightGoldenrodYellow;
+					e.CellStyle.BackColor = manager.GetColor("Info");
+					e.CellStyle.ForeColor = manager.GetColor("InfoText");
 					e.FormattingApplied = true;
 				}
 			}
@@ -413,10 +418,10 @@ namespace River.OneMoreAddIn.Commands.Favorites
 		}
 
 
-		private void AddCurrentPage(object sender, EventArgs e)
+		private async void AddCurrentPage(object sender, EventArgs e)
 		{
-			using var one = new OneNote();
-			var info = one.GetPageInfo();
+			await using var one = new OneNote();
+			var info = await one.GetPageInfo();
 			if (info == null)
 			{
 				return;
@@ -439,9 +444,9 @@ namespace River.OneMoreAddIn.Commands.Favorites
 
 			if (favorite == null)
 			{
-				AddIn.Self.AddFavoritePageCmd(null);
+				await AddIn.Self.AddFavoritePageCmd(null);
 
-				using var provider = new FavoritesProvider(null);
+				await using var provider = new FavoritesProvider(null);
 				var favorites = provider.LoadFavorites();
 				source.Add(favorites[favorites.Count - 1]);
 				MoveBottom();
@@ -496,7 +501,7 @@ namespace River.OneMoreAddIn.Commands.Favorites
 
 		private async void CheckFavorites(object sender, EventArgs e)
 		{
-			using var provider = new FavoritesProvider(null);
+			await using var provider = new FavoritesProvider(null);
 
 			var list = ((BindingList<Favorite>)gridView.DataSource).ToList();
 			await provider.ValidateFavorites(list);
@@ -512,9 +517,9 @@ namespace River.OneMoreAddIn.Commands.Favorites
 		}
 
 
-		private void SortFavorites(object sender, EventArgs e)
+		private async void SortFavorites(object sender, EventArgs e)
 		{
-			using var provider = new FavoritesProvider(null);
+			await using var provider = new FavoritesProvider(null);
 			var list = provider.SortFavorites();
 			gridView.DataSource = new BindingList<Favorite>(list);
 		}

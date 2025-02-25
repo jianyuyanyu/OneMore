@@ -8,17 +8,15 @@
 #pragma warning disable S3885   // Use Load instead of LoadFrom
 
 namespace River.OneMoreAddIn
-{ 
+{
 	using Extensibility;
 	using Microsoft.Office.Core;
-	using River.OneMoreAddIn.Helpers.Office;
 	using River.OneMoreAddIn.Settings;
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
-	using System.Management;
 	using System.Runtime.InteropServices;
 	using System.Threading.Tasks;
 
@@ -32,12 +30,11 @@ namespace River.OneMoreAddIn
 	[ProgId("River.OneMoreAddin")]
 	public partial class AddIn : IDTExtensibility2, IRibbonExtensibility
 	{
-		private const uint ReasonableClockSpeed = 1800;
 
 		private IRibbonUI ribbon;                   // the ribbon control
 		private ILogger logger;                     // our diagnostic logger
 		private CommandFactory factory;
-		private readonly Process process;           // current process, to kill if necessary
+		//private readonly Process process;         // current process, to kill if necessary
 		private List<IDisposable> trash;            // track disposables
 
 
@@ -52,37 +49,11 @@ namespace River.OneMoreAddIn
 
 			logger = Logger.Current;
 			trash = new List<IDisposable>();
-			process = Process.GetCurrentProcess();
+			//process = Process.GetCurrentProcess();
 
-			UIHelper.PrepareUI();
+			UI.Scaling.PrepareUI();
 
-			var thread = System.Threading.Thread.CurrentThread;
-
-			var settings = new SettingsProvider().GetCollection(nameof(GeneralSheet));
-			var lang = settings.Get("language", thread.CurrentUICulture.Name);
-			Culture = CultureInfo.GetCultureInfo(lang);
-			thread.CurrentCulture = Culture;
-			thread.CurrentUICulture = Culture;
-
-			var (cpu, ram) = GetMachineProps();
-			var uram = ram > ulong.MaxValue ? ">GB" : ((ulong)ram).ToBytes();
-
-			logger.WriteLine();
-			logger.Start(
-				$"Starting {process.ProcessName} {process.Id}, {cpu} Mhz, {uram}, " +
-				$"{thread.CurrentCulture.Name}/{thread.CurrentUICulture.Name}, " +
-				$"v{AssemblyInfo.Version}, OneNote {Office.GetOneNoteVersion()}, " +
-				$"Office {Office.GetOfficeVersion()}, " +
-				DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
-
-			logger.WriteLine(Commands.DiagnosticsCommand.GetWindowsProductName());
-
-			var hostproc = Process.GetProcessesByName("ONENOTE");
-			if (hostproc.Length > 0)
-			{
-				var module = hostproc[0].MainModule;
-				logger.WriteLine($"{module.FileName} ({module.FileVersionInfo.ProductVersion})");
-			}
+			Helpers.SessionLogger.WriteSessionHeader();
 
 			Self = this;
 
@@ -100,7 +71,7 @@ namespace River.OneMoreAddIn
 		/// <returns></returns>
 		private System.Reflection.Assembly CustomAssemblyResolve(object sender, ResolveEventArgs args)
 		{
-			//logger.WriteLine($"AssemblyResolve of '{args.Name}'");
+			logger.Debug($"AssemblyResolve of '{args.Name}'");
 
 			var path = new Uri(Path.Combine(
 				Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase),
@@ -109,13 +80,13 @@ namespace River.OneMoreAddIn
 
 			try
 			{
-				//logger.WriteLine($"resolving {path}");
+				logger.Debug($"resolving {path}");
 				var asm = System.Reflection.Assembly.LoadFrom(path);
 				return asm;
 			}
-			catch (Exception)
+			catch (Exception exc)
 			{
-				//logger.WriteLine($"AssemblyResolve exception {exc.Message} for {path}");
+				logger.Debug($"AssemblyResolve exception {exc.Message} for {path}");
 				return null;
 			}
 		}
@@ -128,7 +99,47 @@ namespace River.OneMoreAddIn
 		/// <param name="e"></param>
 		private void CatchUnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
-			logger.WriteLine("Unhandled appdomain exception", (Exception)e.ExceptionObject);
+			//Debugger.Launch();
+
+			var entry = new EventLog("Application") { Source = "OneMore" };
+
+			var msg = "OneMore UnhandledException";
+			if (e.IsTerminating)
+			{
+				msg += ", Terminating";
+			}
+
+			msg += ": ";
+
+			if (e.ExceptionObject is not null)
+			{
+				msg += Environment.NewLine + (e.ExceptionObject is Exception exc
+					? exc.FormatDetails()
+					: e.ExceptionObject.GetType().FullName);
+			}
+			else
+			{
+				msg += "null ExceptionObject in CatchUnhandledException";
+			}
+
+			entry.WriteEntry(msg, EventLogEntryType.Error, 881);
+			logger.WriteLine($"Unhandled appdomain exception: {msg}");
+
+			Array custom = null;
+			OnBeginShutdown(ref custom);
+		}
+
+
+		private static CultureInfo GetCultureSetting()
+		{
+			var thread = System.Threading.Thread.CurrentThread;
+
+			var settings = new SettingsProvider().GetCollection(nameof(GeneralSheet));
+			var lang = settings.Get("language", thread.CurrentUICulture.Name);
+			var culture = CultureInfo.GetCultureInfo(lang);
+			thread.CurrentCulture = culture;
+			thread.CurrentUICulture = culture;
+			return culture;
 		}
 
 
@@ -136,55 +147,13 @@ namespace River.OneMoreAddIn
 		/// Gets the thread culture for use in subsequent threads; used primarily for 
 		/// debugging when explicitly setting the culture in the AddIn() constructor
 		/// </summary>
-		public static CultureInfo Culture { get; private set; } = CultureInfo.GetCultureInfo("en");
+		public static CultureInfo Culture { get; private set; } = GetCultureSetting();
 
 
 		/// <summary>
 		/// Gets the AddIn instance for use in reflection like CommandPaletteCommand
 		/// </summary>
 		public static AddIn Self { get; private set; }
-
-
-
-		private (uint, double) GetMachineProps()
-		{
-			// using this as a means of short-circuiting the Ensure methods for slower machines
-			// to speed up the display of the menus. CurrentClockSpeed will vary depending on
-			// battery capacity and other factors, whereas MaxClockSpeed is a constant
-
-			uint speed = ReasonableClockSpeed;
-			using (var searcher = 
-				new ManagementObjectSearcher("select CurrentClockSpeed from Win32_Processor"))
-			{
-				foreach (var item in searcher.Get())
-				{
-					speed = Convert.ToUInt32(item["CurrentClockSpeed"]);
-					item.Dispose();
-				}
-			}
-
-			if (speed == 0) speed = ReasonableClockSpeed;
-
-			// returns total RAM across all physical slots; as KB so convert to bytes
-			//var memory = Query<ulong>("MaxCapacityEx", "Win32_PhysicalMemoryArray") * 1024;
-			//var memory = Query<ulong>("Capacity", "Win32_PhysicalMemory") * 1024;
-
-			//var memory = Math.Ceiling(Query<double>(
-			//	"*", "Win32_OperatingSystem", "TotalVisibleMemorySize") * 1024);
-
-			double memory = 0;
-			using (var searcher =
-				new ManagementObjectSearcher("select * from Win32_OperatingSystem"))
-			{
-				foreach (var item in searcher.Get())
-				{
-					memory = Convert.ToDouble(item["TotalVisibleMemorySize"]);
-					item.Dispose();
-				}
-			}
-
-			return (speed, memory);
-		}
 
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -256,7 +225,7 @@ namespace River.OneMoreAddIn
 			catch (Exception exc)
 			{
 				Logger.Current.WriteLine("error starting add-on", exc);
-				UIHelper.ShowError(Properties.Resources.StartupFailureMessage);
+				UI.MoreMessageBox.ShowError(null, Properties.Resources.StartupFailureMessage);
 			}
 
 			logger.End();
@@ -300,7 +269,7 @@ namespace River.OneMoreAddIn
 
 				HotkeyManager.Unregister();
 
-				UIHelper.Shutdown();
+				System.Windows.Forms.Application.Exit();
 			}
 			catch (Exception exc)
 			{
@@ -346,10 +315,10 @@ namespace River.OneMoreAddIn
 		}
 
 
-		private string DescribeCustom(Array custom)
+		private static string DescribeCustom(Array custom)
 		{
 			var description = string.Empty;
-			if (custom != null)
+			if (custom is not null)
 			{
 				// custom is a base-1 array
 				for (var i = custom.GetLowerBound(0); i <= custom.GetUpperBound(0); i++)

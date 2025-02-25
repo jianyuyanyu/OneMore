@@ -4,6 +4,7 @@
 
 namespace River.OneMoreAddIn.Commands
 {
+	using River.OneMoreAddIn.Models;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Xml.Linq;
@@ -76,17 +77,17 @@ namespace River.OneMoreAddIn.Commands
 		{
 			var statusColor = (StatusColor)args[0];
 
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 			if (!page.ConfirmBodyContext())
 			{
-				UIHelper.ShowError(Resx.Error_BodyContext);
+				ShowError(Resx.Error_BodyContext);
 				return;
 			}
 
 			var elements = page.Root.Descendants(ns + "T")
 				.Where(e => e.Attribute("selected")?.Value == "all");
 
-			if (elements != null)
+			if (elements.Any())
 			{
 				string color = "black";
 				string background = "yellow";
@@ -126,12 +127,13 @@ namespace River.OneMoreAddIn.Commands
 					new XCData(
 						new XElement("span",
 							new XAttribute("style",
-								$"font-family:'Segoe UI';font-size:10.0pt;font-weight:bold;{colors}"),
+								$"font-size:10.0pt;font-weight:bold;{colors}"),
 							text
 						).ToString(SaveOptions.DisableFormatting) + "&#160;")
 					);
 
-				page.ReplaceSelectedWithContent(content);
+				var editor = new PageEditor(page);
+				editor.ReplaceSelectedWith(content);
 
 				await one.Update(page);
 			}

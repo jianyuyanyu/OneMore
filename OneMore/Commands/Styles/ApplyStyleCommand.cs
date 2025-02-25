@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2016 Steven M Cohn.  All rights reserved.
+// Copyright © 2016 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 #pragma warning disable S125 // Sections of code should not be commented out
@@ -30,12 +30,18 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
+		/// <summary>
+		/// Applies the specified custom style.
+		/// This is called from the My Styles control.
+		/// </summary>
+		/// <param name="args"></param>
+		/// <returns></returns>
 		public override async Task Execute(params object[] args)
 		{
 			var selectedIndex = (int)args[0];
 
 			style = new ThemeProvider().Theme.GetStyle(selectedIndex);
-			if (style == null)
+			if (style is null)
 			{
 				// could be from a CtrlAltShift+# but that indexed style doesn't exist
 				// e.g. there are only 5 custom styles but the user pressed CtrlAltShift+6
@@ -43,36 +49,76 @@ namespace River.OneMoreAddIn.Commands
 				return;
 			}
 
-			logger.StartClock();
+			await ExecuteWithStyle(style, false);
+		}
 
-			using var one = new OneNote(out page, out ns);
-			if (page != null)
+
+		/// <summary>
+		/// Applies the given style and, optionally, merges it with the existing style
+		/// of the selected content.
+		/// </summary>
+		/// <param name="style">The style to apply.</param>
+		/// <param name="merge">
+		/// True to merge the given style with the existing style of the selected text.
+		/// Otherwise, the style is applied completely as if selected from My Styles.
+		/// </param>
+		/// <returns></returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Major Bug",
+			"S2259:Null pointers should not be dereferenced", Justification = "<Pending>")]
+		public async Task ExecuteWithStyle(Style style, bool merge = true)
+		{
+			await using var one = new OneNote(out page, out ns);
+			if (page is null)
 			{
-				logger.WriteTime($"loaded page; applying style {style.Name}", true);
+				logger.WriteLine("could not load current page");
+				return;
+			}
 
-				stylizer = new Stylizer(style);
+			var actual = style;
 
-
-				bool success = style.StyleType == StyleType.Character
-					? StylizeWords()
-					: StylizeParagraphs();
-
-				if (success)
+			if (merge)
+			{
+				var analyzer = new StyleAnalyzer(page.Root);
+				actual = analyzer.CollectFromSelection();
+				if (actual is not null)
 				{
-					logger.WriteTime("applied style; saving page", true);
+					actual.StyleType = style.StyleType;
 
-					await one.Update(page);
+					if (style.IsBold) actual.IsBold = !actual.IsBold;
+					if (style.IsItalic) actual.IsItalic = !actual.IsItalic;
+					if (style.IsUnderline) actual.IsUnderline = !actual.IsUnderline;
+					if (style.IsStrikethrough) actual.IsStrikethrough = !actual.IsStrikethrough;
+					if (style.IsSubscript) actual.IsSubscript = !actual.IsSubscript;
+					if (style.IsSuperscript) actual.IsSuperscript = !actual.IsSuperscript;
 
-					logger.WriteTime("saved page");
+					if (!string.IsNullOrWhiteSpace(style.Color) &&
+						!style.Color.Equals(Style.Automatic))
+					{
+						actual.Color = style.Color;
+					}
+
+					if (!string.IsNullOrWhiteSpace(style.Highlight) &&
+						!style.Highlight.Equals(Style.Automatic))
+					{
+						actual.Highlight = style.Highlight;
+					}
 				}
-				else
-				{
-					logger.WriteTime("styles not applied");
-				}
+			}
+
+			stylizer = new Stylizer(actual);
+
+			bool success = actual.StyleType == StyleType.Character
+				? StylizeWords()
+				: StylizeParagraphs();
+
+			if (success)
+			{
+				logger.WriteLine(page.Root);
+				await one.Update(page);
 			}
 			else
 			{
-				logger.WriteTime("could not load page");
+				logger.WriteLine("styles not applied");
 			}
 		}
 
@@ -122,18 +168,18 @@ namespace River.OneMoreAddIn.Commands
 				// inside a word, adjacent to a word, or somewhere in whitespace?
 
 				var prev = selection.PreviousNode as XElement;
-				if ((prev != null) && prev.GetCData().EndsWithWhitespace())
+				if ((prev is not null) && prev.GetCData().EndsWithWhitespace())
 				{
 					prev = null;
 				}
 
 				var next = selection.NextNode as XElement;
-				if ((next != null) && next.GetCData().StartsWithWhitespace())
+				if ((next is not null) && next.GetCData().StartsWithWhitespace())
 				{
 					next = null;
 				}
 
-				if ((prev != null) && (next != null))
+				if ((prev is not null) && (next is not null))
 				{
 					empty = false;
 
@@ -204,12 +250,13 @@ namespace River.OneMoreAddIn.Commands
 		private bool StylizeParagraphs()
 		{
 			// find all paragraphs - OE elements - that have selections
-			// TODO: filter out MetaNames.TaggingBank?
-			var elements = page.Root.Descendants(ns + "T")
+			var elements = page.Root
+				// NOT BodyOutlines so we can affect page title too
+				.Descendants(ns + "T")
 				.Where(e => e.Attributes("selected").Any(a => a.Value.Equals("all")))
 				.Select(p => p.Parent);
 
-			if (elements?.Any() != true)
+			if (!elements.Any())
 			{
 				return false;
 			}
@@ -233,7 +280,7 @@ namespace River.OneMoreAddIn.Commands
 
 				// style may still exist if apply colors if false and there are colors
 				var attr = element.Attribute("style");
-				if (attr == null)
+				if (attr is null)
 				{
 					// blast style onto paragraph, let OneNote normalize across
 					// children if it wants
@@ -264,13 +311,15 @@ namespace River.OneMoreAddIn.Commands
 
 		private void SetQuickStyle(Page page, XElement element, Style style)
 		{
-			if (style.StyleType == StyleType.Heading)
+			if (style.StyleType == StyleType.Heading &&
+				// must be in heading range h1=0..h6=5
+				style.Index < 6)
 			{
 				// force override quick style to correct heading index...
 
 				var quick = page.GetQuickStyle((StandardStyles)style.Index);
 				var attr = element.Attribute("quickStyleIndex");
-				if (attr == null)
+				if (attr is null)
 				{
 					element.Add(new XAttribute("quickStyleIndex", quick.Index));
 				}
@@ -285,7 +334,7 @@ namespace River.OneMoreAddIn.Commands
 				// do not override quote, cite, etc with normal.
 
 				var attr = element.Attribute("quickStyleIndex");
-				if (attr != null)
+				if (attr is not null)
 				{
 					if (int.TryParse(attr.Value, out var index))
 					{
@@ -304,7 +353,7 @@ namespace River.OneMoreAddIn.Commands
 		private static void ApplySpacing(XElement element, string name, string space)
 		{
 			var attr = element.Attribute(name);
-			if (attr == null)
+			if (attr is null)
 			{
 				element.Add(new XAttribute(name, space));
 			}
@@ -320,7 +369,7 @@ namespace River.OneMoreAddIn.Commands
 			var item = element.Elements(ns + "List").Elements()
 				.FirstOrDefault(e => e.Name.LocalName == "Bullet" || e.Name.LocalName == "Number");
 
-			if (item != null)
+			if (item is not null)
 			{
 				item.SetAttributeValue("fontColor", style.Color);
 				item.SetAttributeValue("fontSize", style.FontSize);

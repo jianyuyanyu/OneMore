@@ -35,15 +35,15 @@ namespace River.OneMoreAddIn.Commands
 
 		private async Task Toggle(bool pageOnly, bool showTimestamps)
 		{
-			using var one = new OneNote();
+			await using var one = new OneNote();
 			if (pageOnly)
 			{
-				var page = one.GetPage();
+				var page = await one.GetPage();
 				await SetTimestampVisibility(one, page, showTimestamps);
 			}
 			else
 			{
-				var section = one.GetSection();
+				var section = await one.GetSection();
 				if (section != null)
 				{
 					var ns = one.GetNamespace(section);
@@ -58,7 +58,7 @@ namespace River.OneMoreAddIn.Commands
 
 					foreach (var pageId in pageIds)
 					{
-						var page = one.GetPage(pageId, OneNote.PageDetail.Basic);
+						var page = await one.GetPage(pageId, OneNote.PageDetail.Basic);
 						var name = page.Root.Attribute("name").Value;
 
 						progress.SetMessage(name);

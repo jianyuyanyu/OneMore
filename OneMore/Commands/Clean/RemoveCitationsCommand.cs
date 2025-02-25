@@ -24,11 +24,11 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns);
+			await using var one = new OneNote(out var page, out var ns);
 			logger.StartClock();
 
 			var style = page.GetQuickStyles()
-				.FirstOrDefault(s => s.Name == "cite");
+				.Find(s => s.Name == "cite");
 
 			if (style == null)
 			{
@@ -48,7 +48,7 @@ namespace River.OneMoreAddIn.Commands
 				 select e)
 				.ToList();
 
-			if (elements?.Count > 0)
+			if (elements.Any())
 			{
 				foreach (var element in elements)
 				{

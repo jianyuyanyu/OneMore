@@ -7,6 +7,7 @@
 namespace River.OneMoreAddIn.Commands
 {
 	using System;
+	using System.Threading.Tasks;
 	using Resx = River.OneMoreAddIn.Properties.Resources;
 
 
@@ -18,7 +19,7 @@ namespace River.OneMoreAddIn.Commands
 	}
 
 
-	internal partial class ImportWebDialog : UI.LocalizableForm
+	internal partial class ImportWebDialog : UI.MoreForm
 	{
 		public ImportWebDialog()
 		{
@@ -39,12 +40,15 @@ namespace River.OneMoreAddIn.Commands
 				});
 			}
 
-			using var one = new OneNote(out var page, out _);
-			if (page == null)
+			Task.Run(async () =>
 			{
-				newChildButton.Enabled = false;
-				appendButton.Enabled = false;
-			}
+				await using var one = new OneNote(out var page, out _);
+				if (page == null)
+				{
+					newChildButton.Enabled = false;
+					appendButton.Enabled = false;
+				}
+			}).Wait();
 		}
 
 

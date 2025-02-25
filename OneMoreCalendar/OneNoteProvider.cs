@@ -8,9 +8,9 @@ namespace OneMoreCalendar
 	using River.OneMoreAddIn.Models;
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.IO;
 	using System.Linq;
-	using System.Runtime.InteropServices;
 	using System.Threading.Tasks;
 	using System.Xml.Linq;
 
@@ -27,13 +27,13 @@ namespace OneMoreCalendar
 		/// </summary>
 		/// <param name="pageID"></param>
 		/// <returns>The path of the file generated</returns>
-		public string Export(string pageID)
+		public async Task<string> Export(string pageID)
 		{
 			var path = Path.Combine(
 				Path.GetTempPath(),
 				Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + ".emf");
 
-			using var one = new OneNote();
+			await using var one = new OneNote();
 			one.Export(pageID, path, OneNote.ExportFormat.EMF);
 
 			return path;
@@ -55,7 +55,7 @@ namespace OneMoreCalendar
 			IEnumerable<string> notebookIDs,
 			bool created, bool modified, bool deleted)
 		{
-			using var one = new OneNote();
+			await using var one = new OneNote();
 
 			var notebooks = await GetNotebooks(notebookIDs);
 			var ns = notebooks.GetNamespaceOfPrefix(OneNote.Prefix);
@@ -70,8 +70,8 @@ namespace OneMoreCalendar
 				.Select(e => new
 				{
 					Page = e,
-					Created = DateTime.Parse(e.Attribute("dateTime").Value),
-					Modified = DateTime.Parse(e.Attribute("lastModifiedTime").Value),
+					Created = DateTime.Parse(e.Attribute("dateTime").Value, DateTimeFormatInfo.CurrentInfo),
+					Modified = DateTime.Parse(e.Attribute("lastModifiedTime").Value, DateTimeFormatInfo.CurrentInfo),
 					IsDeleted = e.Attribute("isInRecycleBin") != null
 				})
 				// filter by one or both filters
@@ -93,7 +93,9 @@ namespace OneMoreCalendar
 					Modified = a.Modified,
 					IsDeleted = a.IsDeleted,
 					HasReminders = a.Page.Elements(ns + "Meta")
-						.Any(e => e.Attribute("name").Value == MetaNames.Reminder)
+						.Any(e =>
+							e.Attribute("name").Value == MetaNames.Reminder &&
+							e.Attribute("content").Value.Length > 0)
 				}));
 
 			pages.ForEach(page =>
@@ -114,7 +116,7 @@ namespace OneMoreCalendar
 		{
 			// attempt optimal ways to load...
 
-			using var one = new OneNote();
+			await using var one = new OneNote();
 
 			if (!ids.Any())
 			{
@@ -160,12 +162,36 @@ namespace OneMoreCalendar
 		/// <returns></returns>
 		public async Task<IEnumerable<Notebook>> GetNotebooks()
 		{
-			using var one = new OneNote();
+			await using var one = new OneNote();
 			var notebooks = await one.GetNotebooks();
 			var ns = notebooks.GetNamespaceOfPrefix(OneNote.Prefix);
 
 			return notebooks.Elements(ns + "Notebook")
 				.Select(e => new Notebook(e));
+		}
+
+
+		/// <summary>
+		/// Gets the onenote:hyperlink and Web hyperlink for each page.
+		/// </summary>
+		/// <param name="pages">A collection of CalendarPages</param>
+		/// <returns></returns>
+		public async Task GetPageLinks(List<CalendarPage> pages)
+		{
+			await using var one = new OneNote();
+			foreach (var page in pages)
+			{
+				try
+				{
+					page.Hyperlink = one.GetHyperlink(page.PageID, string.Empty);
+					page.WebHyperlink = one.GetWebHyperlink(page.PageID, string.Empty);
+				}
+				catch (Exception exc)
+				{
+					Logger.Current.WriteLine("error getting page hyperlinks", exc);
+					page.Hyperlink = null;
+				}
+			}
 		}
 
 
@@ -176,15 +202,17 @@ namespace OneMoreCalendar
 		/// <returns></returns>
 		public async Task<IEnumerable<int>> GetYears(IEnumerable<string> notebookIDs)
 		{
-			using var one = new OneNote();
+			await using var one = new OneNote();
 			var notebooks = await GetNotebooks(notebookIDs);
 			var ns = notebooks.GetNamespaceOfPrefix(OneNote.Prefix);
 
 			var pages = notebooks.Descendants(ns + "Page");
 
 			var years = pages
-				.Select(p => DateTime.Parse(p.Attribute("dateTime").Value).Year)
-				.Union(pages.Select(p => DateTime.Parse(p.Attribute("lastModifiedTime").Value).Year))
+				.Select(p => DateTime.Parse(
+					p.Attribute("dateTime").Value, DateTimeFormatInfo.CurrentInfo).Year)
+				.Union(pages.Select(p => DateTime.Parse(
+					p.Attribute("lastModifiedTime").Value, DateTimeFormatInfo.CurrentInfo).Year))
 				.Distinct()
 				.OrderByDescending(y => y);
 
@@ -199,7 +227,7 @@ namespace OneMoreCalendar
 		/// <returns></returns>
 		public async Task NavigateTo(string pageID)
 		{
-			using var one = new OneNote();
+			await using var one = new OneNote();
 			var url = one.GetHyperlink(pageID, string.Empty);
 			if (!string.IsNullOrEmpty(url))
 			{

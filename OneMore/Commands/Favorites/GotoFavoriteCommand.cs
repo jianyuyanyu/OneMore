@@ -45,19 +45,26 @@ namespace River.OneMoreAddIn.Commands
 				return;
 			}
 
+			var success = true;
 			try
 			{
-				using var one = new OneNote();
-				await one.NavigateTo(uri);
+				await using var one = new OneNote();
+				success = await one.NavigateTo(uri);
 			}
 			catch (Exception exc)
 			{
 				logger.WriteLine($"error navigating to {uri}", exc);
+				success = false;
 			}
 
 			// reset focus to OneNote window
-			using var onx = new OneNote();
+			await using var onx = new OneNote();
 			Native.SwitchToThisWindow(onx.WindowHandle, false);
+
+			if (!success)
+			{
+				ShowError("Could not navigate at this time. Try again in a few seconds");
+			}
 		}
 	}
 }

@@ -15,6 +15,7 @@ namespace River.OneMoreAddIn.Commands
 	using System.Text.RegularExpressions;
 	using System.Threading.Tasks;
 	using System.Xml.Linq;
+	using Resx = Properties.Resources;
 
 
 	internal class FileQuickNotesCommand : Command
@@ -47,6 +48,10 @@ namespace River.OneMoreAddIn.Commands
 					var grouping = collection.Get("grouping", 0);
 					await FileIntoNotebook(notebookID, grouping);
 				}
+				else
+				{
+					ShowInfo(Resx.FileQuickNotesCommand_noTargetNotebook);
+				}
 			}
 			else
 			{
@@ -55,10 +60,16 @@ namespace River.OneMoreAddIn.Commands
 				{
 					await FileIntoSection(sectionID);
 				}
+				else
+				{
+					ShowInfo(Resx.FileQuickNotesCommand_noTargetSection);
+				}
 			}
 		}
 
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Major Bug",
+			"S2583:Conditionally executed code should be reachable", Justification = "<Pending>")]
 		private async Task FileIntoNotebook(string notebookID, int grouping)
 		{
 			one = new OneNote();
@@ -70,6 +81,12 @@ namespace River.OneMoreAddIn.Commands
 			}
 
 			var notebook = await one.GetNotebook(notebookID, OneNote.Scope.Sections);
+			if (notebook == null)
+			{
+				ShowInfo(Resx.FileQuickNotesCommand_noTargetNotebook);
+				return;
+			}
+
 			var ns = notebook.GetNamespaceOfPrefix(OneNote.Prefix);
 			var count = 0;
 			string sectionID = null; // keep track of last section used
@@ -80,15 +97,18 @@ namespace River.OneMoreAddIn.Commands
 				e.GetAttributeValue("dateTime", out var dateTime);
 				e.GetAttributeValue("lastModifiedTime", out var lastModifiedTime);
 
-				var page = one.GetPage(e.Attribute("ID").Value, OneNote.PageDetail.All);
-				var section = await FindFilingSection(notebook, grouping, page, DateTime.Parse(dateTime));
+				var page = await one.GetPage(e.Attribute("ID").Value, OneNote.PageDetail.All);
+
+				var section = await FindFilingSection(notebook, grouping, page,
+					DateTime.Parse(dateTime, AddIn.Culture));
+
 				sectionID = section.Attribute("ID").Value;
 
 				AddHeader(page, name, dateTime);
 
 				logger.WriteLine($"moving quick note [{name}] to section [{section.Attribute("name").Value}]");
 				var pageID = await CopyPage(page, sectionID);
-				Timewarp(sectionID, pageID, dateTime, lastModifiedTime);
+				await Timewarp(sectionID, pageID, dateTime, lastModifiedTime);
 				count++;
 			});
 
@@ -185,7 +205,13 @@ namespace River.OneMoreAddIn.Commands
 				return;
 			}
 
-			var section = one.GetSection(sectionID);
+			var section = await one.GetSection(sectionID);
+			if (section == null)
+			{
+				ShowInfo(Resx.FileQuickNotesCommand_noTargetSection);
+				return;
+			}
+
 			var ns = section.GetNamespaceOfPrefix(OneNote.Prefix);
 			var count = 0;
 
@@ -197,20 +223,23 @@ namespace River.OneMoreAddIn.Commands
 
 				logger.WriteLine($"moving quick note [{name}]");
 
-				var page = one.GetPage(e.Attribute("ID").Value, OneNote.PageDetail.All);
+				var page = await one.GetPage(e.Attribute("ID").Value, OneNote.PageDetail.All);
 
 				AddHeader(page, name, dateTime);
 				var pageID = await CopyPage(page, sectionID);
 
-				Timewarp(sectionID, pageID, dateTime, lastModifiedTime);
+				await Timewarp(sectionID, pageID, dateTime, lastModifiedTime);
 				count++;
 			});
 
+			// disabled because Sonar can't see the update inside lambdas
+#pragma warning disable S2583 // Conditionally executed code should be reachable
 			if (count > 0)
 			{
 				EmptyQuickNotes(unfiled);
 				await one.NavigateTo(sectionID);
 			}
+#pragma warning restore S2583 // Conditionally executed code should be reachable
 		}
 
 
@@ -250,6 +279,7 @@ namespace River.OneMoreAddIn.Commands
 			{
 				// this case occurs when there is no registry setting but also the
 				// default one:UnfiledNotes section is empty
+				ShowInfo(Resx.FileQuickNotesCommand_noQuickNotes);
 				logger.WriteLine($"unfiled notes is empty");
 				return null;
 			}
@@ -258,6 +288,7 @@ namespace River.OneMoreAddIn.Commands
 			var path = (string)key.GetValue(UnfiledNotesKey);
 			if (path.IsNullOrWhiteSpace() || path.Length < 3)
 			{
+				ShowInfo(Resx.FileQuickNotesCommand_noQuickNotes);
 				return null;
 			}
 
@@ -269,12 +300,14 @@ namespace River.OneMoreAddIn.Commands
 			if (shortPath.StartsWith("https:")) shortPath = shortPath.Replace('\\', '/').Replace("https:/", "https://");
 
 			book = books.Elements()
+				.Where(b => b.Attribute("path") != null)
 				// sort desc so we can find best match on longer book/sect/sect paths
 				.OrderByDescending(b => b.Attribute("path").Value)
 				.FirstOrDefault(b => shortPath.StartsWith(b.Attribute("path").Value, StringComparison.InvariantCultureIgnoreCase));
 
 			if (book == null)
 			{
+				ShowInfo(Resx.FileQuickNotesCommand_noQuickNotes);
 				logger.WriteLine($"could not find UnfiledNotes notebook path {path}");
 				return null;
 			}
@@ -301,6 +334,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (book == null)
 			{
+				ShowInfo(Resx.FileQuickNotesCommand_noQuickNotes);
 				logger.WriteLine($"could not find subsection {sectionPath}");
 				return null;
 			}
@@ -309,6 +343,7 @@ namespace River.OneMoreAddIn.Commands
 			var unfiledSection = await one.GetNotebook(book.Attribute("ID").Value, OneNote.Scope.Pages);
 			if (unfiledSection == null || !unfiledSection.Elements().Any())
 			{
+				ShowInfo(Resx.FileQuickNotesCommand_noQuickNotes);
 				logger.WriteLine($"could not determine UnfiledNotes location");
 				return null;
 			}
@@ -347,8 +382,10 @@ namespace River.OneMoreAddIn.Commands
 				name = string.Empty;
 			}
 
-			if (stamped && DateTime.TryParse(dateTime, out var dttm))
+			if (stamped)
 			{
+				// dateTime comes from hierarchy XML attribute
+				var dttm = DateTime.Parse(dateTime, CultureInfo.InvariantCulture);
 				name = $"{dttm:yyyy-MM-dd} {name}";
 			}
 
@@ -387,10 +424,10 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private void Timewarp(
+		private async Task Timewarp(
 			string sectionID, string pageID, string dateTime, string lastModifiedTime)
 		{
-			var section = one.GetSection(sectionID);
+			var section = await one.GetSection(sectionID);
 			var ns = section.GetNamespaceOfPrefix(OneNote.Prefix);
 
 			var page = section.Descendants(ns + "Page")

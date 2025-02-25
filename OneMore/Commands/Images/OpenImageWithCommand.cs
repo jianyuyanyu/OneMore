@@ -29,14 +29,14 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out var page, out var ns, OneNote.PageDetail.All);
+			await using var one = new OneNote(out var page, out var ns, OneNote.PageDetail.All);
 
 			var elements = page.Root.Descendants(ns + "Image")?
 				.Where(e => e.Attribute("selected")?.Value == "all");
 
 			if (elements.IsNullOrEmpty() || (elements.Count() > 1))
 			{
-				UIHelper.ShowMessage(Resx.OpenImageWithCommand_selectOne);
+				ShowMessage(Resx.OpenImageWithCommand_selectOne);
 				return;
 			}
 
@@ -110,7 +110,7 @@ namespace River.OneMoreAddIn.Commands
 			// reader-makes-right...
 			var settings = new SettingsProvider();
 
-			var editor = 
+			var editor =
 				settings.GetCollection(nameof(ImagesSheet)).Get<string>("imageViewer")
 				?? settings.GetCollection("images").Get("viewer", "mspaint");
 

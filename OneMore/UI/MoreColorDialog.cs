@@ -1,5 +1,5 @@
 ﻿//************************************************************************************************
-// Copyright © 2016 Steven M Cohn.  Yada yada...
+// Copyright © 2016 Steven M Cohn. All rights reserved.
 //************************************************************************************************
 
 namespace River.OneMoreAddIn.UI
@@ -92,7 +92,7 @@ namespace River.OneMoreAddIn.UI
 
 				var colors = doc.Elements(ns + "color").Select(e => e.Value);
 
-				if (colors?.Count() > 0)
+				if (colors.Any())
 				{
 					var list = new List<int>();
 

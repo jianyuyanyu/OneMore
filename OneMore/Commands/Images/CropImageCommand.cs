@@ -30,21 +30,21 @@ namespace River.OneMoreAddIn.Commands
 
 		public override async Task Execute(params object[] args)
 		{
-			using var one = new OneNote(out page, out ns, OneNote.PageDetail.All);
+			await using var one = new OneNote(out page, out ns, OneNote.PageDetail.All);
 
 			var images = page.Root.Descendants(ns + "Image")?
 				.Where(e => e.Attribute("selected")?.Value == "all");
 
 			if (!images.Any())
 			{
-				UIHelper.ShowError(Resx.CropImage_oneImage);
+				ShowError(Resx.CropImage_oneImage);
 				return;
 			}
 
 			var image = images.First();
 			if (image.Attributes().Any(a => a.Name == "isPrintOut"))
 			{
-				if (UIHelper.ShowQuestion(Resx.CropImageDialog_printout) != DialogResult.Yes)
+				if (UI.MoreMessageBox.ShowQuestion(owner, Resx.CropImageDialog_printout) != DialogResult.Yes)
 				{
 					return;
 				}
