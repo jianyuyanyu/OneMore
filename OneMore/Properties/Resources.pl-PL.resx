@@ -1451,7 +1451,7 @@ Ta strona</value>
     <value>Zaplanuj przyrostowe skanowanie nowo dodanych notatników</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>Zaplanuj odbudowę katalogu hashtagu</value>
+    <value>Zaplanuj skanowanie hashtagu lub skanuj teraz</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -4389,6 +4389,10 @@ Zakładka Pomoc</value>
   </data>
   <data name="SaveSnippet_NeedSelection" xml:space="preserve">
     <value>Wybierz zawartość, aby zapisać jako nowy fragment</value>
+    <comment>error message</comment>
+  </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>Nie znaleziono treści. Uruchom polecenie z menu wstążkowego.</value>
     <comment>error message</comment>
   </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">

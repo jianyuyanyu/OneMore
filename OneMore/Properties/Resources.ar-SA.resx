@@ -1450,7 +1450,7 @@
     <value>قم بجدولة فحص متزايد لدفاتر الملاحظات المضافة حديثًا</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>جدولة إعادة بناء كتالوج الهاشتاج الخاص بك</value>
+    <value>جدولة المسح الضوئي أو المسح الضوئي الآن</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -4388,6 +4388,10 @@ ISO-code then comma then language name</comment>
   </data>
   <data name="SaveSnippet_NeedSelection" xml:space="preserve">
     <value>حدد المحتوى المراد حفظه كمقتطف جديد</value>
+    <comment>error message</comment>
+  </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>لم يتم العثور على محتوى. قم بتشغيل الأمر من قائمة الشريط.</value>
     <comment>error message</comment>
   </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">

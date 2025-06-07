@@ -1451,7 +1451,7 @@ Total Row Font
     <value>תזמן סריקה מצטברת של המחברות החדשות שנוספו</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>קבעו את הבנייה מחדש של קטלוג ה- hashtag שלכם</value>
+    <value>קבעו את סריקת hashtag או סריקה עכשיו</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -4387,6 +4387,10 @@ ISO-code then comma then language name</comment>
   </data>
   <data name="SaveSnippet_NeedSelection" xml:space="preserve">
     <value>בחר תוכן לשמירה כקטע קוד חדש</value>
+    <comment>error message</comment>
+  </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>לא נמצא תוכן. הפעל את הפקודה מתפריט הסרט.</value>
     <comment>error message</comment>
   </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">

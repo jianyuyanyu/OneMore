@@ -1450,7 +1450,7 @@ Diese Seite</value>
     <value>Planen Sie einen inkrementellen Scan Ihrer neu hinzugefügten Notizbücher</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>Planen Sie einen Wiederaufbau Ihres Hashtag -Katalogs</value>
+    <value>Planen Sie jetzt das Hashtag -Scannen oder Scannen</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -4384,6 +4384,10 @@ Registerkarte „Hilfe“.</value>
   </data>
   <data name="SaveSnippet_NeedSelection" xml:space="preserve">
     <value>Wähle den Inhalt aus, der als neues Snippet gespeichert werden soll</value>
+    <comment>error message</comment>
+  </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>Kein Inhalt gefunden. Führen Sie den Befehl aus dem Gelenkmenü aus.</value>
     <comment>error message</comment>
   </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">
