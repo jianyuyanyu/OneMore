@@ -1449,7 +1449,7 @@ OneNote 文件 (*.one)</value>
     <value>安排对新添加的笔记本进行增量扫描</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>安排您的主题标签目录的重建</value>
+    <value>立即安排标签扫描或扫描</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -1502,7 +1502,7 @@ OneNote 文件 (*.one)</value>
     <value>图像查看器</value>
   </data>
   <data name="ImagesSheet_imageViewerLabel.Text" xml:space="preserve">
-    <value>外部图像查看器（如果为空则默认为 mspaint）</value>
+    <value>外部图像查看器（留空以使用系统默认）</value>
     <comment>label</comment>
   </data>
   <data name="ImagesSheet_introBox.Text" xml:space="preserve">
@@ -2001,8 +2001,17 @@ OneNote 文件 (*.one)</value>
     <value>http://schemas.microsoft.com/office/onenote/2013/onenote</value>
     <comment>DO NOT TRANSLATE</comment>
   </data>
+  <data name="OpenFolderDialog_Text" xml:space="preserve">
+    <value>打开文件夹作为笔记本</value>
+    <comment>dialog title</comment>
+  </data>
   <data name="OpenImageWithCommand_selectOne" xml:space="preserve">
     <value>选择一张图片打开</value>
+  </data>
+  <data name="OpenLocationCommand_NoPath" xml:space="preserve">
+    <value>选择本地存储的部分或部分组。
+您无法打开存储在OneDrive上的笔记本的文件夹。</value>
+    <comment>error message</comment>
   </data>
   <data name="OutlineDialog.Text" xml:space="preserve">
     <value>大纲格式</value>
@@ -2801,6 +2810,10 @@ ISO-code then comma then language name</comment>
   <data name="ribArchiveSectionButton_Label" xml:space="preserve">
     <value>档案科</value>
     <comment>ribbon menu</comment>
+  </data>
+  <data name="ribArchiveSectionGroupButton_Label" xml:space="preserve">
+    <value>存档文件夹</value>
+    <comment>sectiongroup context menu</comment>
   </data>
   <data name="ribArrangeContainersButton_Label" xml:space="preserve">
     <value>排列容器</value>
@@ -3722,6 +3735,14 @@ ISO-code then comma then language name</comment>
     <value>搜索</value>
     <comment>ribbon</comment>
   </data>
+  <data name="ribOpenFolderButton_Label" xml:space="preserve">
+    <value>打开文件夹作为笔记本</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenFolderButton_Screentip" xml:space="preserve">
+    <value>打开本地文件夹层次结构作为新笔记本</value>
+    <comment>ribbon file</comment>
+  </data>
   <data name="ribOpenImageWithButton_Label" xml:space="preserve">
     <value>打开图像</value>
     <comment>Ribbon OneMore menu item</comment>
@@ -3729,6 +3750,14 @@ ISO-code then comma then language name</comment>
   <data name="ribOpenImageWithButton_Screentip" xml:space="preserve">
     <value>使用外部编辑器打开所选图像</value>
     <comment>ribbon images</comment>
+  </data>
+  <data name="ribOpenLocationButton_Label" xml:space="preserve">
+    <value>在文件资源管理器中打开</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenLocationButton_Screentip" xml:space="preserve">
+    <value>打开文件资源管理器中的本地文件夹</value>
+    <comment>ribbon file</comment>
   </data>
   <data name="ribOpenLogButton_Label" xml:space="preserve">
     <value>打开日志文件</value>
@@ -4383,6 +4412,10 @@ ISO-code then comma then language name</comment>
     <value>选择内容另存为新片段</value>
     <comment>error message</comment>
   </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>找不到内容。从功能区菜单运行命令。</value>
+    <comment>error message</comment>
+  </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">
     <value>保存代码段</value>
     <comment>dialog title</comment>
@@ -4819,6 +4852,9 @@ ISO-code then comma then language name</comment>
     <value>OneMore无法连接到OneNote，请参阅日志文件以获取异常详细信息</value>
     <comment>message box</comment>
   </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
   <data name="StyleDialog_afterLabel.Text" xml:space="preserve">
     <value>段后空间：</value>
     <comment>label</comment>
@@ -5111,6 +5147,34 @@ ISO-code then comma then language name</comment>
     <value>已安装版本：</value>
     <comment>label</comment>
   </data>
+  <data name="VariablesSheet_deleteVariable" xml:space="preserve">
+    <value>删除变量{0}？</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_deleteVariables" xml:space="preserve">
+    <value>删除选定的变量？</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_doubleWarning" xml:space="preserve">
+    <value>请输入有效的双重值</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_introBox.Text" xml:space="preserve">
+    <value>定义您自己的变量以用于表公式</value>
+    <comment>text</comment>
+  </data>
+  <data name="VariablesSheet_reserved" xml:space="preserve">
+    <value>无法创建名为TableCols或Tablerows的变量</value>
+    <comment>message</comment>
+  </data>
+  <data name="VariablesSheet_Title" xml:space="preserve">
+    <value>变量</value>
+    <comment>settings sheet</comment>
+  </data>
+  <data name="VariablesSheet_uniqueError" xml:space="preserve">
+    <value>可变名称必须是唯一的</value>
+    <comment>messagebox</comment>
+  </data>
   <data name="word_Actual" xml:space="preserve">
     <value>实际的</value>
   </data>
@@ -5342,6 +5406,9 @@ ISO-code then comma then language name</comment>
   <data name="word_Snippets" xml:space="preserve">
     <value>片段</value>
   </data>
+  <data name="word_Sort" xml:space="preserve">
+    <value>种类</value>
+  </data>
   <data name="word_Start" xml:space="preserve">
     <value>开始</value>
   </data>
@@ -5371,6 +5438,9 @@ ISO-code then comma then language name</comment>
   </data>
   <data name="word_Total" xml:space="preserve">
     <value>全部的</value>
+  </data>
+  <data name="word_Value" xml:space="preserve">
+    <value>价值</value>
   </data>
   <data name="word_Warning" xml:space="preserve">
     <value>警告</value>

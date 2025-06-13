@@ -1450,7 +1450,7 @@ Diese Seite</value>
     <value>Planen Sie einen inkrementellen Scan Ihrer neu hinzugefügten Notizbücher</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>Planen Sie einen Wiederaufbau Ihres Hashtag -Katalogs</value>
+    <value>Planen Sie jetzt das Hashtag -Scannen oder Scannen</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -1503,7 +1503,7 @@ Gelber Hintergrund</value>
     <value>Bildbetrachter</value>
   </data>
   <data name="ImagesSheet_imageViewerLabel.Text" xml:space="preserve">
-    <value>Externer Bildbetrachter (Standard, wenn leer, ist mspaint)</value>
+    <value>Externer Bildbieter (lassen Sie leer, um System Standard zu verwenden)</value>
     <comment>label</comment>
   </data>
   <data name="ImagesSheet_introBox.Text" xml:space="preserve">
@@ -2002,8 +2002,17 @@ Möchten Sie die bestehende Seite aktualisieren?</value>
     <value>http://schemas.microsoft.com/office/onenote/2013/onenote</value>
     <comment>DO NOT TRANSLATE</comment>
   </data>
+  <data name="OpenFolderDialog_Text" xml:space="preserve">
+    <value>Öffnen Sie den Ordner als Notizbuch</value>
+    <comment>dialog title</comment>
+  </data>
   <data name="OpenImageWithCommand_selectOne" xml:space="preserve">
     <value>Wähle ein Bild zum Öffnen aus</value>
+  </data>
+  <data name="OpenLocationCommand_NoPath" xml:space="preserve">
+    <value>Wählen Sie einen Abschnitt oder eine Abschnittsgruppe aus, die lokal gespeichert wird.
+Sie können den Ordner eines auf OneDrive gespeicherten Notizbuchs nicht öffnen.</value>
+    <comment>error message</comment>
   </data>
   <data name="OutlineDialog.Text" xml:space="preserve">
     <value>Gliederungsformatierung</value>
@@ -2802,6 +2811,10 @@ Wähle Nein, um eine leere Zeile zwischen den Absätzen zu halten</value>
   <data name="ribArchiveSectionButton_Label" xml:space="preserve">
     <value>Archivabteilung</value>
     <comment>ribbon menu</comment>
+  </data>
+  <data name="ribArchiveSectionGroupButton_Label" xml:space="preserve">
+    <value>Archivordner</value>
+    <comment>sectiongroup context menu</comment>
   </data>
   <data name="ribArrangeContainersButton_Label" xml:space="preserve">
     <value>Container anordnen</value>
@@ -3723,6 +3736,14 @@ Registerkarte „Hilfe“.</value>
     <value>Suchen</value>
     <comment>ribbon</comment>
   </data>
+  <data name="ribOpenFolderButton_Label" xml:space="preserve">
+    <value>Öffnen Sie den Ordner als Notizbuch</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenFolderButton_Screentip" xml:space="preserve">
+    <value>Öffnen Sie eine lokale Ordnerhierarchie als neues Notizbuch</value>
+    <comment>ribbon file</comment>
+  </data>
   <data name="ribOpenImageWithButton_Label" xml:space="preserve">
     <value>Bild öffnen mit</value>
     <comment>Ribbon OneMore menu item</comment>
@@ -3730,6 +3751,14 @@ Registerkarte „Hilfe“.</value>
   <data name="ribOpenImageWithButton_Screentip" xml:space="preserve">
     <value>Öffnet das ausgewählte Bild mit einem externen Editor</value>
     <comment>ribbon images</comment>
+  </data>
+  <data name="ribOpenLocationButton_Label" xml:space="preserve">
+    <value>Im Datei -Explorer geöffnet</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenLocationButton_Screentip" xml:space="preserve">
+    <value>Öffnen Sie den lokalen Ordner im Datei -Explorer</value>
+    <comment>ribbon file</comment>
   </data>
   <data name="ribOpenLogButton_Label" xml:space="preserve">
     <value>Protokolldatei öffnen</value>
@@ -4386,6 +4415,10 @@ Registerkarte „Hilfe“.</value>
     <value>Wähle den Inhalt aus, der als neues Snippet gespeichert werden soll</value>
     <comment>error message</comment>
   </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>Kein Inhalt gefunden. Führen Sie den Befehl aus dem Gelenkmenü aus.</value>
+    <comment>error message</comment>
+  </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">
     <value>Snippet speichern</value>
     <comment>dialog title</comment>
@@ -4821,6 +4854,9 @@ Notizbücher</value>
     <value>OneMore konnte keine Verbindung zu OneNote herstellen. Ausnahmedetails finden Sie in der Protokolldatei</value>
     <comment>message box</comment>
   </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
   <data name="StyleDialog_afterLabel.Text" xml:space="preserve">
     <value>Leerzeichen nach:</value>
     <comment>label</comment>
@@ -5113,6 +5149,34 @@ Umkehren</value>
     <value>Installierte Version:</value>
     <comment>label</comment>
   </data>
+  <data name="VariablesSheet_deleteVariable" xml:space="preserve">
+    <value>Variable löschen {0}?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_deleteVariables" xml:space="preserve">
+    <value>Ausgewählte Variablen löschen?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_doubleWarning" xml:space="preserve">
+    <value>Bitte geben Sie einen gültigen Doppelwert ein</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_introBox.Text" xml:space="preserve">
+    <value>Definieren Sie Ihre eigenen Variablen für die Verwendung in Tabellenformeln</value>
+    <comment>text</comment>
+  </data>
+  <data name="VariablesSheet_reserved" xml:space="preserve">
+    <value>Eine Variable namens TableCols oder Tablerows kann nicht erstellt werden</value>
+    <comment>message</comment>
+  </data>
+  <data name="VariablesSheet_Title" xml:space="preserve">
+    <value>Variablen</value>
+    <comment>settings sheet</comment>
+  </data>
+  <data name="VariablesSheet_uniqueError" xml:space="preserve">
+    <value>Variablennamen müssen eindeutig sein</value>
+    <comment>messagebox</comment>
+  </data>
   <data name="word_Actual" xml:space="preserve">
     <value>Tatsächlich</value>
   </data>
@@ -5344,6 +5408,9 @@ Umkehren</value>
   <data name="word_Snippets" xml:space="preserve">
     <value>Snippets</value>
   </data>
+  <data name="word_Sort" xml:space="preserve">
+    <value>Sortieren</value>
+  </data>
   <data name="word_Start" xml:space="preserve">
     <value>Start</value>
   </data>
@@ -5373,6 +5440,9 @@ Umkehren</value>
   </data>
   <data name="word_Total" xml:space="preserve">
     <value>Gesamt</value>
+  </data>
+  <data name="word_Value" xml:space="preserve">
+    <value>Wert</value>
   </data>
   <data name="word_Warning" xml:space="preserve">
     <value>Warnung</value>

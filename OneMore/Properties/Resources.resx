@@ -1451,7 +1451,7 @@ This page</value>
     <value>Schedule an incremental scan of your newly added notebooks</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>Schedule a rebuild of your hashtag catalog</value>
+    <value>Schedule Hashtag Scanning or Scan Now</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -1504,7 +1504,7 @@ Yellow Background</value>
     <value>Image Viewer</value>
   </data>
   <data name="ImagesSheet_imageViewerLabel.Text" xml:space="preserve">
-    <value>External image viewer (default if empty is mspaint)</value>
+    <value>External image viewer (leave blank to use system default)</value>
     <comment>label</comment>
   </data>
   <data name="ImagesSheet_introBox.Text" xml:space="preserve">
@@ -2003,8 +2003,17 @@ Do you want to refresh the existing page?</value>
     <value>http://schemas.microsoft.com/office/onenote/2013/onenote</value>
     <comment>SKIP</comment>
   </data>
+  <data name="OpenFolderDialog_Text" xml:space="preserve">
+    <value>Open Folder as Notebook</value>
+    <comment>dialog title</comment>
+  </data>
   <data name="OpenImageWithCommand_selectOne" xml:space="preserve">
     <value>Select one image to open</value>
+  </data>
+  <data name="OpenLocationCommand_NoPath" xml:space="preserve">
+    <value>Select a section or section group that is stored locally.
+You cannot open the folder of a notebook stored on OneDrive.</value>
+    <comment>error message</comment>
   </data>
   <data name="OutlineDialog.Text" xml:space="preserve">
     <value>Outline Formatting</value>
@@ -2807,6 +2816,10 @@ Select No to keep one empty line between paragraphs</value>
   <data name="ribArchiveSectionButton_Label" xml:space="preserve">
     <value>Archive Section</value>
     <comment>section context menu</comment>
+  </data>
+  <data name="ribArchiveSectionGroupButton_Label" xml:space="preserve">
+    <value>Archive Folder</value>
+    <comment>sectiongroup context menu</comment>
   </data>
   <data name="ribArrangeContainersButton_Label" xml:space="preserve">
     <value>Arrange Containers</value>
@@ -3728,6 +3741,14 @@ Help Tab</value>
     <value>Search</value>
     <comment>ribbon</comment>
   </data>
+  <data name="ribOpenFolderButton_Label" xml:space="preserve">
+    <value>Open Folder as Notebook</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenFolderButton_Screentip" xml:space="preserve">
+    <value>Open a local folder hierarchy as a new notebook</value>
+    <comment>ribbon file</comment>
+  </data>
   <data name="ribOpenImageWithButton_Label" xml:space="preserve">
     <value>Open Image With</value>
     <comment>ribbon images</comment>
@@ -3735,6 +3756,14 @@ Help Tab</value>
   <data name="ribOpenImageWithButton_Screentip" xml:space="preserve">
     <value>Open the selected image with an external editor</value>
     <comment>ribbon images</comment>
+  </data>
+  <data name="ribOpenLocationButton_Label" xml:space="preserve">
+    <value>Open in File Explorer</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenLocationButton_Screentip" xml:space="preserve">
+    <value>Open the local folder in File Explorer</value>
+    <comment>ribbon file</comment>
   </data>
   <data name="ribOpenLogButton_Label" xml:space="preserve">
     <value>Open Log File</value>
@@ -4392,6 +4421,10 @@ Help Tab</value>
     <value>Select content to save as a new snippet</value>
     <comment>error message</comment>
   </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>No content found. Run the command from the ribbon menu.</value>
+    <comment>error message</comment>
+  </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">
     <value>Save Snippet</value>
     <comment>dialog title</comment>
@@ -4828,6 +4861,9 @@ Notebooks</value>
     <value>OneMore failed to connect to OneNote, see log file for exception details</value>
     <comment>message box</comment>
   </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
   <data name="StyleDialog_afterLabel.Text" xml:space="preserve">
     <value>Space After:</value>
     <comment>label</comment>
@@ -5120,6 +5156,34 @@ Invert</value>
     <value>Installed version:</value>
     <comment>label</comment>
   </data>
+  <data name="VariablesSheet_deleteVariable" xml:space="preserve">
+    <value>Delete variable {0}?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_deleteVariables" xml:space="preserve">
+    <value>Delete selected variables?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_doubleWarning" xml:space="preserve">
+    <value>Please enter a valid double value</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_introBox.Text" xml:space="preserve">
+    <value>Define your own variables for use in table formulas</value>
+    <comment>text</comment>
+  </data>
+  <data name="VariablesSheet_reserved" xml:space="preserve">
+    <value>Cannot create a variable named tablecols or tablerows</value>
+    <comment>message</comment>
+  </data>
+  <data name="VariablesSheet_Title" xml:space="preserve">
+    <value>Variables</value>
+    <comment>settings sheet</comment>
+  </data>
+  <data name="VariablesSheet_uniqueError" xml:space="preserve">
+    <value>Variable names must be unique</value>
+    <comment>messagebox</comment>
+  </data>
   <data name="word_Actual" xml:space="preserve">
     <value>Actual</value>
   </data>
@@ -5351,6 +5415,9 @@ Invert</value>
   <data name="word_Snippets" xml:space="preserve">
     <value>Snippets</value>
   </data>
+  <data name="word_Sort" xml:space="preserve">
+    <value>Sort</value>
+  </data>
   <data name="word_Start" xml:space="preserve">
     <value>Start</value>
   </data>
@@ -5380,6 +5447,9 @@ Invert</value>
   </data>
   <data name="word_Total" xml:space="preserve">
     <value>Total</value>
+  </data>
+  <data name="word_Value" xml:space="preserve">
+    <value>Value</value>
   </data>
   <data name="word_Warning" xml:space="preserve">
     <value>Warning</value>
@@ -5768,6 +5838,9 @@ Invert</value>
   </data>
   <data name="InfoBoxThemes" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\commands\snippets\infoboxthemes.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="VariablesDB" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Commands\Tables\Formulas\VariablesDB.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="HashtagsDB" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Commands\Tagging\HashtagsDB.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>

@@ -1451,7 +1451,7 @@ Esta página</value>
     <value>Agende uma verificação incremental dos seus notebooks recém-adicionados</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>Programe uma reconstrução do seu catálogo de hashtag</value>
+    <value>Agende a varredura ou digitalização de hashtag agora</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -1504,7 +1504,7 @@ Fundo Amarelo</value>
     <value>Visualizador de imagens</value>
   </data>
   <data name="ImagesSheet_imageViewerLabel.Text" xml:space="preserve">
-    <value>Visualizador de imagens externo (o padrão se estiver vazio é mspaint)</value>
+    <value>Visualizador de imagem externa (deixe em branco para usar o padrão do sistema)</value>
     <comment>label</comment>
   </data>
   <data name="ImagesSheet_introBox.Text" xml:space="preserve">
@@ -2003,8 +2003,17 @@ Deseja atualizar a página existente?</value>
     <value>http://schemas.microsoft.com/office/onenote/2013/onenote</value>
     <comment>SKIP</comment>
   </data>
+  <data name="OpenFolderDialog_Text" xml:space="preserve">
+    <value>Pasta aberta como caderno</value>
+    <comment>dialog title</comment>
+  </data>
   <data name="OpenImageWithCommand_selectOne" xml:space="preserve">
     <value>Selecione uma imagem para abrir</value>
+  </data>
+  <data name="OpenLocationCommand_NoPath" xml:space="preserve">
+    <value>Selecione uma seção ou grupo de seção armazenado localmente.
+Você não pode abrir a pasta de um caderno armazenado no OneDrive.</value>
+    <comment>error message</comment>
   </data>
   <data name="OutlineDialog.Text" xml:space="preserve">
     <value>Formatação de esboço</value>
@@ -2803,6 +2812,10 @@ Selecione Não para manter uma linha vazia entre os parágrafos</value>
   <data name="ribArchiveSectionButton_Label" xml:space="preserve">
     <value>Seção de Arquivo</value>
     <comment>ribbon menu</comment>
+  </data>
+  <data name="ribArchiveSectionGroupButton_Label" xml:space="preserve">
+    <value>Pasta de arquivo</value>
+    <comment>sectiongroup context menu</comment>
   </data>
   <data name="ribArrangeContainersButton_Label" xml:space="preserve">
     <value>Organizar recipientes</value>
@@ -3721,6 +3734,14 @@ Guia Ajuda</value>
     <value>Procurar</value>
     <comment>ribbon</comment>
   </data>
+  <data name="ribOpenFolderButton_Label" xml:space="preserve">
+    <value>Pasta aberta como caderno</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenFolderButton_Screentip" xml:space="preserve">
+    <value>Abra uma hierarquia de pastas local como um novo caderno</value>
+    <comment>ribbon file</comment>
+  </data>
   <data name="ribOpenImageWithButton_Label" xml:space="preserve">
     <value>Abrir imagem com</value>
     <comment>Ribbon OneMore menu item</comment>
@@ -3728,6 +3749,14 @@ Guia Ajuda</value>
   <data name="ribOpenImageWithButton_Screentip" xml:space="preserve">
     <value>Abra a imagem selecionada com um editor externo</value>
     <comment>ribbon images</comment>
+  </data>
+  <data name="ribOpenLocationButton_Label" xml:space="preserve">
+    <value>Abrir no File Explorer</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenLocationButton_Screentip" xml:space="preserve">
+    <value>Abra a pasta local no arquivo explorador</value>
+    <comment>ribbon file</comment>
   </data>
   <data name="ribOpenLogButton_Label" xml:space="preserve">
     <value>Abrir arquivo de registro</value>
@@ -4390,6 +4419,10 @@ Guia Ajuda</value>
     <value>Selecione o conteúdo para salvar como um novo snippet</value>
     <comment>error message</comment>
   </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>Nenhum conteúdo encontrado. Execute o comando no menu da faixa de opções.</value>
+    <comment>error message</comment>
+  </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">
     <value>Salvar trecho</value>
     <comment>dialog title</comment>
@@ -4826,6 +4859,9 @@ cadernos</value>
     <value>Falha do OneMore ao se conectar ao OneNote, consulte o arquivo de log para obter detalhes da exceção</value>
     <comment>message box</comment>
   </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
   <data name="StyleDialog_afterLabel.Text" xml:space="preserve">
     <value>Espaço depois:</value>
     <comment>label</comment>
@@ -5118,6 +5154,34 @@ Invertido</value>
     <value>Versão instalada:</value>
     <comment>label</comment>
   </data>
+  <data name="VariablesSheet_deleteVariable" xml:space="preserve">
+    <value>Excluir variável {0}?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_deleteVariables" xml:space="preserve">
+    <value>Excluir variáveis ​​selecionadas?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_doubleWarning" xml:space="preserve">
+    <value>Por favor, insira um valor duplo válido</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_introBox.Text" xml:space="preserve">
+    <value>Defina suas próprias variáveis ​​para uso em fórmulas de tabela</value>
+    <comment>text</comment>
+  </data>
+  <data name="VariablesSheet_reserved" xml:space="preserve">
+    <value>Não é possível criar uma variável denominada comprimidos ou tablerows</value>
+    <comment>message</comment>
+  </data>
+  <data name="VariablesSheet_Title" xml:space="preserve">
+    <value>Variáveis</value>
+    <comment>settings sheet</comment>
+  </data>
+  <data name="VariablesSheet_uniqueError" xml:space="preserve">
+    <value>Nomes variáveis ​​devem ser únicos</value>
+    <comment>messagebox</comment>
+  </data>
   <data name="word_Actual" xml:space="preserve">
     <value>Real</value>
   </data>
@@ -5349,6 +5413,9 @@ Invertido</value>
   <data name="word_Snippets" xml:space="preserve">
     <value>Trechos</value>
   </data>
+  <data name="word_Sort" xml:space="preserve">
+    <value>Organizar</value>
+  </data>
   <data name="word_Start" xml:space="preserve">
     <value>Começar</value>
   </data>
@@ -5378,6 +5445,9 @@ Invertido</value>
   </data>
   <data name="word_Total" xml:space="preserve">
     <value>Total</value>
+  </data>
+  <data name="word_Value" xml:space="preserve">
+    <value>Valor</value>
   </data>
   <data name="word_Warning" xml:space="preserve">
     <value>Aviso</value>

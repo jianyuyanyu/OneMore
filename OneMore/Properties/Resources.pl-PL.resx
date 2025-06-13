@@ -1451,7 +1451,7 @@ Ta strona</value>
     <value>Zaplanuj przyrostowe skanowanie nowo dodanych notatników</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>Zaplanuj odbudowę katalogu hashtagu</value>
+    <value>Zaplanuj skanowanie hashtagu lub skanuj teraz</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -1504,7 +1504,7 @@ Czerwony pierwszy plan
     <value>Przeglądarka obrazów</value>
   </data>
   <data name="ImagesSheet_imageViewerLabel.Text" xml:space="preserve">
-    <value>Zewnętrzna przeglądarka obrazów (domyślna, jeśli pusta to mspaint)</value>
+    <value>Zewnętrzny przeglądarka obrazu (pozostaw puste, aby użyć systemu domyślnego)</value>
     <comment>label</comment>
   </data>
   <data name="ImagesSheet_introBox.Text" xml:space="preserve">
@@ -2003,8 +2003,17 @@ Czy chcesz odświeżyć istniejącą stronę?</value>
     <value>http://schemas.microsoft.com/office/onenote/2013/onenote</value>
     <comment>SKIP</comment>
   </data>
+  <data name="OpenFolderDialog_Text" xml:space="preserve">
+    <value>Otwórz folder jako notatnik</value>
+    <comment>dialog title</comment>
+  </data>
   <data name="OpenImageWithCommand_selectOne" xml:space="preserve">
     <value>Wybierz jeden obraz do otwarcia</value>
+  </data>
+  <data name="OpenLocationCommand_NoPath" xml:space="preserve">
+    <value>Wybierz sekcję lub grupę sekcji, która jest przechowywana lokalnie.
+Nie możesz otworzyć folderu notebooka przechowywanego na OneDrive.</value>
+    <comment>error message</comment>
   </data>
   <data name="OutlineDialog.Text" xml:space="preserve">
     <value>Formatowanie konturu.</value>
@@ -2803,6 +2812,10 @@ Wybierz Nie, aby zachować jedną pustą linię między akapitami</value>
   <data name="ribArchiveSectionButton_Label" xml:space="preserve">
     <value>Sekcja archiwum.</value>
     <comment>ribbon menu</comment>
+  </data>
+  <data name="ribArchiveSectionGroupButton_Label" xml:space="preserve">
+    <value>Folder archiwum</value>
+    <comment>sectiongroup context menu</comment>
   </data>
   <data name="ribArrangeContainersButton_Label" xml:space="preserve">
     <value>Ułóż pojemniki</value>
@@ -3722,6 +3735,14 @@ Zakładka Pomoc</value>
     <value>Szukaj</value>
     <comment>ribbon</comment>
   </data>
+  <data name="ribOpenFolderButton_Label" xml:space="preserve">
+    <value>Otwórz folder jako notatnik</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenFolderButton_Screentip" xml:space="preserve">
+    <value>Otwórz lokalną hierarchię folderów jako nowy notatnik</value>
+    <comment>ribbon file</comment>
+  </data>
   <data name="ribOpenImageWithButton_Label" xml:space="preserve">
     <value>Otwórz obraz za pomocą</value>
     <comment>Ribbon OneMore menu item</comment>
@@ -3729,6 +3750,14 @@ Zakładka Pomoc</value>
   <data name="ribOpenImageWithButton_Screentip" xml:space="preserve">
     <value>Otwórz wybrany obraz za pomocą zewnętrznego edytora</value>
     <comment>ribbon images</comment>
+  </data>
+  <data name="ribOpenLocationButton_Label" xml:space="preserve">
+    <value>Otwórz w eksploratorze plików</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenLocationButton_Screentip" xml:space="preserve">
+    <value>Otwórz folder lokalny w eksploratorze plików</value>
+    <comment>ribbon file</comment>
   </data>
   <data name="ribOpenLogButton_Label" xml:space="preserve">
     <value>Otwórz plik dziennika</value>
@@ -4391,6 +4420,10 @@ Zakładka Pomoc</value>
     <value>Wybierz zawartość, aby zapisać jako nowy fragment</value>
     <comment>error message</comment>
   </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>Nie znaleziono treści. Uruchom polecenie z menu wstążkowego.</value>
+    <comment>error message</comment>
+  </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">
     <value>Zapisz fragment</value>
     <comment>dialog title</comment>
@@ -4827,6 +4860,9 @@ Notatniki</value>
     <value>Onemore nie udało się połączyć z OneNote, zobacz plik dziennika dla szczegółów wyjątków</value>
     <comment>message box</comment>
   </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
   <data name="StyleDialog_afterLabel.Text" xml:space="preserve">
     <value>Przestrzeń po:</value>
     <comment>label</comment>
@@ -5119,6 +5155,34 @@ Odwracać</value>
     <value>Zainstalowana wersja:</value>
     <comment>label</comment>
   </data>
+  <data name="VariablesSheet_deleteVariable" xml:space="preserve">
+    <value>Usuń zmienną {0}?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_deleteVariables" xml:space="preserve">
+    <value>Usuń wybrane zmienne?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_doubleWarning" xml:space="preserve">
+    <value>Wprowadź ważną podwójną wartość</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_introBox.Text" xml:space="preserve">
+    <value>Zdefiniuj własne zmienne do użytku w formułach tabeli</value>
+    <comment>text</comment>
+  </data>
+  <data name="VariablesSheet_reserved" xml:space="preserve">
+    <value>Nie może utworzyć zmiennej o nazwie TableCols lub Tablerows</value>
+    <comment>message</comment>
+  </data>
+  <data name="VariablesSheet_Title" xml:space="preserve">
+    <value>Zmienne</value>
+    <comment>settings sheet</comment>
+  </data>
+  <data name="VariablesSheet_uniqueError" xml:space="preserve">
+    <value>Nazwy zmiennych muszą być unikalne</value>
+    <comment>messagebox</comment>
+  </data>
   <data name="word_Actual" xml:space="preserve">
     <value>Rzeczywisty</value>
   </data>
@@ -5350,6 +5414,9 @@ Odwracać</value>
   <data name="word_Snippets" xml:space="preserve">
     <value>Fragmenty</value>
   </data>
+  <data name="word_Sort" xml:space="preserve">
+    <value>Sortować</value>
+  </data>
   <data name="word_Start" xml:space="preserve">
     <value>Początek</value>
   </data>
@@ -5379,6 +5446,9 @@ Odwracać</value>
   </data>
   <data name="word_Total" xml:space="preserve">
     <value>Całkowity</value>
+  </data>
+  <data name="word_Value" xml:space="preserve">
+    <value>Wartość</value>
   </data>
   <data name="word_Warning" xml:space="preserve">
     <value>Ostrzeżenie</value>

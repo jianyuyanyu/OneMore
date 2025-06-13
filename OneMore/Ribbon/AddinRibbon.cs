@@ -346,8 +346,13 @@ namespace River.OneMoreAddIn
 					}
 				}
 
-				var element = root.Descendants()
-					.FirstOrDefault(e => e.Attribute("id")?.Value == key);
+				// special case for Save Snippet button which doesn't exist yet because that
+				// submenu is created dynamically
+
+				var element = key == SnippetsProvider.SaveSnippetButtonId
+					? SnippetsProvider.MakeSaveSnippetButton(ns)
+					: root.Descendants()
+						.FirstOrDefault(e => e.Attribute("id")?.Value == key);
 
 				if (element == null)
 				{
@@ -718,6 +723,7 @@ namespace River.OneMoreAddIn
 
 			if (key == "pcm" || key == "pcs" || // pcm/pcs - fabricated page context menu items
 				key == "ctx" || key == "cts" || // ctx/cts - de-dupping from within ribbon.xml
+				key == "ctg" ||                 // ctg - context menu section group
 				key == "bar" ||                 // bar - custom ribbon bar from settings
 				key == "ct2")                   // ct2 - used?
 			{

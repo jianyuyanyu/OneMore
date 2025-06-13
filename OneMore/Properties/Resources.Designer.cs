@@ -3784,7 +3784,7 @@ namespace River.OneMoreAddIn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Schedule a rebuild of your hashtag catalog.
+        ///   Looks up a localized string similar to Schedule Hashtag Scanning or Scan Now.
         /// </summary>
         internal static string HashtagSheet_scheduleLink_Text {
             get {
@@ -3903,7 +3903,7 @@ namespace River.OneMoreAddIn.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to External image viewer (default if empty is mspaint).
+        ///   Looks up a localized string similar to External image viewer (leave blank to use system default).
         /// </summary>
         internal static string ImagesSheet_imageViewerLabel_Text {
             get {
@@ -5433,11 +5433,30 @@ namespace River.OneMoreAddIn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open Folder as Notebook.
+        /// </summary>
+        internal static string OpenFolderDialog_Text {
+            get {
+                return ResourceManager.GetString("OpenFolderDialog_Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select one image to open.
         /// </summary>
         internal static string OpenImageWithCommand_selectOne {
             get {
                 return ResourceManager.GetString("OpenImageWithCommand_selectOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select a section or section group that is stored locally.
+        ///You cannot open the folder of a notebook stored on OneDrive..
+        /// </summary>
+        internal static string OpenLocationCommand_NoPath {
+            get {
+                return ResourceManager.GetString("OpenLocationCommand_NoPath", resourceCulture);
             }
         }
         
@@ -7196,6 +7215,15 @@ namespace River.OneMoreAddIn.Properties {
         internal static string ribArchiveSectionButton_Label {
             get {
                 return ResourceManager.GetString("ribArchiveSectionButton_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Archive Folder.
+        /// </summary>
+        internal static string ribArchiveSectionGroupButton_Label {
+            get {
+                return ResourceManager.GetString("ribArchiveSectionGroupButton_Label", resourceCulture);
             }
         }
         
@@ -9356,6 +9384,24 @@ namespace River.OneMoreAddIn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open Folder as Notebook.
+        /// </summary>
+        internal static string ribOpenFolderButton_Label {
+            get {
+                return ResourceManager.GetString("ribOpenFolderButton_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open a local folder hierarchy as a new notebook.
+        /// </summary>
+        internal static string ribOpenFolderButton_Screentip {
+            get {
+                return ResourceManager.GetString("ribOpenFolderButton_Screentip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open Image With.
         /// </summary>
         internal static string ribOpenImageWithButton_Label {
@@ -9370,6 +9416,24 @@ namespace River.OneMoreAddIn.Properties {
         internal static string ribOpenImageWithButton_Screentip {
             get {
                 return ResourceManager.GetString("ribOpenImageWithButton_Screentip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open in File Explorer.
+        /// </summary>
+        internal static string ribOpenLocationButton_Label {
+            get {
+                return ResourceManager.GetString("ribOpenLocationButton_Label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open the local folder in File Explorer.
+        /// </summary>
+        internal static string ribOpenLocationButton_Screentip {
+            get {
+                return ResourceManager.GetString("ribOpenLocationButton_Screentip", resourceCulture);
             }
         }
         
@@ -10860,6 +10924,15 @@ namespace River.OneMoreAddIn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No content found. Run the command from the ribbon menu..
+        /// </summary>
+        internal static string SaveSnippet_NoContext {
+            get {
+                return ResourceManager.GetString("SaveSnippet_NoContext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Name is already in use.
         /// </summary>
         internal static string SaveSnippetDialog_duplicateName {
@@ -11871,6 +11944,15 @@ namespace River.OneMoreAddIn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string String1 {
+            get {
+                return ResourceManager.GetString("String1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Space After:.
         /// </summary>
         internal static string StyleDialog_afterLabel_Text {
@@ -12568,6 +12650,79 @@ namespace River.OneMoreAddIn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CREATE TABLE IF NOT EXISTS variable (name TEXT (50) PRIMARY KEY UNIQUE NOT NULL, value REAL NOT NULL);
+        ///.
+        /// </summary>
+        internal static string VariablesDB {
+            get {
+                return ResourceManager.GetString("VariablesDB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete variable {0}?.
+        /// </summary>
+        internal static string VariablesSheet_deleteVariable {
+            get {
+                return ResourceManager.GetString("VariablesSheet_deleteVariable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete selected variables?.
+        /// </summary>
+        internal static string VariablesSheet_deleteVariables {
+            get {
+                return ResourceManager.GetString("VariablesSheet_deleteVariables", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please enter a valid double value.
+        /// </summary>
+        internal static string VariablesSheet_doubleWarning {
+            get {
+                return ResourceManager.GetString("VariablesSheet_doubleWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Define your own variables for use in table formulas.
+        /// </summary>
+        internal static string VariablesSheet_introBox_Text {
+            get {
+                return ResourceManager.GetString("VariablesSheet_introBox.Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot create a variable named tablecols or tablerows.
+        /// </summary>
+        internal static string VariablesSheet_reserved {
+            get {
+                return ResourceManager.GetString("VariablesSheet_reserved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Variables.
+        /// </summary>
+        internal static string VariablesSheet_Title {
+            get {
+                return ResourceManager.GetString("VariablesSheet_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Variable names must be unique.
+        /// </summary>
+        internal static string VariablesSheet_uniqueError {
+            get {
+                return ResourceManager.GetString("VariablesSheet_uniqueError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Actual.
         /// </summary>
         internal static string word_Actual {
@@ -13261,6 +13416,15 @@ namespace River.OneMoreAddIn.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sort.
+        /// </summary>
+        internal static string word_Sort {
+            get {
+                return ResourceManager.GetString("word_Sort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Start.
         /// </summary>
         internal static string word_Start {
@@ -13347,6 +13511,15 @@ namespace River.OneMoreAddIn.Properties {
         internal static string word_Total {
             get {
                 return ResourceManager.GetString("word_Total", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Value.
+        /// </summary>
+        internal static string word_Value {
+            get {
+                return ResourceManager.GetString("word_Value", resourceCulture);
             }
         }
         

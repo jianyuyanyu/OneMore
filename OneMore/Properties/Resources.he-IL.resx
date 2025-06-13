@@ -1451,7 +1451,7 @@ Total Row Font
     <value>תזמן סריקה מצטברת של המחברות החדשות שנוספו</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>קבעו את הבנייה מחדש של קטלוג ה- hashtag שלכם</value>
+    <value>קבעו את סריקת hashtag או סריקה עכשיו</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -1504,7 +1504,7 @@ Total Row Font
     <value>צופה תמונה</value>
   </data>
   <data name="ImagesSheet_imageViewerLabel.Text" xml:space="preserve">
-    <value>מציג תמונות חיצוני (ברירת מחדל אם ריק הוא mspaint)</value>
+    <value>מציג תמונות חיצוני (השאר ריק לשימוש ברירת מחדל של המערכת)</value>
     <comment>label</comment>
   </data>
   <data name="ImagesSheet_introBox.Text" xml:space="preserve">
@@ -2003,8 +2003,17 @@ Total Row Font
     <value>http://schemas.microsoft.com/office/onenote/2013/onenote</value>
     <comment>SKIP</comment>
   </data>
+  <data name="OpenFolderDialog_Text" xml:space="preserve">
+    <value>פתח את התיקיה כמחברת</value>
+    <comment>dialog title</comment>
+  </data>
   <data name="OpenImageWithCommand_selectOne" xml:space="preserve">
     <value>בחר תמונה אחת לפתיחה</value>
+  </data>
+  <data name="OpenLocationCommand_NoPath" xml:space="preserve">
+    <value>בחר קטע או קבוצת קטעים המאוחסנים באופן מקומי.
+אינך יכול לפתוח את התיקיה של מחברת המאוחסנת ב- OneDrive.</value>
+    <comment>error message</comment>
   </data>
   <data name="OutlineDialog.Text" xml:space="preserve">
     <value>עיצוב מתאר</value>
@@ -2807,6 +2816,10 @@ ISO-code then comma then language name</comment>
   <data name="ribArchiveSectionButton_Label" xml:space="preserve">
     <value>מדור ארכיון</value>
     <comment>ribbon menu</comment>
+  </data>
+  <data name="ribArchiveSectionGroupButton_Label" xml:space="preserve">
+    <value>תיקיית ארכיון</value>
+    <comment>sectiongroup context menu</comment>
   </data>
   <data name="ribArrangeContainersButton_Label" xml:space="preserve">
     <value>מסדרים מיכלים</value>
@@ -3728,6 +3741,14 @@ ISO-code then comma then language name</comment>
     <value>לְחַפֵּשׂ</value>
     <comment>ribbon</comment>
   </data>
+  <data name="ribOpenFolderButton_Label" xml:space="preserve">
+    <value>פתח את התיקיה כמחברת</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenFolderButton_Screentip" xml:space="preserve">
+    <value>פתח היררכיה של תיקיות מקומיות כמחברת חדשה</value>
+    <comment>ribbon file</comment>
+  </data>
   <data name="ribOpenImageWithButton_Label" xml:space="preserve">
     <value>פתח תמונה עם</value>
     <comment>Ribbon OneMore menu item</comment>
@@ -3735,6 +3756,14 @@ ISO-code then comma then language name</comment>
   <data name="ribOpenImageWithButton_Screentip" xml:space="preserve">
     <value>פתח את התמונה שנבחרה עם עורך חיצוני</value>
     <comment>ribbon images</comment>
+  </data>
+  <data name="ribOpenLocationButton_Label" xml:space="preserve">
+    <value>פתח בחוקר קבצים</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenLocationButton_Screentip" xml:space="preserve">
+    <value>פתח את התיקיה המקומית בסייר קבצים</value>
+    <comment>ribbon file</comment>
   </data>
   <data name="ribOpenLogButton_Label" xml:space="preserve">
     <value>פתח את קובץ היומן</value>
@@ -4389,6 +4418,10 @@ ISO-code then comma then language name</comment>
     <value>בחר תוכן לשמירה כקטע קוד חדש</value>
     <comment>error message</comment>
   </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>לא נמצא תוכן. הפעל את הפקודה מתפריט הסרט.</value>
+    <comment>error message</comment>
+  </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">
     <value>שמור את הקטע</value>
     <comment>dialog title</comment>
@@ -4825,6 +4858,9 @@ ISO-code then comma then language name</comment>
     <value>OneMore לא הצליח להתחבר ל- OneNote, ראה קובץ יומן לקבלת פרטי חריג</value>
     <comment>message box</comment>
   </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
   <data name="StyleDialog_afterLabel.Text" xml:space="preserve">
     <value>מרחב אחרי:</value>
     <comment>label</comment>
@@ -5117,6 +5153,34 @@ ISO-code then comma then language name</comment>
     <value>גרסה מותקנת:</value>
     <comment>label</comment>
   </data>
+  <data name="VariablesSheet_deleteVariable" xml:space="preserve">
+    <value>למחוק משתנה {0}?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_deleteVariables" xml:space="preserve">
+    <value>למחוק משתנים נבחרים?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_doubleWarning" xml:space="preserve">
+    <value>אנא הזן ערך כפול תקף</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_introBox.Text" xml:space="preserve">
+    <value>הגדר משתנים משלך לשימוש בנוסחאות טבלה</value>
+    <comment>text</comment>
+  </data>
+  <data name="VariablesSheet_reserved" xml:space="preserve">
+    <value>לא ניתן ליצור משתנה בשם TableCols או טבלאות</value>
+    <comment>message</comment>
+  </data>
+  <data name="VariablesSheet_Title" xml:space="preserve">
+    <value>משתנים</value>
+    <comment>settings sheet</comment>
+  </data>
+  <data name="VariablesSheet_uniqueError" xml:space="preserve">
+    <value>שמות משתנים חייבים להיות ייחודיים</value>
+    <comment>messagebox</comment>
+  </data>
   <data name="word_Actual" xml:space="preserve">
     <value>מַמָשִׁי</value>
   </data>
@@ -5348,6 +5412,9 @@ ISO-code then comma then language name</comment>
   <data name="word_Snippets" xml:space="preserve">
     <value>קטעים</value>
   </data>
+  <data name="word_Sort" xml:space="preserve">
+    <value>סוּג</value>
+  </data>
   <data name="word_Start" xml:space="preserve">
     <value>הַתחָלָה</value>
   </data>
@@ -5377,6 +5444,9 @@ ISO-code then comma then language name</comment>
   </data>
   <data name="word_Total" xml:space="preserve">
     <value>סה"כ</value>
+  </data>
+  <data name="word_Value" xml:space="preserve">
+    <value>עֵרֶך</value>
   </data>
   <data name="word_Warning" xml:space="preserve">
     <value>אַזהָרָה</value>

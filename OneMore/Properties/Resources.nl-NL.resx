@@ -1451,7 +1451,7 @@ Deze pagina</value>
     <value>Plan een incrementele scan van uw nieuw toegevoegde notitieboekjes</value>
   </data>
   <data name="HashtagSheet_scheduleLink.Text" xml:space="preserve">
-    <value>Plan een herbouw van uw hashtag -catalogus</value>
+    <value>Plan hashtag scannen of scan nu</value>
     <comment>link label</comment>
   </data>
   <data name="HashtagSheet_styleBox.Text" xml:space="preserve">
@@ -1504,7 +1504,7 @@ Gele achtergrond</value>
     <value>Afbeeldingsviewer</value>
   </data>
   <data name="ImagesSheet_imageViewerLabel.Text" xml:space="preserve">
-    <value>Externe afbeeldingsviewer (standaard indien leeg is mspaint)</value>
+    <value>Externe afbeeldingsviewer (laat leeg staan ​​om het systeem standaard te gebruiken)</value>
     <comment>label</comment>
   </data>
   <data name="ImagesSheet_introBox.Text" xml:space="preserve">
@@ -2003,8 +2003,17 @@ Wilt u de bestaande pagina vernieuwen?</value>
     <value>http://schemas.microsoft.com/office/onenote/2013/onenote</value>
     <comment>SKIP</comment>
   </data>
+  <data name="OpenFolderDialog_Text" xml:space="preserve">
+    <value>Open de map als notitieboekje</value>
+    <comment>dialog title</comment>
+  </data>
   <data name="OpenImageWithCommand_selectOne" xml:space="preserve">
     <value>Selecteer een afbeelding om te openen</value>
+  </data>
+  <data name="OpenLocationCommand_NoPath" xml:space="preserve">
+    <value>Selecteer een sectie of sectiegroep die lokaal is opgeslagen.
+U kunt de map niet openen van een notebook dat is opgeslagen op OneDrive.</value>
+    <comment>error message</comment>
   </data>
   <data name="OutlineDialog.Text" xml:space="preserve">
     <value>Overzichtsopmaak</value>
@@ -2803,6 +2812,10 @@ Selecteer NO om één lege regel tussen paragrafen te behouden</value>
   <data name="ribArchiveSectionButton_Label" xml:space="preserve">
     <value>Archiefgedeelte</value>
     <comment>ribbon menu</comment>
+  </data>
+  <data name="ribArchiveSectionGroupButton_Label" xml:space="preserve">
+    <value>Archiefmap</value>
+    <comment>sectiongroup context menu</comment>
   </data>
   <data name="ribArrangeContainersButton_Label" xml:space="preserve">
     <value>Containers schikken</value>
@@ -3721,6 +3734,14 @@ Tabblad Help</value>
     <value>Zoekopdracht</value>
     <comment>ribbon</comment>
   </data>
+  <data name="ribOpenFolderButton_Label" xml:space="preserve">
+    <value>Open de map als notitieboekje</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenFolderButton_Screentip" xml:space="preserve">
+    <value>Open een lokale maphiërarchie als een nieuw notitieboekje</value>
+    <comment>ribbon file</comment>
+  </data>
   <data name="ribOpenImageWithButton_Label" xml:space="preserve">
     <value>Afbeelding openen met</value>
     <comment>Ribbon OneMore menu item</comment>
@@ -3728,6 +3749,14 @@ Tabblad Help</value>
   <data name="ribOpenImageWithButton_Screentip" xml:space="preserve">
     <value>Open de geselecteerde afbeelding met een externe editor</value>
     <comment>ribbon images</comment>
+  </data>
+  <data name="ribOpenLocationButton_Label" xml:space="preserve">
+    <value>Open in File Explorer</value>
+    <comment>ribbon file</comment>
+  </data>
+  <data name="ribOpenLocationButton_Screentip" xml:space="preserve">
+    <value>Open de lokale map in File Explorer</value>
+    <comment>ribbon file</comment>
   </data>
   <data name="ribOpenLogButton_Label" xml:space="preserve">
     <value>Logbestand openen</value>
@@ -4390,6 +4419,10 @@ Tabblad Help</value>
     <value>Selecteer inhoud om op te slaan als een nieuw fragment</value>
     <comment>error message</comment>
   </data>
+  <data name="SaveSnippet_NoContext" xml:space="preserve">
+    <value>Geen inhoud gevonden. Voer de opdracht uit vanuit het lintmenu.</value>
+    <comment>error message</comment>
+  </data>
   <data name="SaveSnippetDialog.Text" xml:space="preserve">
     <value>Bewaar fragment</value>
     <comment>dialog title</comment>
@@ -4826,6 +4859,9 @@ Notitieboekjes</value>
     <value>OneMore kon geen verbinding maken met OneNote, zie logbestand voor details over uitzonderingen</value>
     <comment>message box</comment>
   </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
   <data name="StyleDialog_afterLabel.Text" xml:space="preserve">
     <value>Ruimte na:</value>
     <comment>label</comment>
@@ -5118,6 +5154,34 @@ Omkeren</value>
     <value>Geïnstalleerde versie:</value>
     <comment>label</comment>
   </data>
+  <data name="VariablesSheet_deleteVariable" xml:space="preserve">
+    <value>Variabele {0} verwijderen?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_deleteVariables" xml:space="preserve">
+    <value>Geselecteerde variabelen verwijderen?</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_doubleWarning" xml:space="preserve">
+    <value>Voer een geldige dubbele waarde in</value>
+    <comment>messagebox</comment>
+  </data>
+  <data name="VariablesSheet_introBox.Text" xml:space="preserve">
+    <value>Definieer uw eigen variabelen voor gebruik in tabelformules</value>
+    <comment>text</comment>
+  </data>
+  <data name="VariablesSheet_reserved" xml:space="preserve">
+    <value>Kan geen variabele met de naam Tablecols of Tableerows maken</value>
+    <comment>message</comment>
+  </data>
+  <data name="VariablesSheet_Title" xml:space="preserve">
+    <value>Variabelen</value>
+    <comment>settings sheet</comment>
+  </data>
+  <data name="VariablesSheet_uniqueError" xml:space="preserve">
+    <value>Variabele namen moeten uniek zijn</value>
+    <comment>messagebox</comment>
+  </data>
   <data name="word_Actual" xml:space="preserve">
     <value>Werkelijk</value>
   </data>
@@ -5349,6 +5413,9 @@ Omkeren</value>
   <data name="word_Snippets" xml:space="preserve">
     <value>Fragmenten</value>
   </data>
+  <data name="word_Sort" xml:space="preserve">
+    <value>Soort</value>
+  </data>
   <data name="word_Start" xml:space="preserve">
     <value>Begin</value>
   </data>
@@ -5378,6 +5445,9 @@ Omkeren</value>
   </data>
   <data name="word_Total" xml:space="preserve">
     <value>Totaal</value>
+  </data>
+  <data name="word_Value" xml:space="preserve">
+    <value>Waarde</value>
   </data>
   <data name="word_Warning" xml:space="preserve">
     <value>Waarschuwing</value>
