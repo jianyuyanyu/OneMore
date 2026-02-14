@@ -46,6 +46,7 @@ namespace River.OneMoreAddIn.Commands
 
 			if (ink is null)
 			{
+				logger.WriteLine("no ink drawing selected");
 				UI.MoreMessageBox.ShowError(owner, Resx.RecolorInkCommand_noselection);
                 return;
 			}
@@ -53,6 +54,7 @@ namespace River.OneMoreAddIn.Commands
             var strokes = DeserializeInkFromBase64(ink.Element(ns + "Data").Value);
             if (strokes.Count == 0)
             {
+				logger.WriteLine("no strokes found in selection");
 				UI.MoreMessageBox.ShowError(owner, Resx.RecolorInkCommand_noselection);
 				return;
             }
@@ -62,12 +64,14 @@ namespace River.OneMoreAddIn.Commands
 			var color = GetNewColor(Color.FromArgb(badColor.A, badColor.R, badColor.G, badColor.B));
 			if (color == Color.Empty)
 			{
+				logger.WriteLine("color selection cancelled");
 				return;
 			}
 
-			var modified = Recolor(color);
-			if (modified)
+			var count = Recolor(color);
+			if (count > 0)
 			{
+				logger.WriteLine($"recoloring {count} ink strokes");
 				await one.Update(page);
 			}
 		}
@@ -98,7 +102,7 @@ namespace River.OneMoreAddIn.Commands
 		}
 
 
-		private bool Recolor(Color color)
+		private int Recolor(Color color)
 		{
 			var goodColor = new System.Windows.Media.Color
 			{
@@ -108,7 +112,7 @@ namespace River.OneMoreAddIn.Commands
 				B = color.B
 			};
 
-			var modified = false;
+			var count = 0;
 
 			var drawings = page.Root.Descendants(ns + "InkDrawing");
 			foreach (var drawing in drawings)
@@ -127,11 +131,11 @@ namespace River.OneMoreAddIn.Commands
 				if (mod)
 				{
 					drawing.Element(ns + "Data").Value = SerializeToBase64(strokes);
-					modified = true;
+					count++;
 				}
 			}
 
-			return modified;
+			return count;
 		}
 
 
