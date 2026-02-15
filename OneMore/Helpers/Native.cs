@@ -56,6 +56,7 @@ namespace River.OneMoreAddIn
 		public const int IDC_HAND = 32649;
 		public const int IDC_SIZENS = 32645;
 
+		public const int SW_RESTORE = 9;
 		public const uint SWP_NOSIZE = 0x0001;
 		public const uint SWP_NOMOVE = 0x0002;
 
@@ -382,6 +383,11 @@ namespace River.OneMoreAddIn
 			WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
 
 
+		// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-showwindow
+		[DllImport("user32.dll")]
+		public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+		
+		
 		// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-switchtothiswindow
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern void SwitchToThisWindow(IntPtr hWnd, bool turnOn);
